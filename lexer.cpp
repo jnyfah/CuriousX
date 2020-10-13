@@ -40,7 +40,7 @@ Token tokenizeCharacter(std::string str);
 std::vector<Token>Tokenize(std::string input);
 
 int main() {
-    std::string input = "(2-3.87  *-(7 +5.765))";
+    std::string input = "(2-3.87  *- golden (7 +5.765))";
 
     std::vector<Token>m_tok = Tokenize(input);
 
@@ -74,8 +74,17 @@ std::vector<Token>Tokenize(std::string input){
             else{
                 m_tok.push_back({temp, LexerTokenType::FloatToken});
             }
-        }
-        else{
+        } else if(std::isalpha(input[current])){
+            temp = input[current];
+            current++;   
+            while(std::isalpha(input[current]) || input[current] == '_') {
+
+                temp += input[current];
+                current++;
+            }
+             m_tok.push_back({temp, LexerTokenType::VarToken});
+
+        } else{
             temp = input[current];
             m_tok.push_back(tokenizeCharacter(temp));
             current++;
