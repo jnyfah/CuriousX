@@ -1,4 +1,4 @@
-h![example workflow](https://github.com/jnyfah/Kalculator/actions/workflows/cmake.yml/badge.svg)
+![example workflow](https://github.com/jnyfah/Kalculator/actions/workflows/cmake.yml/badge.svg)
 ![GitHub](https://img.shields.io/github/license/jnyfah/Kalculator)
 
 # Kalculator App
