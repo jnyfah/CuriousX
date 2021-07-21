@@ -2,3 +2,5 @@ CMakeLists.txt.user
 build
 .vs
 out
+Lexer/**/lexer.exe
+Kalculator.exe

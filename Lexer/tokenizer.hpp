@@ -1,6 +1,6 @@
-#ifndef LEXER_HPP
-#define LEXER_HPP
-#include "sourcelocation.hpp"
+#ifndef TOKENIZER_HPP
+#define TOKENIZER_HPP
+#include "../utils/sourcelocation.hpp"
 #include <string>
 #include <vector>
 
@@ -12,6 +12,7 @@ enum class LexerTokenType {
     FloatToken,
     IntToken,
     VarToken,
+    print,
 
     PlusToken,
     MinusToken,
@@ -20,7 +21,7 @@ enum class LexerTokenType {
     EqualToken,
 
     ArrowToken,
-    SemiColonToken,
+    ColonToken,
     Space,
     Tab,
     NewLine,
@@ -30,11 +31,13 @@ enum class LexerTokenType {
 
 };
 
+
+
 struct Token {
         std::string value;
         LexerTokenType type;
         SourceLocation source;
-      };
+};
 
 class Lexer {
     public:

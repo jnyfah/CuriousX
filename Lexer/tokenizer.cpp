@@ -1,8 +1,5 @@
-#include "../include/lexer.hpp"
+#include "tokenizer.hpp"
 
-#include <regex>
-#include <string>
-#include <vector>
 #include <iomanip>
 #include <iostream>
 
@@ -74,8 +71,8 @@ Token Lexer::tokenizeCharacter(std::string str, unsigned short row, unsigned sho
         Token token{str, LexerTokenType::DivideToken,{row,col}};
         return token;
 
-    } else if(str == ";") {
-        Token token{str, LexerTokenType::SemiColonToken, {row,col}};
+    } else if(str == ":") {
+        Token token{str, LexerTokenType::ColonToken, {row,col}};
         return token;
 
     } else if(str == "*") {
@@ -119,7 +116,7 @@ const char* Lexer::toString(LexerTokenType t){
 
     case LexerTokenType::ArrowToken:          return "ArrowToken";
    
-    case LexerTokenType::SemiColonToken:      return "SemiColonToken";
+    case LexerTokenType::ColonToken:      return "ColonToken";
    
     case LexerTokenType::Space:               return "Space";
    
@@ -128,6 +125,8 @@ const char* Lexer::toString(LexerTokenType t){
     case LexerTokenType::NewLine:             return "NewLine";
   
     case LexerTokenType::Eof:                 return "Eof";
+
+    case LexerTokenType::print:               return "PrintToken";
 
     case LexerTokenType::unknown:             return "unknown";
    
@@ -176,8 +175,11 @@ std::vector<Token> Lexer::Tokenize(std::string input, unsigned short line){
                 temp += input[current];
                 current++;
             }
-             token.push_back({temp, LexerTokenType::VarToken, {row,col}});
-
+            if(temp == "print") {
+                token.push_back({temp, LexerTokenType::print, {row,col}});
+            } else {
+                token.push_back({temp, LexerTokenType::VarToken, {row,col}});
+            }
         } else if(this->IsWhiteSpace(input[current])){
             temp = input[current];
             col = current;
