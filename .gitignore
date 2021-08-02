@@ -1,6 +1,7 @@
 CMakeLists.txt.user
 build
 .vs
+.vscode
 out
 Lexer/**/lexer.exe
 Kalculator.exe
