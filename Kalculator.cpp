@@ -7,9 +7,7 @@
 
 #include <fstream>
 
-#include "Lexer/Lexer.hpp"
-#include "utils/FileHandler.hpp"
-#include "Lexer/LexerToken.cpp"
+
 
 using namespace std;
 
@@ -23,5 +21,7 @@ int main() {
         auto vv = "[" +  std::string(t.value) + "]";//
         std::cout << std::left << std::setw(6) << vv << " ->   " << t.location.toString() << ";\t " << toString(t.type) << std::endl;
     }
+
+    return 0;
    
 }

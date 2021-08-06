@@ -3,6 +3,8 @@
 
 #pragma once
 #include <iostream>
-#include "Lexer/Lexer.cpp"
+#include "Lexer/Lexer.hpp"
+#include "utils/FileHandler.hpp"
+#include "Lexer/LexerToken.cpp"
 
 // TODO: Reference additional headers your program requires here.
