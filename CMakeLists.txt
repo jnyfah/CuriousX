@@ -9,3 +9,5 @@ project ("Kalculator")
 add_executable (Kalculator "Kalculator.cpp" "Kalculator.hpp")
 
 # TODO: Add tests and install targets if needed.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)

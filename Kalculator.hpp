@@ -3,5 +3,6 @@
 
 #pragma once
 #include <iostream>
+#include "Lexer/Lexer.cpp"
 
 // TODO: Reference additional headers your program requires here.
