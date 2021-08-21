@@ -12,3 +12,4 @@ A simple calculator compiler project written in C++ with details.
 - Division ( / )
 - Multiplication ( * )
 - Equal ( = )
+- Print ( print )
