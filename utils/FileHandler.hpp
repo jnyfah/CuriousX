@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <string_view>
 
 class FileHandler {
 
@@ -14,7 +15,7 @@ public:
     }
 
 
-    void checkFile(FILE *file, std::string inputFile) {
+    void checkFile(FILE *file, std::string_view inputFile) {
         if (!file) {
             std::cerr << "Error: Cannot open file '" << inputFile << "'.\n";
             exit(1);
