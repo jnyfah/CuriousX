@@ -33,7 +33,7 @@ public:
     }
 
     ~FileHandler() {
-       
+       fclose(file);
     }
 
 
