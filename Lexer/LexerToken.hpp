@@ -35,7 +35,7 @@ const char* toString(LexerTokenType t);
 
 //! Represents a single token in the expression stream
 struct LexerToken {
-    std::string_view value;
+    std::string value;
     SourceLocation location;
     LexerTokenType type;
 

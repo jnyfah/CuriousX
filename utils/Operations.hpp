@@ -1,58 +1,42 @@
 #ifndef OPERATIONS_HPP
 #define OPERATIONS_HPP
 
-#include "SourceLocation.hpp"
-#include <vector>
+#include <stdlib.h>
 
-    /**
-        * enum  Operation
-        * brief Operations available in Kalculator
-    */
 
-enum class Operations {
+class List {
+private:
+    void **items;
+    size_t size;
+    size_t item_size;
 
-    ASSIGNMENT,
-    DIVIDE,
-    EQUAL,
-    PLUS,
-    MINUS,
-    MULTIPLY,
+public:
 
-    UNKOWN_OP
-        
+    List(size_t item_size) {
+        this->size = 0;
+        this->item_size = item_size;
+        this->items = 0;
+    }
+
+    void list_push(void *item) {
+        this->size += 1;
+
+        if(this->items == nullptr) {
+
+            this->items = new void*;
+
+        } else {
+
+            this->items = (void**)realloc(this->items, (this->size * this->item_size));
+        }
+
+        this->items[this->size - 1] = item;
+    }
+
+
+    void *getItems(int i) { return this->items[i]; }
+
+
 };
-
-
-enum class NodeKind : unsigned int
-            {
-                // Misc
-                ERROR,
-
-                // Declarations
-                VAR_DECL,
-
-                // Expressions
-                ARRAY_EXPR,
-                BINARY_EXPR,
-                BOOLEAN_EXPR,
-                CALL_EXPR,
-                IDENTIFIER_EXPR,
-                NUMBER_EXPR,
-                STRING_EXPR,
-
-                // Statements
-                COMPOUND_STMT,
-                PRINT_STMT,
-               
-    };
-
-struct Node {
-    NodeKind nodetype;                 
-    std::string name;              
-    std::vector<std::unique_ptr<Node>> children;       /*!< List of children nodes linked to this AST node */
-    SourceLocation location;  
-};
-
-
 
 #endif

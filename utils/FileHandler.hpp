@@ -28,12 +28,15 @@ public:
         std::string fileContents(fileSize, ' ');
         fread(fileContents.data(), 1, fileSize, file);
 
+        if(fileContents.empty()) {
+           std::cerr << inputFile << " is empty" <<"'.\n";
+           exit(1); 
+        }
+
         return fileContents;
     }
 
-    ~FileHandler() {
-       
-    }
+    ~FileHandler() {}
 
 
 private:

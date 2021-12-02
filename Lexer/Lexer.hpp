@@ -9,9 +9,12 @@
 #include "../utils/SourceLocation.hpp"
 #include "../utils/FileHandler.hpp"
 
+
+FileHandler fh("utils/input.txt");
+
 class Lexer {
-    const std::string data;
-    std::string_view input = data;
+    const std::string data = fh.scan();
+    std::string input = data;
     unsigned checkpoint[3] = {0, 0, 0};
     unsigned pos = 0;
     unsigned x_pos = 1;
@@ -19,7 +22,7 @@ class Lexer {
     
 
 public:
-    Lexer(std::string data) : data(data)  {}
+    Lexer() {}
 
     LexerToken nextNWToken() {
         auto t = nextToken();
@@ -128,13 +131,13 @@ private:
 
 
 
-    std::string_view fetch_consecutive(int startPos, char ch) {
+    std::string fetch_consecutive(int startPos, char ch) {
         auto count = 1;
         for (;peek_next_char() == ch; ++count, next_char());
         return input.substr(startPos, count);
     }
 
-    std::string_view next_valid_sequences(int from) {
+    std::string next_valid_sequences(int from) {
         int counts = 0;
         while(true) {
             char c = peek_next_char();

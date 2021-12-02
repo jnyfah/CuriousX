@@ -3,6 +3,9 @@
 
 #include <string>
 #include <exception>
+#include <stdexcept>
+
+#include "SourceLocation.hpp"
 
 
 
@@ -18,9 +21,15 @@ private:
 
 class Error {
 public:
-    Error() {}
+    Error(){}
+
+    void missingNumber(std::string message, SourceLocation location) {
+        throw std::invalid_argument(message + location.toString());
+    }
+
+
 private:
-    std::string message;
+   
 };
 
 #endif // DIAGNOSTIC_HPP

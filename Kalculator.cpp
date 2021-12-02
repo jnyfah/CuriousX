@@ -14,10 +14,9 @@ using namespace std;
 
 int main() {
   
-  FileHandler fh("input.txt");
   
  
-   Lexer lex(fh.scan());
+   Lexer lex;
     //for (auto t = lex.nextToken(); t.type != LexerTokenType::Eof; t = lex.nextToken()) {
         //auto vv = "[" +  std::string(t.value) + "]";
         //std::cout << std::left << std::setw(6) << vv << " ->   " << t.location.toString() << ";\t " << toString(t.type) << std::endl;
