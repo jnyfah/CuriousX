@@ -6,7 +6,7 @@
 #include <string_view>
 
 #include "LexerToken.hpp"
-#include "../utils/SourceLocation.hpp"
+#include "../utils/sourcelocation.hpp"
 #include "../utils/FileHandler.hpp"
 
 

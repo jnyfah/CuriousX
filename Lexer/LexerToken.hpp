@@ -4,7 +4,7 @@
 #include <string>
 #include <string_view>
 
-#include "../utils/SourceLocation.hpp"
+#include "../utils/sourcelocation.hpp"
 
 enum class LexerTokenType {
     ParenOpen,
