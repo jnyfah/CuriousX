@@ -1,1 +1,0 @@
-g++ -std=c++17 Kalculator.cpp -o Kalculator && Kalculator
