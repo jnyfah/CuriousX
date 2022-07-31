@@ -2,5 +2,5 @@
 
 
 int main() {
-    std::cout<< "Kalkulator \n";
+    std::cout<< "Curious X \n";
 }
