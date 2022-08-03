@@ -63,9 +63,9 @@ class FileHandler {
             return true;
         }
 
-        std::string getLine() {
+        /*std::string getLine() {
             if(inputFile.eof())
-        }
+        }*/
 
     private:
         std::string filename;
