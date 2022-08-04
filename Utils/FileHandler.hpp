@@ -31,6 +31,7 @@
 #include <fstream>
 #include <string_view>
 
+
 namespace fs = std::filesystem;
 
 class FileHandler {
@@ -63,13 +64,10 @@ class FileHandler {
             return true;
         }
 
-        /*std::string getLine() {
-            if(inputFile.eof())
-        }*/
 
     private:
         std::string filename;
-         std::fstream inputFile;
+        std::fstream inputFile;
         
 
 };
