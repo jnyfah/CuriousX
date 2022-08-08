@@ -15,5 +15,9 @@ endif()
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+
 include_directories(Utils)
+add_subdirectory(LexicalAnalysis)
+
+
 

@@ -30,6 +30,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string_view>
+#include <iostream>
 
 
 namespace fs = std::filesystem;
@@ -42,14 +43,17 @@ class FileHandler {
         bool ParseArguments(int argc, const char* argv[]) {
             int start = 0;
 
-            if(argc < 2 || argc > 3) {
+            if(argc < 2) {
+                std::cerr<< "greater??";
                 return false;
+                
             }
 
             std::string_view option = argv[start];   
             filename = argv[++start];
 
-            if(fs::is_regular_file(fs::path(filename)) || fs::path(filename).extension() != ".txt") {
+            if(!fs::is_regular_file(fs::path(filename)) || fs::path(filename).extension() != ".txt") {
+                std::cerr<< "greater";
                 return false;
             }
 
