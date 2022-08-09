@@ -93,14 +93,34 @@ private:
     if (nchar == '+') return { input.substr(startPos, 1), location, LexerTokenType::PlusToken };
     if (nchar == '/') return { input.substr(startPos, 1), location, LexerTokenType::DivideToken };
     if (nchar == '*') return { input.substr(startPos, 1), location, LexerTokenType::MultiplyToken };
-    if (nchar == '=') return { input.substr(startPos, 1), location, LexerTokenType::EqualToken };
+    //if (nchar == '=') return { input.substr(startPos, 1), location, LexerTokenType::EqualToken };
+    if (nchar == '-') return { input.substr(startPos, 1), location, LexerTokenType::MinusToken };
     if (nchar == ';') return { input.substr(startPos, 1), location, LexerTokenType::SemicolonToken };
-    if (nchar == '-') {
+    if (nchar == '>') {
       saveCheckpoint();
-      if (next_char() == '>') { return { input.substr(startPos, 2), location, LexerTokenType::AssignToken }; }
+      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::GreaterEqualToken }; }
       restoreCheckpoint();
-      return { input.substr(startPos, 1), location, LexerTokenType::MinusToken };
+      return { input.substr(startPos, 1), location, LexerTokenType::GreaterThanToken};
     }
+    if (nchar == '<') {
+      saveCheckpoint();
+      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::LessEqualToken }; }
+      restoreCheckpoint();
+      return { input.substr(startPos, 1), location, LexerTokenType::LessThanToken};
+    }
+    if (nchar == '=') {
+      saveCheckpoint();
+      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::EqualToken }; }
+      restoreCheckpoint();
+      return { input.substr(startPos, 1), location, LexerTokenType::AssignToken};
+    }
+    if (nchar == '!') {
+      saveCheckpoint();
+      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::NotEqualToken }; }
+      restoreCheckpoint();
+      return { input.substr(startPos, 1), location, LexerTokenType::NotToken};
+    }
+
 
     if (!(isAlpha(nchar) || isNumeric(nchar))) {
       return { input.substr(startPos, 1), location, LexerTokenType::Unkown };
