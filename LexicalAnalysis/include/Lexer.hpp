@@ -136,6 +136,8 @@ private:
       }
     }
     if (substr == "print" || substr == "Print") { return { substr, location, LexerTokenType::PrintToken }; }
+    else if (substr == "if") { return { substr, location, LexerTokenType::IfToken }; }
+    else if (substr == "else") { return { substr, location, LexerTokenType::ElseToken }; }
     return { substr, location, LexerTokenType::VarToken };
   }
 

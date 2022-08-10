@@ -95,4 +95,4 @@ Output (`lexer.cpp`)
 ```
 
 ## TODO
-__if and else tokens__
+__Get text file, test output__
