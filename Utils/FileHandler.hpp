@@ -31,7 +31,7 @@
 #include <fstream>
 #include <string_view>
 #include <iostream>
-#include <strstream>
+#include <sstream>
 
 namespace fs = std::filesystem;
 
