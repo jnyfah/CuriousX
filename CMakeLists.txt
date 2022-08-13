@@ -19,5 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories(Utils)
 add_subdirectory(LexicalAnalysis)
 
+target_link_libraries( ${PROJECT_NAME} LexicalAnalysis)
+
 
 

@@ -5,7 +5,6 @@
 #include <string>
 #include <string_view>
 
-#include "FileHandler.hpp"
 #include "SourceLocation.hpp"
 #include "LexerToken.hpp"
 
@@ -15,8 +14,7 @@
 
 class Lexer
 {
-  const std::string data = "fh.scan()";
-  std::string input = data;
+  std::string data;
   unsigned checkpoint[3] = { 0, 0, 0 };
   unsigned pos = 0;
   unsigned x_pos = 1;
@@ -24,7 +22,7 @@ class Lexer
 
 
 public:
-  Lexer() {}
+  Lexer(std::string data):data(data){}
 
   LexerToken nextNWToken()
   {
@@ -64,19 +62,19 @@ private:
 
   char next_char()
   {
-    if (pos >= input.size()) { return '\0'; }
+    if (pos >= data.size()) { return '\0'; }
     x_pos++;
-    if (input[pos] == '\n') {
+    if (data[pos] == '\n') {
       y_pos++;
       x_pos = 1;
     }
-    return input[pos++];
+    return data[pos++];
   }
 
   char peek_next_char()
   {
-    if (pos >= input.size()) { return '\0'; }
-    return input[pos];
+    if (pos >= data.size()) { return '\0'; }
+    return data[pos];
   }
 
   LexerToken doGetNextToken()
@@ -86,44 +84,45 @@ private:
     const char nchar = next_char();
     if (nchar == '\0') return { {}, location, LexerTokenType::Eof };
     if (nchar == '\n') return { {}, location, LexerTokenType::Newline };
-    if (nchar == '\t') return { input.substr(startPos, 1), location, LexerTokenType::Tab };
+    if (nchar == '\t') return { data.substr(startPos, 1), location, LexerTokenType::Tab };
     if (nchar == ' ') return { fetch_consecutive(startPos, ' '), location, LexerTokenType::Space };
-    if (nchar == '(') return { input.substr(startPos, 1), location, LexerTokenType::ParenOpen };
-    if (nchar == ')') return { input.substr(startPos, 1), location, LexerTokenType::ParenClose };
-    if (nchar == '+') return { input.substr(startPos, 1), location, LexerTokenType::PlusToken };
-    if (nchar == '/') return { input.substr(startPos, 1), location, LexerTokenType::DivideToken };
-    if (nchar == '*') return { input.substr(startPos, 1), location, LexerTokenType::MultiplyToken };
-    //if (nchar == '=') return { input.substr(startPos, 1), location, LexerTokenType::EqualToken };
-    if (nchar == '-') return { input.substr(startPos, 1), location, LexerTokenType::MinusToken };
-    if (nchar == ';') return { input.substr(startPos, 1), location, LexerTokenType::SemicolonToken };
+    if (nchar == '(') return { data.substr(startPos, 1), location, LexerTokenType::ParenOpen };
+    if (nchar == ')') return { data.substr(startPos, 1), location, LexerTokenType::ParenClose };
+     if (nchar == '{') return { data.substr(startPos, 1), location, LexerTokenType::BraceOpen };
+    if (nchar == '}') return { data.substr(startPos, 1), location, LexerTokenType::BraceClose };
+    if (nchar == '+') return { data.substr(startPos, 1), location, LexerTokenType::PlusToken };
+    if (nchar == '/') return { data.substr(startPos, 1), location, LexerTokenType::DivideToken };
+    if (nchar == '*') return { data.substr(startPos, 1), location, LexerTokenType::MultiplyToken };
+    if (nchar == '-') return { data.substr(startPos, 1), location, LexerTokenType::MinusToken };
+    if (nchar == ';') return { data.substr(startPos, 1), location, LexerTokenType::SemicolonToken };
     if (nchar == '>') {
       saveCheckpoint();
-      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::GreaterEqualToken }; }
+      if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::GreaterEqualToken }; }
       restoreCheckpoint();
-      return { input.substr(startPos, 1), location, LexerTokenType::GreaterThanToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::GreaterThanToken};
     }
     if (nchar == '<') {
       saveCheckpoint();
-      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::LessEqualToken }; }
+      if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::LessEqualToken }; }
       restoreCheckpoint();
-      return { input.substr(startPos, 1), location, LexerTokenType::LessThanToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::LessThanToken};
     }
     if (nchar == '=') {
       saveCheckpoint();
-      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::EqualToken }; }
+      if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::EqualToken }; }
       restoreCheckpoint();
-      return { input.substr(startPos, 1), location, LexerTokenType::AssignToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::AssignToken};
     }
     if (nchar == '!') {
       saveCheckpoint();
-      if (next_char() == '=') { return { input.substr(startPos, 2), location, LexerTokenType::NotEqualToken }; }
+      if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::NotEqualToken }; }
       restoreCheckpoint();
-      return { input.substr(startPos, 1), location, LexerTokenType::NotToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::NotToken};
     }
 
 
     if (!(isAlpha(nchar) || isNumeric(nchar))) {
-      return { input.substr(startPos, 1), location, LexerTokenType::Unkown };
+      return { data.substr(startPos, 1), location, LexerTokenType::Unkown };
     }
 
     auto substr = next_valid_sequences(startPos);
@@ -147,7 +146,7 @@ private:
     auto count = 1;
     for (; peek_next_char() == ch; ++count, next_char())
       ;
-    return input.substr(startPos, count);
+    return data.substr(startPos, count);
   }
 
   std::string next_valid_sequences(int from)
@@ -159,7 +158,7 @@ private:
       if (!(isAlpha(c) || isNumeric(c))) break;
       next_char();
     }
-    return input.substr(from, counts);
+    return data.substr(from, counts);
   }
 
   static bool isNumeric(char c) { return (c >= '0' && c <= '9') || c == '.'; }

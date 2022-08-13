@@ -9,6 +9,8 @@
 enum class LexerTokenType {
   ParenOpen,
   ParenClose,
+  BraceOpen,
+  BraceClose,
   FloatToken,
   IntToken,
   VarToken,

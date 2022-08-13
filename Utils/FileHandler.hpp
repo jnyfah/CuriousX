@@ -44,7 +44,7 @@ class FileHandler {
             int start = 0;
 
             if(argc < 2) {
-                std::cerr<< "greater??";
+                std::cerr<< "no input file specified" <<std::endl;
                 return false;
                 
             }
@@ -53,7 +53,7 @@ class FileHandler {
             filename = argv[++start];
 
             if(!fs::is_regular_file(fs::path(filename)) || fs::path(filename).extension() != ".txt") {
-                std::cerr<< "greater";
+                std::cerr<< "invalid input file path" << std::endl;
                 return false;
             }
 
@@ -68,6 +68,12 @@ class FileHandler {
             return true;
         }
 
+        std::string getFileContents(){
+            std::ostringstream sstr;
+            sstr << inputFile.rdbuf();
+            return sstr.str();
+        }
+
 
     private:
         std::string filename;
@@ -77,6 +83,3 @@ class FileHandler {
 };
 
 #endif
-
-// TO do: validate input file
-// Read input file and get components 

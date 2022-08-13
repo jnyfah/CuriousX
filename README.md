@@ -21,3 +21,8 @@ CuriousX is a mini subset of C++ language created just for fun and out of curios
 - Statements
 - __Target Architecture:__ X86 and ARM
 
+
+##### ToDo
+open file in binary mode
+save lexer output to txt file
+
