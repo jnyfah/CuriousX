@@ -31,7 +31,14 @@
 #include <fstream>
 #include <string_view>
 #include <iostream>
+#include <vector>
 #include <sstream>
+
+
+#include "../LexicalAnalysis/include/LexerToken.hpp"
+
+
+
 
 namespace fs = std::filesystem;
 
@@ -72,6 +79,23 @@ class FileHandler {
             std::ostringstream sstr;
             sstr << inputFile.rdbuf();
             return sstr.str();
+        }
+
+        bool LexerFile(std::vector<LexerToken> m_tokens) {
+          std::fstream outputFile;
+
+          outputFile.open("Lexical-analysis.txt", std::ios_base::out);
+          if (!outputFile.is_open()) {
+            std::cout << "failed to create lexical analysis file \n";
+            return false;
+          } 
+
+           for (auto x : m_tokens) {
+                auto vv = "[" +  std::string(x.value) + "]";
+             outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t "
+                      << toString(x.type) << std::endl;
+            }
+            return true;
         }
 
 

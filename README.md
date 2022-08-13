@@ -15,14 +15,8 @@ CuriousX is a mini subset of C++ language created just for fun and out of curios
 - Print
 - Variables (strings, integer and float)
 - if/else statements
-- Expresions (add, subtract, divide, and multiply)
+- Expressions (add, subtract, divide, and multiply)
 - Operator precedence
 - Operator comparisons
 - Statements
 - __Target Architecture:__ X86 and ARM
-
-
-##### ToDo
-open file in binary mode
-save lexer output to txt file
-

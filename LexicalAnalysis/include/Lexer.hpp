@@ -22,7 +22,8 @@ class Lexer
 
 
 public:
-  Lexer(std::string data):data(data){}
+  
+  explicit Lexer(const std::string &data):data(data){}
 
   LexerToken nextNWToken()
   {
