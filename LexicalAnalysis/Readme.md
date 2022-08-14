@@ -95,4 +95,4 @@ Output (`lexer.cpp`)
 ```
 
 ## TODO
-__Get text file, test output__
+write tests for lexer
