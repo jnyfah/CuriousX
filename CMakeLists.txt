@@ -2,6 +2,7 @@
 
 project ("CuriousX")
 
+
 # Add source to this project's executable.
 add_executable (CuriousX "main.cpp")
 
@@ -16,7 +17,11 @@ endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 
+enable_testing()
+
+
 include_directories(Utils)
+include_directories(tests)
 add_subdirectory(LexicalAnalysis)
 
 target_link_libraries( ${PROJECT_NAME} LexicalAnalysis)
