@@ -62,8 +62,8 @@ const char *toString(LexerTokenType t)
   case LexerTokenType::Eof:
     return "Eof";
 
-  case LexerTokenType::Unkown:
-    return "Unkown";
+  case LexerTokenType::Unknown:
+    return "Unknown";
   default:
     break;
   }

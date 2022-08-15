@@ -1,9 +1,8 @@
 
 ## Lexer
 
-The job of the Lexer is to identify the lexical elements, or tokens, in the input language.
-Each token scanned will be stored in this structure
-(from `tokenizer.hpp`):
+The job of the Lexer is to identify the lexical elements, or tokens in the input language.
+Each token scanned will be stored in this structure (from `LexerToken.hpp`):
 
 ```c
 // Token structure
@@ -13,32 +12,44 @@ struct Token {
         SourceLocation source;
 };
 ```
-where the `sourcelocation` is the location i.e, row and coloumn of a token, the type field can be one of these values (from `tokenizer.hpp`):
+where the `SourceLocation` is the location i.e, row and column of a token, the type field can be one of these values (from `LexerToken.hpp`):
 
 ```c
 enum class LexerTokenType {
 
-    ParenOpen,
-    ParenClose,
-    FloatToken,
-    IntToken,
-    VarToken,
-    print,
+  ParenOpen,
+  ParenClose,
+  BraceOpen,
+  BraceClose,
+  FloatToken,
+  IntToken,
+  VarToken,
 
-    PlusToken,
-    MinusToken,
-    MultiplyToken,
-    DivideToken,
-    EqualToken,
+  PlusToken,
+  MinusToken,
+  DivideToken,
+  MultiplyToken,
+  AssignToken,
+  PrintToken,
 
-    ArrowToken,
-    ColonToken,
-    Space,
-    Tab,
-    NewLine,
-    Eof,
+  IfToken,
+  ElseToken,
+  NotToken,
 
-    unknown
+  GreaterThanToken,
+  LessThanToken,
+  GreaterEqualToken,
+  LessEqualToken,
+  NotEqualToken,
+  EqualToken,
+
+  SemicolonToken,
+  Space,
+  Tab,
+  Newline,
+  Eof,
+
+  Unknown
 
 };
 ```
@@ -46,7 +57,7 @@ enum class LexerTokenType {
 
 ## Some Example Input Files
 
-Some example input files have been provided in (`input.txt`) so as to see what tokens
+Some example input files have been provided in (`Utils/input.txt`) so as to see what tokens
 the lexer finds in the file
 
 ```
@@ -57,7 +68,7 @@ x->2.54
 print(x)
 ```
 
-Output (`lexer.cpp`) 
+Output (`Lexer.cpp`) 
 
 ```
 [x]       VarToken       <line:1, col:0>
@@ -95,4 +106,4 @@ Output (`lexer.cpp`)
 ```
 
 ## TODO
-write tests for lexer
+write unit tests for lexer

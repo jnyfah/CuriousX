@@ -39,7 +39,7 @@ enum class LexerTokenType {
   Newline,
   Eof,
 
-  Unkown,
+  Unknown
 };
 
 //! Converts LexerToken to String

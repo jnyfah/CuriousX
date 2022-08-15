@@ -123,7 +123,7 @@ private:
 
 
     if (!(isAlpha(nchar) || isNumeric(nchar))) {
-      return { data.substr(startPos, 1), location, LexerTokenType::Unkown };
+      return { data.substr(startPos, 1), location, LexerTokenType::Unknown };
     }
 
     auto substr = next_valid_sequences(startPos);
