@@ -1,22 +1,29 @@
-os: freebsd
-sudo: required
-language:
-  - cpp
-compiler:
-  - gcc
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-9
-      - g++-9
+language: cpp
+
+matrix:
+  include:
+    - os: freebsd
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - clang-8
+      env:
+        - MATRIX_EVAL="CC=clang-8 CXX=clang++-8"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - g++-9
+      env:
+        - MATRIX_EVAL="CC=gcc-9 CXX=g++-9"
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+
 script:
-  # Export CC and CXX to tell cmake which compiler to use
-  - export CC=/usr/bin/gcc-9
-  - export CXX=/usr/bin/g++-9
-  # Check versions of gcc, g++ and cmake
-  - gcc -v && g++ -v && cmake --version
-  # Run your build commands next
   - cmake CMakeLists.txt
   - cmake  --build .
