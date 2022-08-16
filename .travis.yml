@@ -1,4 +1,4 @@
-dist: bionic
+dist: freebsd
 sudo: required
 language:
   - cpp
