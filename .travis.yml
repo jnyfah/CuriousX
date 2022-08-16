@@ -1,4 +1,4 @@
-dist: xenial
+dist: freebsd
 notifications:
   email: false
 
@@ -6,7 +6,7 @@ notifications:
 # Feel free to add/remove entries from this list.
 matrix:
   include:
-    - os: linux
+    - os: freebsd
       addons:
         apt:
           sources:
