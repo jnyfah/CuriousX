@@ -1,28 +1,35 @@
-language: cpp
+dist: xenial
+notifications:
+  email: false
 
+# Define builds on mulitple OS/compiler combinations. 
+# Feel free to add/remove entries from this list.
 matrix:
   include:
-    - os: freebsd
-      addons:
-        apt:
-          sources:
-            - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages:
-            - clang-8
-      env:
-        - MATRIX_EVAL="CC=clang-8 CXX=clang++-8"
     - os: linux
       addons:
         apt:
           sources:
-            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - ubuntu-toolchain-r-test
           packages:
-            - g++-9
+            - lcov
+            - g++-7
       env:
-        - MATRIX_EVAL="CC=gcc-9 CXX=g++-9"
+        - MATRIX_EVAL="CXX_COMPILER=g++-7; sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 90"
+
+      env:
+        - MATRIX_EVAL="CXX_COMPILER=clang++"
+    
 
 before_install:
   - eval "${MATRIX_EVAL}"
+  - PARENTDIR=$(pwd)
+  - mkdir $PARENTDIR/build
+
+install: 
+  - cd $PARENTDIR/build
+  - cmake $PARENTDIR -DCMAKE_BUILD_TYPE=Coverage -DCMAKE_CXX_COMPILER=$CXX_COMPILER
+  - make
 
 script:
   - cmake CMakeLists.txt
