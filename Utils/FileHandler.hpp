@@ -30,7 +30,12 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string_view>
+#include <vector>
+
+
+#include "../LexicalAnalysis/include/LexerToken.hpp"
 
 
 namespace fs = std::filesystem;
@@ -46,7 +51,7 @@ public:
     int start = 0;
 
     if (argc < 2) {
-      std::cerr << "greater??";
+      std::cerr << "no input file specified" << std::endl;// Todo exception
       return false;
     }
 
@@ -54,20 +59,47 @@ public:
     filename = argv[++start];
 
     if (!fs::is_regular_file(fs::path(filename)) || fs::path(filename).extension() != ".txt") {
-      std::cerr << "greater";
+      std::cerr << "invalid input file path" << std::endl;
       return false;
     }
 
     inputFile.open(filename);
 
     if (!inputFile.is_open()) {
-      std::cerr << " cannot open audio file \n";
+      std::cerr << " cannot open audio file \n";// Todo exception
       return false;
     }
 
 
     return true;
   }
+
+  std::string getFileContents()
+  {
+    std::ostringstream sstr;
+    sstr << inputFile.rdbuf();
+    return sstr.str();
+  }
+
+  bool LexerFile(std::vector<LexerToken> m_tokens)
+  {
+    std::fstream outputFile;
+
+    outputFile.open("Lexical-analysis.txt", std::ios_base::out);
+    if (!outputFile.is_open()) {
+      std::cout << "failed to create lexical analysis file \n";// Todo exception
+      return false;
+    }
+
+    for (auto x : m_tokens) {
+      auto vv = "[" + std::string(x.value) + "]";
+      outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t " << toString(x.type)
+                 << std::endl;
+    }
+    return true;
+  }
+
+  std::string getFilename() { return filename; }
 
 
 private:
@@ -76,6 +108,3 @@ private:
 };
 
 #endif
-
-// TO do: validate input file
-// Read input file and get components
