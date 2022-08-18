@@ -51,7 +51,7 @@ class FileHandler {
             int start = 0;
 
             if(argc < 2) {
-                std::cerr<< "no input file specified" <<std::endl;
+                std::cerr<< "no input file specified" <<std::endl; // Todo exception
                 return false;
                 
             }
@@ -67,7 +67,7 @@ class FileHandler {
             inputFile.open(filename);
 
             if (!inputFile.is_open()) {
-                std::cerr << " cannot open audio file \n";
+                std::cerr << " cannot open audio file \n";  // Todo exception
                 return false;
             }
             
@@ -86,7 +86,7 @@ class FileHandler {
 
           outputFile.open("Lexical-analysis.txt", std::ios_base::out);
           if (!outputFile.is_open()) {
-            std::cout << "failed to create lexical analysis file \n";
+            std::cout << "failed to create lexical analysis file \n"; // Todo exception
             return false;
           } 
 
@@ -96,6 +96,10 @@ class FileHandler {
                       << toString(x.type) << std::endl;
             }
             return true;
+        }
+
+        std::string getFilename(){
+            return filename;
         }
 
 

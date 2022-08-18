@@ -10,8 +10,6 @@
 
 
 
-
-
 class Lexer
 {
   std::string data;
@@ -89,7 +87,7 @@ private:
     if (nchar == ' ') return { fetch_consecutive(startPos, ' '), location, LexerTokenType::Space };
     if (nchar == '(') return { data.substr(startPos, 1), location, LexerTokenType::ParenOpen };
     if (nchar == ')') return { data.substr(startPos, 1), location, LexerTokenType::ParenClose };
-     if (nchar == '{') return { data.substr(startPos, 1), location, LexerTokenType::BraceOpen };
+    if (nchar == '{') return { data.substr(startPos, 1), location, LexerTokenType::BraceOpen };
     if (nchar == '}') return { data.substr(startPos, 1), location, LexerTokenType::BraceClose };
     if (nchar == '+') return { data.substr(startPos, 1), location, LexerTokenType::PlusToken };
     if (nchar == '/') return { data.substr(startPos, 1), location, LexerTokenType::DivideToken };
@@ -119,6 +117,14 @@ private:
       if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::NotEqualToken }; }
       restoreCheckpoint();
       return { data.substr(startPos, 1), location, LexerTokenType::NotToken};
+    }
+
+    if (nchar == '#') {
+      int i =1;
+      while(next_char()!= '#'){
+        i++;
+      }
+      return { data.substr(startPos, i+1), location, LexerTokenType::StringToken};
     }
 
 
