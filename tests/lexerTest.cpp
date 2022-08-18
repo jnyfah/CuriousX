@@ -91,6 +91,7 @@ TEST(lexerTest, Expression)
 }
 
 
+// Test Conditions
 TEST(lexerTest, Conditions)
 {
   std::string actual = "if(x ==5){ if(y >= 7)} else{z != 0.48}";
