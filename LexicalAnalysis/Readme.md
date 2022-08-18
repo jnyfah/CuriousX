@@ -102,6 +102,3 @@ Output (`Lexer.cpp`)
 [)]       ParenClose     <line:5, col:7>
 
 ```
-
-## TODO
-write unit tests for lexer
