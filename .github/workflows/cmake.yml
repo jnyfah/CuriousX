@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 env:
-  CMAKE_VERSION: 3.10
+  CMAKE_VERSION: 3.13
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 

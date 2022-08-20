@@ -25,6 +25,7 @@ enum class LexerTokenType {
   IfToken,
   ElseToken,
   NotToken,
+  StringToken,
 
   GreaterThanToken,
   LessThanToken,
@@ -38,6 +39,7 @@ enum class LexerTokenType {
   Tab,
   Newline,
   Eof,
+
 
   Unknown
 };

@@ -23,8 +23,7 @@ if (NOT googletest_POPULATED)
 endif()
 
 
-# Todo add option to build test
-enable_testing()
+
 
 
 
@@ -40,9 +39,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
 endif()
 
 
+
+# Todo add option to build test
+
+# -------------------- Options --------------------------------
+option( CURIOUSX_BUILD_TESTS "Specifies whether to build the tests" OFF )
+option( CURIOUSX_BUILD_EXAMPLES "Specifies whether to build the examples" OFF )
+
 # -------------------- add subdirectories --------------------
 include_directories(Utils)
-include_directories(tests)
+
+if(CURIOUSX_BUILD_TESTS) 
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
+
 add_subdirectory(LexicalAnalysis)
 
 target_link_libraries( ${PROJECT_NAME} LexicalAnalysis)

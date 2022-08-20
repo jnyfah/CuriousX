@@ -103,5 +103,3 @@ Output (`Lexer.cpp`)
 
 ```
 
-## TODO
-write unit tests for lexer

@@ -5,11 +5,8 @@
 #include <string>
 #include <string_view>
 
-#include "SourceLocation.hpp"
 #include "LexerToken.hpp"
-
-
-
+#include "SourceLocation.hpp"
 
 
 class Lexer
@@ -22,8 +19,7 @@ class Lexer
 
 
 public:
-  
-  explicit Lexer(const std::string &data):data(data){}
+  explicit Lexer(const std::string &data) : data(data) {}
 
   LexerToken nextNWToken()
   {
@@ -89,7 +85,7 @@ private:
     if (nchar == ' ') return { fetch_consecutive(startPos, ' '), location, LexerTokenType::Space };
     if (nchar == '(') return { data.substr(startPos, 1), location, LexerTokenType::ParenOpen };
     if (nchar == ')') return { data.substr(startPos, 1), location, LexerTokenType::ParenClose };
-     if (nchar == '{') return { data.substr(startPos, 1), location, LexerTokenType::BraceOpen };
+    if (nchar == '{') return { data.substr(startPos, 1), location, LexerTokenType::BraceOpen };
     if (nchar == '}') return { data.substr(startPos, 1), location, LexerTokenType::BraceClose };
     if (nchar == '+') return { data.substr(startPos, 1), location, LexerTokenType::PlusToken };
     if (nchar == '/') return { data.substr(startPos, 1), location, LexerTokenType::DivideToken };
@@ -100,25 +96,31 @@ private:
       saveCheckpoint();
       if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::GreaterEqualToken }; }
       restoreCheckpoint();
-      return { data.substr(startPos, 1), location, LexerTokenType::GreaterThanToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::GreaterThanToken };
     }
     if (nchar == '<') {
       saveCheckpoint();
       if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::LessEqualToken }; }
       restoreCheckpoint();
-      return { data.substr(startPos, 1), location, LexerTokenType::LessThanToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::LessThanToken };
     }
     if (nchar == '=') {
       saveCheckpoint();
       if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::EqualToken }; }
       restoreCheckpoint();
-      return { data.substr(startPos, 1), location, LexerTokenType::AssignToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::AssignToken };
     }
     if (nchar == '!') {
       saveCheckpoint();
       if (next_char() == '=') { return { data.substr(startPos, 2), location, LexerTokenType::NotEqualToken }; }
       restoreCheckpoint();
-      return { data.substr(startPos, 1), location, LexerTokenType::NotToken};
+      return { data.substr(startPos, 1), location, LexerTokenType::NotToken };
+    }
+
+    if (nchar == '#') {
+      int i = 1;
+      while (next_char() != '#') { i++; }
+      return { data.substr(startPos, i + 1), location, LexerTokenType::StringToken };
     }
 
 
@@ -135,9 +137,13 @@ private:
         return { substr, location, LexerTokenType::FloatToken };
       }
     }
-    if (substr == "print" || substr == "Print") { return { substr, location, LexerTokenType::PrintToken }; }
-    else if (substr == "if") { return { substr, location, LexerTokenType::IfToken }; }
-    else if (substr == "else") { return { substr, location, LexerTokenType::ElseToken }; }
+    if (substr == "print" || substr == "Print") {
+      return { substr, location, LexerTokenType::PrintToken };
+    } else if (substr == "if") {
+      return { substr, location, LexerTokenType::IfToken };
+    } else if (substr == "else") {
+      return { substr, location, LexerTokenType::ElseToken };
+    }
     return { substr, location, LexerTokenType::VarToken };
   }
 
