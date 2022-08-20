@@ -101,5 +101,8 @@ Output (`Lexer.cpp`)
 [x]       VarToken       <line:5, col:6>
 [)]       ParenClose     <line:5, col:7>
 
+<<<<<<< HEAD
 ```
 
+## TODO
+write unit tests for lexer
