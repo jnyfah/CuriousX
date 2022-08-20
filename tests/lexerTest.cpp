@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "FileHandler.hpp"
-#include "LexicalAnalysis\include\Lexer.hpp"
+#include "LexicalAnalysis/include/Lexer.hpp"
 
 namespace fs = std::filesystem;
 

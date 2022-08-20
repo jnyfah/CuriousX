@@ -3,30 +3,6 @@
 project ("CuriousX")
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-
-# -------------------- Fetch googletest content--------------------
-
-include(FetchContent)
-
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.12.1
-)
-
-FetchContent_GetProperties(googletest)
-
-if (NOT googletest_POPULATED)
-    FetchContent_Populate(googletest)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
-
-
-
-
-
-
 # todo: remove ?
 add_executable (CuriousX "main.cpp")
 
@@ -48,14 +24,33 @@ option( CURIOUSX_BUILD_EXAMPLES "Specifies whether to build the examples" OFF )
 
 # -------------------- add subdirectories --------------------
 include_directories(Utils)
+add_subdirectory(LexicalAnalysis)
 
 if(CURIOUSX_BUILD_TESTS) 
+
+# -------------------- Fetch googletest content--------------------
+  include(FetchContent)
+
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.12.1
+  )
+
+  FetchContent_GetProperties(googletest)
+
+  if (NOT googletest_POPULATED)
+      FetchContent_Populate(googletest)
+      set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+      add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
   enable_testing()
   add_subdirectory(tests)
+
 endif()
 
 
-add_subdirectory(LexicalAnalysis)
+
 
 target_link_libraries( ${PROJECT_NAME} LexicalAnalysis)
 
