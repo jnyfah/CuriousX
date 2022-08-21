@@ -1,5 +1,6 @@
 [![Travis](https://img.shields.io/travis/jnyfah/CuriousX/master.svg?style=flat&logo=travis&color=yellow)](https://app.travis-ci.com/jnyfah/CuriousX)
 ![Windows](https://github.com/jnyfah/CuriousX/actions/workflows/windows.yml/badge.svg)
+[![Ubuntu](https://github.com/jnyfah/CuriousX/workflows/ubuntu.yml/badge.svg)](https://github.com/jnyfah/CuriousX/actions/workflows/ubuntu.yml)
 ![Ubuntu](https://github.com/jnyfah/CuriousX/workflows/ubuntu.yml/badge.svg)
 ![macOS](https://github.com/jnyfah/CuriousX/workflows/macos.yml/badge.svg)
 ![Unit Test](https://github.com/jnyfah/CuriousX/actions/workflows/unittest.yml/badge.svg)
