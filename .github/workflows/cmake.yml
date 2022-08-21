@@ -1,4 +1,4 @@
-name: Windows
+name: CMake Build
 
 on:
   push:
@@ -32,6 +32,16 @@ jobs:
             name: "Windows Latest MinGW", artifact: "Windows-MinGW.7z",
             os: windows-latest,
             cc: "gcc", cxx: "g++"
+          }
+        - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.7z",
+            os: ubuntu-latest,
+            cc: "gcc", cxx: "g++"
+          }
+        - {
+            name: "macOS Latest Clang", artifact: "macOS.7z",
+            os: macos-latest,
+            cc: "clang", cxx: "clang++"
           }
 
 
