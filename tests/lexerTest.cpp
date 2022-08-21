@@ -3,7 +3,11 @@
 #include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
 
+#ifdef __APPLE__
+namespace fs = std::__fs::filesystem;
+#else
 namespace fs = std::filesystem;
+#endif
 
 void LexerEquality(std::vector<LexerToken> actual, std::vector<LexerToken> expected)
 {
