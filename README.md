@@ -1,6 +1,8 @@
+[![Travis](https://img.shields.io/travis/jnyfah/CuriousX/master.svg?style=flat&logo=travis&color=yellow)](https://app.travis-ci.com/jnyfah/CuriousX)
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/cmake.yml/badge.svg)
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/unittest.yml/badge.svg)
-[![Travis](https://img.shields.io/travis/jnyfah/CuriousX/master.svg?style=flat&logo=travis&color=yellow)](https://app.travis-ci.com/jnyfah/CuriousX)
+![Github](https://github.com/jnyfah/CuriousX/actions/workflows/msvc.yml/badge.svg)
+![Github](https://github.com/jnyfah/CuriousX/actions/workflows/codeql.yml/badge.svg)
 ![GitHub](https://img.shields.io/github/license/jnyfah/CuriousX?color=blue&logo=github)
 ![GitHub top language](https://img.shields.io/github/languages/top/jnyfah/CuriousX?color=red)
 
