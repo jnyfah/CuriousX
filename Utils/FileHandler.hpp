@@ -37,6 +37,8 @@
 
 #include "../LexicalAnalysis/include/LexerToken.hpp"
 
+#include "Error.hpp"
+
 
 #ifdef __APPLE__
 namespace fs = std::__fs::filesystem;
@@ -50,29 +52,24 @@ class FileHandler
 public:
   FileHandler() {}
 
+  Error error;
+
   bool ParseArguments(int argc, const char *argv[])
   {
     int start = 0;
 
-    if (argc < 2) {
-      std::cerr << "no input file specified" << std::endl;// Todo exception
-      return false;
-    }
+    error.CHECK((argc >= 2), "no input file specified \n");
 
     std::string_view option = argv[start];
     filename = argv[++start];
 
-    if (!fs::is_regular_file(fs::path(filename)) || fs::path(filename).extension() != ".txt") {
-      std::cerr << "invalid input file path" << std::endl;
-      return false;
-    }
+    error.CHECK( (fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt") , "invalid input file path \n");
+
+    
 
     inputFile.open(filename);
 
-    if (!inputFile.is_open()) {
-      std::cerr << " cannot open audio file \n";// Todo exception
-      return false;
-    }
+    error.CHECK(inputFile.is_open(), "cannot open input file \n");
 
 
     return true;
@@ -90,10 +87,8 @@ public:
     std::fstream outputFile;
 
     outputFile.open("Lexical-analysis.txt", std::ios_base::out);
-    if (!outputFile.is_open()) {
-      std::cout << "failed to create lexical analysis file \n";// Todo exception
-      return false;
-    }
+
+    error.CHECK(outputFile.is_open(), "failed to create lexical analysis file \n");
 
     for (auto x : m_tokens) {
       auto vv = "[" + std::string(x.value) + "]";

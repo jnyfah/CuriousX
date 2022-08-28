@@ -33,31 +33,26 @@
 ///////////////////////////////////////////////////////////////////////////
 
 
-enum ErrorCode {
-    OK = 0,
-    FAIL = -1,
-    UNKNOWN_ERROR = -2
-};
-
 
 class Error : public std::exception {
     public:
-        Error(const char* message, ErrorCode errorCode): message(message), errorCode(errorCode) {}
+        Error(const char* message): message(message){}
+        Error(){}
 
-        ErrorCode getErrorCode() const {
-            return errorCode;
+
+        std::string getErrorMessage() const{
+            return message;
         }
 
         /// Method to be used for checking required conditions.
-        void CHECK(bool check, ErrorCode errorCode, const char* message) {
+        void CHECK(bool check, const char* message) {
             if (!check) {
-                throw Error(message, errorCode);
+                throw Error(message);
             }
         }
    
     private:
         std::string message;
-        ErrorCode errorCode;
 };
 
 #endif
