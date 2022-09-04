@@ -4,30 +4,23 @@
 #include <sstream>
 
 
+int main(int argc, const char *argv[])
+{
+  try {
+    FileHandler fileHandler;
 
+    if (fileHandler.ParseArguments(argc, argv)) {
 
+      Lexer lex(fileHandler.getFileContents());
 
-int main(int argc, const char* argv[]) { 
-    try{
-        FileHandler fileHandler;
+      std::vector<LexerToken> m_tokens;
 
-        if(fileHandler.ParseArguments(argc, argv)) {
-       
-            Lexer lex(fileHandler.getFileContents());
-
-            std::vector<LexerToken> m_tokens;
-            for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken()) {
-                m_tokens.emplace_back(token);
-            }
-            if (fileHandler.LexerFile(m_tokens)) { 
-                std::cout << "yes";
-            }
+      for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken()) {
+        m_tokens.emplace_back(token);
+      }
+      fileHandler.LexerFile(m_tokens);
     }
-    }catch(Error& ex){
-        std::cerr<< ex.getErrorMessage()<<std::endl;
-    }
-    
-
- }
-
-
+  } catch (Error &ex) {
+    std::cerr << ex.getErrorMessage() << std::endl;
+  }
+}

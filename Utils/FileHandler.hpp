@@ -63,9 +63,9 @@ public:
     std::string_view option = argv[start];
     filename = argv[++start];
 
-    error.CHECK( (fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt") , "invalid input file path \n");
+    error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
+      "invalid input file path \n");
 
-    
 
     inputFile.open(filename);
 
@@ -82,7 +82,7 @@ public:
     return sstr.str();
   }
 
-  bool LexerFile(std::vector<LexerToken> m_tokens)
+  void LexerFile(std::vector<LexerToken> m_tokens)
   {
     std::fstream outputFile;
 
@@ -95,7 +95,6 @@ public:
       outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t " << toString(x.type)
                  << std::endl;
     }
-    return true;
   }
 
   std::string getFilename() { return filename; }

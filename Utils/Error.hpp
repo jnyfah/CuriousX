@@ -12,7 +12,7 @@
  ** @email: <jnyfaah@gmail.com>
  **
  ** see https://github.com/jnyfah/CuriousX for most recent version including documentation.
- ** Project CuriousX...2022 
+ ** Project CuriousX...2022
  **
  */
 
@@ -33,28 +33,23 @@
 ///////////////////////////////////////////////////////////////////////////
 
 
+class Error : public std::exception
+{
+public:
+  Error(const char *message) : message(message) {}
+  Error() {}
 
-class Error : public std::exception {
-    public:
-        Error(const char* message): message(message){}
-        Error(){}
 
+  std::string getErrorMessage() const { return message; }
 
-        std::string getErrorMessage() const{
-            return message;
-        }
+  /// Method to be used for checking required conditions.
+  void CHECK(bool check, const char *message)
+  {
+    if (!check) { throw Error(message); }
+  }
 
-        /// Method to be used for checking required conditions.
-        void CHECK(bool check, const char* message) {
-            if (!check) {
-                throw Error(message);
-            }
-        }
-   
-    private:
-        std::string message;
+private:
+  std::string message;
 };
 
 #endif
-
-
