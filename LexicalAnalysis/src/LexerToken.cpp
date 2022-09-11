@@ -39,6 +39,8 @@ const char *toString(LexerTokenType t)
     return "NotToken";
   case LexerTokenType::StringToken:
     return "StringToken";
+  case LexerTokenType::LetToken:
+    return "LetToken";
 
   case LexerTokenType::GreaterThanToken:
     return "GreaterThanToken";

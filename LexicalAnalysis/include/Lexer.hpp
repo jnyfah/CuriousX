@@ -8,6 +8,8 @@
 #include "LexerToken.hpp"
 #include "SourceLocation.hpp"
 
+namespace Lexer {
+
 
 class Lexer
 {
@@ -143,6 +145,8 @@ private:
       return { substr, location, LexerTokenType::IfToken };
     } else if (substr == "else") {
       return { substr, location, LexerTokenType::ElseToken };
+    } else if (substr == "let") {
+      return { substr, location, LexerTokenType::LetToken };
     }
     return { substr, location, LexerTokenType::VarToken };
   }
@@ -173,5 +177,7 @@ private:
   static bool isInteger(char c) { return (c >= '0' && c <= '9'); }
 
   static bool isAlpha(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '.'; }
+};
+
 };
 #endif// LEXER_HPP
