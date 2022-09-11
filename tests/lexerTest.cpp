@@ -9,6 +9,8 @@ namespace fs = std::__fs::filesystem;
 namespace fs = std::filesystem;
 #endif
 
+using namespace Lexer;
+
 void LexerEquality(std::vector<LexerToken> actual, std::vector<LexerToken> expected)
 {
   EXPECT_EQ(actual.size(), expected.size());
