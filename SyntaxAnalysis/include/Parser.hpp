@@ -1,38 +1,50 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
+#include <vector>
 
-
-#include "LexicalAnalysis/include/Lexer.hpp"
+#include "Error.hpp"
 #include "Node.hpp"
 
 
-namespace Parser{
+namespace Parser {
 
-class Parser {
+class Parser
+{
 
-   
+
 public:
+  explicit Parser(const std::vector<LexerToken> &token) : token(token)
+  {
+    root = nullptr;
+    current = 0;
+  }
 
-    Parser(Lexer::Lexer lexer): lexer(lexer){}
+  std::unique_ptr<Node> Expression();
 
-    std::unique_ptr<Node> Expression();
-    
-    std::unique_ptr<Node> Factor();
+  std::unique_ptr<Node> Term();
 
-    std::unique_ptr<Node> Assign();
+  std::unique_ptr<Node> Factor();
 
-    bool Parse();
+  std::unique_ptr<Node> Assign();
 
+  bool Parse();
 
+  void printAst();
+
+  void inOrder(std::unique_ptr<Node> node);
 
 private:
-    Lexer::Lexer lexer;
-    std::unique_ptr<Node> root;
-  
+  std::unique_ptr<Node> root;
+
+  std::vector<LexerToken> token;
+  size_t current;
+
+
+  int level;
 };
 
- 
-};
+
+};// namespace Parser
 
 #endif
