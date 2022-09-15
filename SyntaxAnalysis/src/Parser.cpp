@@ -1,11 +1,9 @@
-#include "Parser.hpp"
+#include "SyntaxAnalysis/include/Parser.hpp"
+#include <iostream>
 
-
-namespace Parser {
-
-bool Parser::Parser::Parse()
+bool Parser::Parse()
 {
-  if (token[current].type == LexerTokenType::Eof) { return false; }
+  if (current >= token.size()) { return false; }
 
   root = Expression();
   if (root == nullptr) { return false; }
@@ -16,41 +14,53 @@ bool Parser::Parser::Parse()
 
 std::unique_ptr<Node> Parser::Expression()
 {
-  std::unique_ptr<Node> node;
 
-  node->left = Term();
+  std::unique_ptr<Node> node = std::make_unique<Node>();
 
-  if (token[current].type == LexerTokenType::Eof) { return nullptr; }
+  std::unique_ptr<Node> a = Term();
 
-  if ((token[current].type == LexerTokenType::PlusToken) || (token[current].type == LexerTokenType::MinusToken)) {
-    node->type = token[current];
-    current++;
-    node->right = Term();
+  while (true) {
+    if (current >= token.size()) { return a; }
+    if ((token[current].type == LexerTokenType::PlusToken) || (token[current].type == LexerTokenType::MinusToken)) {
+      node->type = token[current];
+      current++;
+      if (current >= token.size()) { return a; }
+      std::unique_ptr<Node> b = Term();
+      a = makeNode(std::move(a), std::move(b), node->type);
+    } else {
+      return a;
+    }
   }
-  return node;
 }
-
 
 std::unique_ptr<Node> Parser::Term()
 {
-  std::unique_ptr<Node> node;
 
-  node->left = Factor();
+  std::unique_ptr<Node> node = std::make_unique<Node>();
 
-  if (token[current].type == LexerTokenType::Eof) { return nullptr; }
+  std::unique_ptr<Node> a = Factor();
 
-  if ((token[current].type == LexerTokenType::MultiplyToken) || (token[current].type == LexerTokenType::DivideToken)) {
-    node->type = token[current];
-    current++;
-    node->right = Factor();
+  while (true) {
+    if (current >= token.size()) { return a; }
+    if ((token[current].type == LexerTokenType::MultiplyToken)
+        || (token[current].type == LexerTokenType::DivideToken)) {
+      node->type = token[current];
+      current++;
+      if (current >= token.size()) { return a; }
+      std::unique_ptr<Node> b = Factor();
+      a = makeNode(std::move(a), std::move(b), node->type);
+    } else {
+      return a;
+    }
   }
-  return node;
 }
 
 
 std::unique_ptr<Node> Parser::Factor()
 {
-  std::unique_ptr<Node> node;
+  std::unique_ptr<Node> node = std::make_unique<Node>();
+
+  if (current >= token.size()) { return node; }
 
   // To do variable name, if,
   if ((token[current].type == LexerTokenType::IntToken) || (token[current].type == LexerTokenType::FloatToken)) {
@@ -62,21 +72,24 @@ std::unique_ptr<Node> Parser::Factor()
 }
 
 
-void Parser::printAst() { inOrder(std::move(root)); }
-
-void Parser::inOrder(std::unique_ptr<Node> node)
+void displayInOrder(std::unique_ptr<Node> nodePtr)
 {
-  if (node) {
-    std::cout << node->type.value << std::endl;
-
-    inOrder(std::move(root->left));
-
-    inOrder(std::move(root->right));
+  if (nodePtr) {
+    displayInOrder(std::move(nodePtr->left));
+    std::cout << nodePtr->type.value << std::endl;
+    displayInOrder(std::move(nodePtr->right));
   }
 }
 
-
-};// namespace Parser
+void printTree(std::unique_ptr<Node> root, int space)
+{
+  if (root == NULL) return;
+  space += 1;
+  printTree(std::move(root->right), space);
+  for (int i = 1; i < space; i++) std::cout << "\t";
+  std::cout << root->type.value << "\n";
+  printTree(std::move(root->left), space);
+}
 
 
 // 7 + 8
@@ -95,3 +108,7 @@ void Parser::inOrder(std::unique_ptr<Node> node)
 // unknown
 
 // if
+
+// Todo
+// add parenopen
+// add asignment

@@ -2,16 +2,16 @@ project (SyntaxAnalysis)
 
 add_library(${PROJECT_NAME} src/Parser.cpp)
 
-include_directories(Utils)
-include_directories(LexicalAnalysis)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC LexicalAnalysis)
-
-
-target_include_directories( ${PROJECT_NAME}
-    PUBLIC ${PROJECT_SOURCE_DIR}/include
+target_include_directories(${PROJECT_NAME}
+    PUBLIC 
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
+        $<INSTALL_INTERFACE:include>                                # in case we will install our lib 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>      # when we use lib - where to look up public headers
+        ${CMAKE_CURRENT_SOURCE_DIR}/src                             # private headers - only for build lib
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 )
 
-target_sources( ${PROJECT_NAME}
-PUBLIC ${PROJECT_SOURCE_DIR}/src)
+add_dependencies(SyntaxAnalysis LexicalAnalysis)
+target_link_libraries(SyntaxAnalysis PRIVATE LexicalAnalysis)
 

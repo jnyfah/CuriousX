@@ -4,7 +4,7 @@
 #include <memory>
 
 
-#include "LexicalAnalysis/include/Lexer.hpp"
+#include "LexicalAnalysis/include/LexerToken.hpp"
 
 struct Node
 {
@@ -17,7 +17,7 @@ struct Node
 // Build and return a generic AST node
 std::unique_ptr<Node> makeNode(std::unique_ptr<Node> left, std::unique_ptr<Node> right, LexerToken type)
 {
-  std::unique_ptr<Node> node;
+  std::unique_ptr<Node> node = std::make_unique<Node>();
 
   node->left = std::move(left);
   node->right = std::move(right);

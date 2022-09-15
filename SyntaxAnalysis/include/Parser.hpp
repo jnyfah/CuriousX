@@ -7,18 +7,17 @@
 #include "Node.hpp"
 
 
-namespace Parser {
-
 class Parser
 {
-
 
 public:
   explicit Parser(const std::vector<LexerToken> &token) : token(token)
   {
-    root = nullptr;
+    root = std::make_unique<Node>();
     current = 0;
   }
+
+  std::unique_ptr<Node> root;
 
   std::unique_ptr<Node> Expression();
 
@@ -35,7 +34,7 @@ public:
   void inOrder(std::unique_ptr<Node> node);
 
 private:
-  std::unique_ptr<Node> root;
+  // std::unique_ptr<Node> root;
 
   std::vector<LexerToken> token;
   size_t current;
@@ -44,7 +43,5 @@ private:
   int level;
 };
 
-
-};// namespace Parser
 
 #endif
