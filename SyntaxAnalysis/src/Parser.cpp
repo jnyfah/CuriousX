@@ -71,7 +71,7 @@ std::unique_ptr<Node> Parser::Factor()
   return node;
 }
 
-
+#ifdef 	_MSC_VER
 void displayInOrder(std::unique_ptr<Node> nodePtr)
 {
   if (nodePtr) {
@@ -90,7 +90,7 @@ void printTree(std::unique_ptr<Node> root, int space)
   std::cout << root->type.value << "\n";
   printTree(std::move(root->left), space);
 }
-
+#endif
 
 // 7 + 8
 
