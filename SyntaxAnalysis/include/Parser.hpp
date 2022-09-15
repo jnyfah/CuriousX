@@ -33,6 +33,9 @@ public:
 
   void inOrder(std::unique_ptr<Node> node);
 
+  void displayInOrder(std::unique_ptr<Node> nodePtr);
+  void printTree(std::unique_ptr<Node> root, int space);
+
 private:
   // std::unique_ptr<Node> root;
 
@@ -43,24 +46,7 @@ private:
   int level;
 };
 
-void displayInOrder(std::unique_ptr<Node> nodePtr)
-{
-  if (nodePtr) {
-    displayInOrder(std::move(nodePtr->left));
-    std::cout << nodePtr->type.value << std::endl;
-    displayInOrder(std::move(nodePtr->right));
-  }
-}
 
-void printTree(std::unique_ptr<Node> root, int space)
-{
-  if (root == NULL) return;
-  space += 1;
-  printTree(std::move(root->right), space);
-  for (int i = 1; i < space; i++) std::cout << "\t";
-  std::cout << root->type.value << "\n";
-  printTree(std::move(root->left), space);
-}
 
 
 #endif

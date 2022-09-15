@@ -29,17 +29,13 @@ int main(int argc, const char *argv[])
       fileHandler.LexerFile(m_tokens);
       Parser parsed(m_tokens);
       if(parsed.Parse()) {
-        printTree(std::move(parsed.root), 0);
-        displayInOrder(std::move(parsed.root));
+        parsed.printTree(std::move(parsed.root), 0);
+        parsed.displayInOrder(std::move(parsed.root));
 
 
       } else {
         std::cout <<"bojack \n";
       }
-
-
-   
-     
     }
   } catch (Error &ex) {
     std::cerr << ex.getErrorMessage() << std::endl;

@@ -15,7 +15,7 @@ struct Node
 
 
 // Build and return a generic AST node
-std::unique_ptr<Node> makeNode(std::unique_ptr<Node> left, std::unique_ptr<Node> right, LexerToken type)
+inline std::unique_ptr<Node> makeNode(std::unique_ptr<Node> left, std::unique_ptr<Node> right, LexerToken type)
 {
   std::unique_ptr<Node> node = std::make_unique<Node>();
 
@@ -27,10 +27,10 @@ std::unique_ptr<Node> makeNode(std::unique_ptr<Node> left, std::unique_ptr<Node>
 }
 
 // Make an AST leaf node
-std::unique_ptr<Node> makeLeaf(LexerToken type) { return (makeNode(nullptr, nullptr, type)); }
+inline std::unique_ptr<Node> makeLeaf(LexerToken type) { return (makeNode(nullptr, nullptr, type)); }
 
 // Make a unary AST node: only one child
-std::unique_ptr<Node> makeUnary(std::unique_ptr<Node> left, LexerToken type)
+inline std::unique_ptr<Node> makeUnary(std::unique_ptr<Node> left, LexerToken type)
 {
   return (makeNode(std::move(left), nullptr, type));
 }
