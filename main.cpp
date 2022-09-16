@@ -18,7 +18,7 @@ int main(int argc, const char *argv[])
 
     if (fileHandler.ParseArguments(argc, argv)) {
 
-      Lexer::Lexer lex(fileHandler.getFileContents());
+      Lexer lex(fileHandler.getFileContents());
 
       std::vector<LexerToken> m_tokens;
 
