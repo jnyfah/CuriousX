@@ -8,7 +8,7 @@
 #include "LexerToken.hpp"
 #include "SourceLocation.hpp"
 
-namespace Lexer {
+
 
 
 class Lexer
@@ -179,5 +179,4 @@ private:
   static bool isAlpha(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '.'; }
 };
 
-};
 #endif// LEXER_HPP

@@ -40,7 +40,7 @@ TEST(lexerTest, VariableAssign)
     { LexerToken{ "1.5", { 1, 8 }, LexerTokenType::FloatToken } }
 
   };
-  Lexer::Lexer lex(actual);
+  Lexer lex(actual);
   std::vector<LexerToken> m_tokens;
   for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken()) {
     m_tokens.emplace_back(token);
@@ -60,7 +60,7 @@ TEST(lexerTest, PrintData)
     { LexerToken{ ")", { 1, 34 }, LexerTokenType::ParenClose } }
 
   };
-  Lexer::Lexer lex(actual);
+  Lexer lex(actual);
   std::vector<LexerToken> m_tokens;
   for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken()) {
     m_tokens.emplace_back(token);
@@ -86,7 +86,7 @@ TEST(lexerTest, Expression)
     { LexerToken{ ")", { 1, 22 }, LexerTokenType::ParenClose } }
 
   };
-  Lexer::Lexer lex(actual);
+  Lexer lex(actual);
   std::vector<LexerToken> m_tokens;
   for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken()) {
     m_tokens.emplace_back(token);
@@ -122,7 +122,7 @@ TEST(lexerTest, Conditions)
     { LexerToken{ "}", { 1, 38 }, LexerTokenType::BraceClose } }
 
   };
-  Lexer::Lexer lex(actual);
+  Lexer lex(actual);
   std::vector<LexerToken> m_tokens;
   for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken()) {
     m_tokens.emplace_back(token);
@@ -138,7 +138,7 @@ TEST(lexerTest, Files)
   const char *argv[] = { "lexer", "tests\testfile_1.txt", "lkjk" };
   // ASSERT_TRUE(filehandler.ParseArguments(2, argv));
 
-  Lexer::Lexer lex(filehandler.getFileContents());
+  Lexer lex(filehandler.getFileContents());
 
   std::vector<LexerToken> m_tokens;
   for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken()) {
