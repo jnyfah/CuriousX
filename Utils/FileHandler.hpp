@@ -48,61 +48,64 @@ namespace fs = std::filesystem;
 
 class FileHandler
 {
+  public:
+    FileHandler() {}
 
-public:
-  FileHandler() {}
+    Error error;
 
-  Error error;
+    bool ParseArguments(int argc, const char* argv[])
+    {
+        int start = 0;
 
-  bool ParseArguments(int argc, const char *argv[])
-  {
-    int start = 0;
+        error.CHECK((argc >= 2), "no input file specified \n");
 
-    error.CHECK((argc >= 2), "no input file specified \n");
+        std::string_view option = argv[start];
+        filename = argv[++start];
 
-    std::string_view option = argv[start];
-    filename = argv[++start];
-
-    error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
-      "invalid input file path \n");
-
-
-    inputFile.open(filename);
-
-    error.CHECK(inputFile.is_open(), "cannot open input file \n");
+        error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
+                    "invalid input file path \n");
 
 
-    return true;
-  }
+        inputFile.open(filename);
 
-  std::string getFileContents()
-  {
-    std::ostringstream sstr;
-    sstr << inputFile.rdbuf();
-    return sstr.str();
-  }
+        error.CHECK(inputFile.is_open(), "cannot open input file \n");
 
-  void LexerFile(std::vector<LexerToken> m_tokens)
-  {
-    std::fstream outputFile;
 
-    outputFile.open("Lexical-analysis.txt", std::ios_base::out);
-
-    error.CHECK(outputFile.is_open(), "failed to create lexical analysis file \n");
-
-    for (auto x : m_tokens) {
-      auto vv = "[" + std::string(x.value) + "]";
-      outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t " << toString(x.type)
-                 << std::endl;
+        return true;
     }
-  }
 
-  std::string getFilename() { return filename; }
+    std::string getFileContents()
+    {
+        std::ostringstream sstr;
+        sstr << inputFile.rdbuf();
+        return sstr.str();
+    }
+
+    void LexerFile(std::vector<LexerToken> m_tokens)
+    {
+        std::fstream outputFile;
+
+        outputFile.open("Lexical-analysis.txt", std::ios_base::out);
+
+        error.CHECK(outputFile.is_open(), "failed to create lexical analysis file \n");
+
+        for (auto x : m_tokens)
+        {
+            auto vv = "[" + std::string(x.value) + "]";
+            outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t " << toString(x.type)
+                       << std::endl;
+        }
+    }
+
+    std::string getFilename()
+    {
+        return filename;
+    }
 
 
-private:
-  std::string filename;
-  std::fstream inputFile;
+  private:
+    std::string filename;
+    std::fstream inputFile;
 };
 
 #endif

@@ -9,43 +9,42 @@
 
 class Parser
 {
+  public:
+    explicit Parser(const std::vector<LexerToken>& token)
+      : token(token)
+    {
+        root = std::make_unique<Node>();
+        current = 0;
+    }
 
-public:
-  explicit Parser(const std::vector<LexerToken> &token) : token(token)
-  {
-    root = std::make_unique<Node>();
-    current = 0;
-  }
+    std::unique_ptr<Node> root;
 
-  std::unique_ptr<Node> root;
+    std::unique_ptr<Node> Expression();
 
-  std::unique_ptr<Node> Expression();
+    std::unique_ptr<Node> Term();
 
-  std::unique_ptr<Node> Term();
+    std::unique_ptr<Node> Factor();
 
-  std::unique_ptr<Node> Factor();
+    std::unique_ptr<Node> Assign();
 
-  std::unique_ptr<Node> Assign();
+    bool Parse();
 
-  bool Parse();
+    void printAst();
 
-  void printAst();
+    void inOrder(std::unique_ptr<Node> node);
 
-  void inOrder(std::unique_ptr<Node> node);
+    void displayInOrder(std::unique_ptr<Node> nodePtr);
+    void printTree(std::unique_ptr<Node> root, int space);
 
-  void displayInOrder(std::unique_ptr<Node> nodePtr);
-  void printTree(std::unique_ptr<Node> root, int space);
+  private:
+    // std::unique_ptr<Node> root;
 
-private:
-  // std::unique_ptr<Node> root;
-
-  std::vector<LexerToken> token;
-  size_t current;
+    std::vector<LexerToken> token;
+    size_t current;
 
 
-  int level;
+    int level;
 };
-
 
 
 
