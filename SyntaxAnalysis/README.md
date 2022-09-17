@@ -26,12 +26,12 @@ TreeNode {
 }
 
 To do
--[x] Operator precedence
--[ ] assignment
--[x] parenthesis
--[x] mathematical expressions
--[ ] logical operators
--[ ] if
--[ ] else
--[ ] print
--[ ] AST print node function
+- [x] Operator precedence
+- [ ] assignment
+- [x] parenthesis
+- [x] mathematical expressions
+- [ ] logical operators
+- [ ] if
+- [ ] else
+- [ ] print
+- [ ] AST print node function
