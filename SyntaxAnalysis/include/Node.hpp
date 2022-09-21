@@ -1,9 +1,12 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
+#include <iomanip>
 #include <memory>
+#include <queue>
 
 
+#include "Error.hpp"
 #include "LexicalAnalysis/include/LexerToken.hpp"
 
 struct Node
