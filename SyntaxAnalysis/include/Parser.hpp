@@ -29,13 +29,6 @@ class Parser
 
     bool Parse();
 
-    void printAst();
-
-    void inOrder(std::unique_ptr<Node> node);
-
-    void displayInOrder(std::unique_ptr<Node> nodePtr);
-    void printTree(std::unique_ptr<Node> root, int space);
-
   private:
     // std::unique_ptr<Node> root;
 

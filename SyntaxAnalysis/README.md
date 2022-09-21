@@ -34,4 +34,4 @@ To do
 - [ ] if
 - [ ] else
 - [ ] print
-- [ ] AST print node function
+- [x] AST print node function
