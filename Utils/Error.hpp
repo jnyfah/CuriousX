@@ -37,7 +37,7 @@
 class Error : public std::exception
 {
   public:
-    Error(const char* message)
+    explicit Error(const char* message)
       : message(message)
     {}
     Error(const char* message, SourceLocation location)
