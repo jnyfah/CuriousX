@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/614c0695eb754c58a218f19486b769ac)](https://app.codacy.com/gh/jnyfah/CuriousX?utm_source=github.com&utm_medium=referral&utm_content=jnyfah/CuriousX&utm_campaign=Badge_Grade_Settings)
 [![Travis](https://img.shields.io/travis/jnyfah/CuriousX/master.svg?style=flat&logo=travis&color=yellow)](https://app.travis-ci.com/jnyfah/CuriousX)
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/cmake.yml/badge.svg)
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/unittest.yml/badge.svg)
