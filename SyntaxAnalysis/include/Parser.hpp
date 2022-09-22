@@ -34,9 +34,6 @@ class Parser
 
     std::vector<LexerToken> token;
     size_t current;
-
-
-    int level;
 };
 
 

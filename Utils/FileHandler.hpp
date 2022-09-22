@@ -59,8 +59,6 @@ public:
     int start = 0;
 
     error.CHECK((argc >= 2), "no input file specified \n");
-
-    std::string_view option = argv[start];
     filename = argv[++start];
 
     error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
