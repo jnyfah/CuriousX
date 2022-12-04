@@ -12,7 +12,7 @@
  ** @email: <jnyfaah@gmail.com>
  **
  ** see https://github.com/jnyfah/CuriousX for most recent version including documentation.
- ** Project CuriousX...2022 
+ ** Project CuriousX...2022
  **
  */
 
@@ -33,33 +33,23 @@
 ///////////////////////////////////////////////////////////////////////////
 
 
-enum ErrorCode {
-    OK = 0,
-    FAIL = -1,
-    UNKNOWN_ERROR = -2
-};
+class Error : public std::exception
+{
+public:
+  Error(const char *message) : message(message) {}
+  Error() {}
 
 
-class Error : public std::exception {
-    public:
-        Error(const char* message, ErrorCode errorCode): message(message), errorCode(errorCode) {}
+  std::string getErrorMessage() const { return message; }
 
-        ErrorCode getErrorCode() const {
-            return errorCode;
-        }
+  /// Method to be used for checking required conditions.
+  void CHECK(bool check, const char *message)
+  {
+    if (!check) { throw Error(message); }
+  }
 
-        /// Method to be used for checking required conditions.
-        void CHECK(bool check, ErrorCode errorCode, const char* message) {
-            if (!check) {
-                throw Error(message, errorCode);
-            }
-        }
-   
-    private:
-        std::string message;
-        ErrorCode errorCode;
+private:
+  std::string message;
 };
 
 #endif
-
-

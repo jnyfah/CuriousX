@@ -26,6 +26,7 @@ enum class LexerTokenType {
   ElseToken,
   NotToken,
   StringToken,
+  LetToken,
 
   GreaterThanToken,
   LessThanToken,

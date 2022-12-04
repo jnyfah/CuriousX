@@ -1,5 +1,5 @@
 
-## Lexer
+## Lexical Analysis
 
 The job of the Lexer is to identify the lexical elements, or tokens in the input language.
 Each token scanned will be stored in this structure (from `LexerToken.hpp`):
