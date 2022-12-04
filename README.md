@@ -9,7 +9,7 @@
 
 # CuriousX
 
-This repo is for people who are curious about how compilers work, compilers are just one part of the toolchain that help  build programs from source code to executable to learn more visit [what is CuriousX](https://jenniferchukwu.com/posts/buildsystems2)
+This repo is for people who are curious about how compilers work, compilers are just one part of the toolchain that help  build programs from source code to executable to learn more visit [what is CuriousX](https://jenniferchukwu.com/posts/curiousx)
 
 CuriousX is a mini subset of C++ language created just for fun and out of curiosity, a visualization of each stage would also be created and maybe a web playground too !!
 
