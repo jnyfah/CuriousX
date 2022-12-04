@@ -187,7 +187,7 @@ class Lexer
 
         if (nchar == '#')
         {
-            int i = 1;
+            size_t i = 1;
             while (next_char() != '#')
             {
                 i++;
@@ -198,7 +198,8 @@ class Lexer
 
         if (!(isAlpha(nchar) || isNumeric(nchar)))
         {
-            return {data.substr(startPos, 1), location, LexerTokenType::Unknown};
+            //return {data.substr(startPos, 1), location, LexerTokenType::Unknown};
+            throw Error("unknown charater at line ", location);
         }
 
         auto substr = next_valid_sequences(startPos);
