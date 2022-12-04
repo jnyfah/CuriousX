@@ -16,7 +16,7 @@ y and 5 are  terms
 
 expression is made of sum of terms
 term is a product of factors
-factor is a number or arethesized sub expression
+factor is a number or parenthesized sub expression
 
 
 TreeNode {
@@ -25,4 +25,13 @@ TreeNode {
     name
 }
 
-print
+To do
+- [x] Operator precedence
+- [ ] assignment
+- [x] parenthesis
+- [x] mathematical expressions
+- [ ] logical operators
+- [ ] if
+- [ ] else
+- [ ] print
+- [x] AST print node function

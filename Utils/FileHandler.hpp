@@ -36,6 +36,7 @@
 
 
 #include "../LexicalAnalysis/include/LexerToken.hpp"
+#include "../SyntaxAnalysis/include/Node.hpp"
 
 #include "Error.hpp"
 
@@ -48,7 +49,6 @@ namespace fs = std::filesystem;
 
 class FileHandler
 {
-
 public:
   FileHandler() {}
 
@@ -59,8 +59,6 @@ public:
     int start = 0;
 
     error.CHECK((argc >= 2), "no input file specified \n");
-
-    std::string_view option = argv[start];
     filename = argv[++start];
 
     error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
@@ -96,6 +94,30 @@ public:
                  << std::endl;
     }
   }
+
+  void SyntaxFile(std::unique_ptr<Node> &root)
+  {
+    std::fstream outputFile;
+
+    outputFile.open("Syntax-analysis.txt", std::ios_base::out);
+
+    error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
+
+    printTree(std::move(root), 0, outputFile);
+  }
+
+
+  void printTree(std::unique_ptr<Node> root, int space, std::ostream &out)
+  {
+    if (root == NULL) return;
+    space += 2;
+    printTree(std::move(root->right), space, out);
+    for (int i = 1; i < space; i++) out << "\t";
+    out << root->type.value << "|----"
+        << "\n\n";
+    printTree(std::move(root->left), space, out);
+  }
+
 
   std::string getFilename() { return filename; }
 

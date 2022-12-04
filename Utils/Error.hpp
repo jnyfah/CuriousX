@@ -32,24 +32,38 @@
 /// used internally.
 ///////////////////////////////////////////////////////////////////////////
 
+#include "SourceLocation.hpp"
 
 class Error : public std::exception
 {
-public:
-  Error(const char *message) : message(message) {}
-  Error() {}
+  public:
+    explicit Error(const char* message)
+      : message(message)
+    {}
+    Error(const char* message, SourceLocation location)
+      : message(message)
+      , location(location)
+    {}
+    Error() {}
 
 
-  std::string getErrorMessage() const { return message; }
+    std::string getErrorMessage() const
+    {
+        return message + location.toString();
+    }
 
-  /// Method to be used for checking required conditions.
-  void CHECK(bool check, const char *message)
-  {
-    if (!check) { throw Error(message); }
-  }
+    /// Method to be used for checking required conditions.
+    void CHECK(bool check, const char* message)
+    {
+        if (!check)
+        {
+            throw Error(message);
+        }
+    }
 
-private:
-  std::string message;
+  private:
+    std::string message;
+    SourceLocation location;
 };
 
 #endif
