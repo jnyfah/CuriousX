@@ -46,6 +46,14 @@ std::unique_ptr<Node> Parser::Term()
 {
   std::unique_ptr<Node> left = Factor();
 
+  if (token[current].type == LexerTokenType::AssignToken) {
+    LexerToken type = token[current];
+    current++;
+    std::unique_ptr<Node> right = Expression();
+    left = makeNode(std::move(left), std::move(right), type);
+    return left;
+  }
+
   while (true) {
     if (current >= token.size()) { return left; }
     if ((token[current].type == LexerTokenType::MultiplyToken)
@@ -74,7 +82,7 @@ std::unique_ptr<Node> Parser::Factor()
 
   // To do variable name, if,
   if ((token[current].type == LexerTokenType::IntToken) || (token[current].type == LexerTokenType::FloatToken)
-      || (token[current].type == LexerTokenType::StringToken)) {
+      || (token[current].type == LexerTokenType::VarToken)) {
     node = makeLeaf(token[current]);
     current++;
     return node;
@@ -94,7 +102,6 @@ std::unique_ptr<Node> Parser::Factor()
 }
 
 
-
 // 7 + 8
 
 // 2 * 3 + 4 * 5
@@ -112,5 +119,5 @@ std::unique_ptr<Node> Parser::Factor()
 // if
 
 // Todo
-// add parenopen
+// add next line
 // add asignment
