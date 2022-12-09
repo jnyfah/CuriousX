@@ -95,19 +95,17 @@ public:
     }
   }
 
-  void SyntaxFile(std::unique_ptr<Node> &root)
+  void SyntaxFile(std::vector<std::unique_ptr<Node> > &compound)
   {
     std::fstream outputFile;
-
     outputFile.open("Syntax-analysis.txt", std::ios_base::out);
 
     error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
-
-
-    printTree(std::move(root), outputFile);
+    for(size_t i = 0; i < compound.size(); i++){
+      outputFile << printTree(compound[i]);
+    }
+    
   }
-
-
   std::string getFilename() { return filename; }
 
 
@@ -163,8 +161,9 @@ private:
   }
 
 
-  void printTree(std::unique_ptr<Node> root, std::ostream &out)
+  std::string printTree(std::unique_ptr<Node> &root)
   {
+    std::stringstream out;
     int height = TreeHeight(root);
     std::vector<std::string> output(height), linkAbove(height);
     drawsNode(output, linkAbove, std::move(root), 0, 5, ' ');
@@ -190,9 +189,13 @@ private:
 
     // Output
     for (size_t i = 0; i < height; i++) {
-      if (i) out << linkAbove[i] << '\n';
+      if (i) {
+        out << linkAbove[i] << '\n';
+      }
       out << output[i] << '\n';
+      
     }
+    return out.str();
   }
 };
 

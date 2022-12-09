@@ -33,5 +33,5 @@ To do
 - [ ] logical operators
 - [ ] if
 - [ ] else
-- [ ] print
+- [X] print
 - [x] AST print node function

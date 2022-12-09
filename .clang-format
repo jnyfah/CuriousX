@@ -72,7 +72,7 @@ KeepEmptyLinesAtTheStartOfBlocks: true
 Language: Cpp
 MacroBlockBegin: ''
 MacroBlockEnd: ''
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 5
 NamespaceIndentation: Inner
 ObjCBlockIndentWidth: 7
 ObjCSpaceAfterProperty: true
