@@ -26,9 +26,9 @@ int main(int argc, const char *argv[])
       fileHandler->LexerFile(m_tokens);
       Parser parsed(m_tokens);
       if (parsed.Parse()) {
-        fileHandler->SyntaxFile(parsed.root);
+        fileHandler->SyntaxFile(parsed.compound);
       } else {
-        throw Error("Parsing failed");
+        throw Error("Parsing failed ");
       }
     }
   } catch (Error &ex) {

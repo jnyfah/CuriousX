@@ -19,7 +19,8 @@ BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:
   AfterClass: true
-  AfterControlStatement: false
+  AfterElse: true
+  AfterControlStatement: true
   AfterEnum: false
   AfterFunction: true
   AfterNamespace: false
@@ -64,7 +65,7 @@ IncludeCategories:
   Regex: .*
 IncludeIsMainRegex: (Test)?$
 IndentCaseLabels: false
-IndentWidth: 2
+IndentWidth: 4
 IndentWrappedFunctionNames: true
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
@@ -72,7 +73,7 @@ KeepEmptyLinesAtTheStartOfBlocks: true
 Language: Cpp
 MacroBlockBegin: ''
 MacroBlockEnd: ''
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 5
 NamespaceIndentation: Inner
 ObjCBlockIndentWidth: 7
 ObjCSpaceAfterProperty: true

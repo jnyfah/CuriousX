@@ -27,11 +27,11 @@ TreeNode {
 
 To do
 - [x] Operator precedence
-- [ ] assignment
+- [x] assignment
 - [x] parenthesis
 - [x] mathematical expressions
 - [ ] logical operators
 - [ ] if
 - [ ] else
-- [ ] print
+- [X] print
 - [x] AST print node function
