@@ -47,7 +47,7 @@ enum class LexerTokenType
     ElseToken,
     NotToken,
     StringToken,
-    LetToken,
+
 
     GreaterThanToken,
     LessThanToken,
@@ -56,7 +56,6 @@ enum class LexerTokenType
     NotEqualToken,
     EqualToken,
 
-    SemicolonToken,
     Space,
     Tab,
     Newline,

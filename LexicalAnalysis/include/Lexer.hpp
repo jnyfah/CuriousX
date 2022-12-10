@@ -142,8 +142,6 @@ class Lexer
             return {data.substr(startPos, 1), location, LexerTokenType::MultiplyToken};
         if (nchar == '-')
             return {data.substr(startPos, 1), location, LexerTokenType::MinusToken};
-        if (nchar == ';')
-            return {data.substr(startPos, 1), location, LexerTokenType::SemicolonToken};
         if (nchar == '>')
         {
             saveCheckpoint();
@@ -226,10 +224,6 @@ class Lexer
         else if (substr == "else")
         {
             return {substr, location, LexerTokenType::ElseToken};
-        }
-        else if (substr == "let")
-        {
-            return {substr, location, LexerTokenType::LetToken};
         }
         return {substr, location, LexerTokenType::VarToken};
     }

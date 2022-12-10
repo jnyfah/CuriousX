@@ -40,8 +40,7 @@ const char* toString(LexerTokenType t)
             return "NotToken";
         case LexerTokenType::StringToken:
             return "StringToken";
-        case LexerTokenType::LetToken:
-            return "LetToken";
+
 
         case LexerTokenType::GreaterThanToken:
             return "GreaterThanToken";
@@ -56,8 +55,6 @@ const char* toString(LexerTokenType t)
         case LexerTokenType::NotEqualToken:
             return "NotEqualToken";
 
-        case LexerTokenType::SemicolonToken:
-            return "Semicolon";
         case LexerTokenType::Space:
             return "Space";
         case LexerTokenType::Tab:
