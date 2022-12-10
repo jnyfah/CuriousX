@@ -2,19 +2,31 @@
 #include <iostream>
 
 
+
 bool Parser::Parse()
 {
-  if (current >= token.size()) { return false; }
+    if (current >= token.size()) { return false; }
 
-  // parse multiple lines
-  while (current < token.size()) {
-    root = Expression();
-    compound.push_back(std::move(root));
-  }
+    while (current < token.size())
+    {
+        root = Expression();
+        compound.push_back(std::move(root));
+    }
 
-  // if nothing is parsed
-  if (compound.empty()) { return false; }
-  return true;
+    if (compound.empty()) { return false; }
+    return true;
+}
+
+
+
+std::unique_ptr<Node> Parser::Assign(std::unique_ptr<Node> &left)
+{
+    LexerToken type = token[current];
+    current++;
+
+    std::unique_ptr<Node> right = Expression();
+
+    return makeNode(std::move(left), std::move(right), type);;
 }
 
 
@@ -28,25 +40,31 @@ bool Parser::Parse()
 
 std::unique_ptr<Node> Parser::Expression()
 {
-  std::unique_ptr<Node> left = Term();
+    if (token[current].type == LexerTokenType::IfToken) { return Compare(); }
+    std::unique_ptr<Node> left = Term();
 
-  while (true) {
-    if (current >= token.size()) { return left; }
+    while (true)
+    {
+        if (current >= token.size()) { return left; }
 
-    if ((token[current].type == LexerTokenType::PlusToken) || (token[current].type == LexerTokenType::MinusToken)) {
-      LexerToken type = token[current];
-      current++;
+        if ((token[current].type == LexerTokenType::PlusToken) || (token[current].type == LexerTokenType::MinusToken)
+            || (token[current].type == LexerTokenType::GreaterThanToken))
+        {
 
-      if (current >= token.size()) { return left; }
+            LexerToken type = token[current];
+            current++;
 
-      std::unique_ptr<Node> right = Term();
-      left = makeNode(std::move(left), std::move(right), type);
+            if (current >= token.size()) { return left; }
 
-    } else {
-      return left;
+            std::unique_ptr<Node> right = Term();
+            left = makeNode(std::move(left), std::move(right), type);
+
+        } else {
+            return left;
+        }
     }
-  }
 }
+
 
 
 
@@ -59,36 +77,30 @@ std::unique_ptr<Node> Parser::Expression()
 
 std::unique_ptr<Node> Parser::Term()
 {
-  std::unique_ptr<Node> left = Factor();
+    std::unique_ptr<Node> left = Factor();
 
-  // Parse assign token
-  if (token[current].type == LexerTokenType::AssignToken) {
-    LexerToken type = token[current];
-    current++;
+    // Parse assign token
+    if (token[current].type == LexerTokenType::AssignToken) { return Assign(left); }
 
-    std::unique_ptr<Node> right = Expression();
-    left = makeNode(std::move(left), std::move(right), type);
+    while (true)
+    {
+        if (current >= token.size()) { return left; }
 
-    return left;
-  }
+        if ((token[current].type == LexerTokenType::MultiplyToken)
+            || (token[current].type == LexerTokenType::DivideToken))
+        {
+            LexerToken type = token[current];
+            current++;
 
-  while (true) {
-    if (current >= token.size()) { return left; }
+            if (current >= token.size()) { return left; }
 
-    if ((token[current].type == LexerTokenType::MultiplyToken)
-        || (token[current].type == LexerTokenType::DivideToken)) {
-      LexerToken type = token[current];
-      current++;
+            std::unique_ptr<Node> right = Factor();
+            left = makeNode(std::move(left), std::move(right), type);
 
-      if (current >= token.size()) { return left; }
-
-      std::unique_ptr<Node> right = Factor();
-      left = makeNode(std::move(left), std::move(right), type);
-
-    } else {
-      return left;
+        } else {
+            return left;
+        }
     }
-  }
 }
 
 
@@ -101,34 +113,42 @@ std::unique_ptr<Node> Parser::Term()
  */
 std::unique_ptr<Node> Parser::Factor()
 {
-  std::unique_ptr<Node> node = std::make_unique<Node>();
+    std::unique_ptr<Node> node = std::make_unique<Node>();
 
-  if (current >= token.size()) { return node; }
+    if (current >= token.size()) { return node; }
 
-  // To do variable name, if,
-  if ((token[current].type == LexerTokenType::IntToken) || (token[current].type == LexerTokenType::FloatToken)
-      || (token[current].type == LexerTokenType::VarToken)) {
-    node = makeLeaf(token[current]);
-    current++;
-    return node;
-  }
-  // if parenthesized sub expression
-  else if (token[current].type == LexerTokenType::ParenOpen) {
-    current++;
-    std::unique_ptr<Node> left = Expression();
-
-    if (token[current].type == LexerTokenType::ParenClose) {
-      current++;
-      return left;
-
-    } else {
-      throw Error("no closing braces", left->type.location);
+    // To do variable name, if,
+    if ((token[current].type == LexerTokenType::IntToken) || (token[current].type == LexerTokenType::FloatToken)
+        || (token[current].type == LexerTokenType::VarToken))
+    {
+        node = makeLeaf(token[current]);
+        current++;
+        return node;
     }
-  } else if (token[current].type == LexerTokenType::PrintToken) {
-    return Print();
-  }
+    // if parenthesized sub expression
+    else if (token[current].type == LexerTokenType::ParenOpen)
+    {
+        current++;
+        std::unique_ptr<Node> left = Expression();
 
-  return node;
+        if (token[current].type == LexerTokenType::ParenClose)
+        {
+            current++;
+            return left;
+
+        } else {
+            throw Error("no closing braces", left->type.location);
+        }
+
+    } else if (token[current].type == LexerTokenType::PrintToken)
+    {
+        return Print();
+    } else if ((token[current].type == LexerTokenType::ParenClose))
+    {
+        throw Error("no opening braces", token[current].location);
+    }
+
+    return node;
 }
 
 
@@ -142,28 +162,83 @@ std::unique_ptr<Node> Parser::Factor()
 
 std::unique_ptr<Node> Parser::Print()
 {
-  std::unique_ptr<Node> left = std::make_unique<Node>();
+    std::unique_ptr<Node> left = std::make_unique<Node>();
 
-  LexerToken type = token[current];
-  current++;
+    LexerToken type = token[current];
+    current++;
 
-  // check for parenthesis
-  if (token[current].type != LexerTokenType::ParenOpen) {
-    throw Error("no opening braces after print", token[current].location);
-  }
-  current++;
-  left = Expression();
+    // check for parenthesis
+    if (token[current].type != LexerTokenType::ParenOpen)
+    { throw Error("no opening braces after print", token[current].location); }
 
-  // ensure parenthesis is closed
-  if (token[current].type != LexerTokenType::ParenClose) {
-    throw Error("no closing braces after print", token[current].location);
-  }
-  current++;
-  return makeUnary(std::move(left), type);
+    current++; left = Expression();
+
+
+    // ensure parenthesis is closed
+    if (token[current].type != LexerTokenType::ParenClose)
+    { throw Error("no closing braces after print", token[current].location); }
+
+    current++;
+
+    return makeUnary(std::move(left), type);
 }
 
 
-/*
- check for if
- check for paren
-*/
+
+
+
+/*std::unique_ptr<Node> Parser::Compare()
+{
+    std::unique_ptr<Node> left = std::make_unique<Node>();
+    std::unique_ptr<Node> right = std::make_unique<Node>();
+
+    LexerToken type = token[current];
+    current++;
+
+    // check for parenthesis
+    if (token[current].type != LexerTokenType::ParenOpen)
+    { throw Error("no opening braces after if", token[current].location); }
+    current++;
+    left = Expression();
+
+    // ensure parenthesis is closed
+    if (token[current].type != LexerTokenType::ParenClose)
+    { throw Error("no closing braces after if", token[current].location); }
+
+    current++;
+    right = Expression();
+
+    return makeNode(std::move(left), std::move(right), type);
+} */
+
+
+std::unique_ptr<Node> Parser::Compare()
+{
+    std::unique_ptr<Node> left = std::make_unique<Node>();
+    std::unique_ptr<Node> right = std::make_unique<Node>();
+
+    LexerToken type = token[current];
+    current++;
+
+    // check for parenthesis
+    if (token[current].type == LexerTokenType::ParenOpen)
+    { 
+        current++;
+        left = Expression();
+
+        // ensure parenthesis is closed
+        if (token[current].type != LexerTokenType::ParenClose)
+        { throw Error("no closing braces after if", token[current].location); }
+
+    } else {
+        throw Error("no closing braces before if", token[current].location);
+    }
+    
+    current++;
+    right = Expression();
+
+    return makeNode(std::move(left), std::move(right), type);
+}
+
+
+

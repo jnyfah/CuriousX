@@ -27,6 +27,8 @@ class Parser
 
     std::unique_ptr<Node> Print();
 
+    std::unique_ptr<Node> Assign(std::unique_ptr<Node> &left);
+
     std::unique_ptr<Node> Compare();
 
     bool Parse();
