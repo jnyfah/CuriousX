@@ -107,7 +107,7 @@ TEST(lexerTest, Expression)
 // Test Conditions
 TEST(lexerTest, Conditions)
 {
-    std::string actual = "if(x ==5){ if(y >= 7)} else{z != 0.48}";
+    std::string actual = "if(x ==5){ if(y >= 7)}";
 
     std::vector<LexerToken> expected = {{LexerToken{"if", {1, 1}, LexerTokenType::IfToken}},
                                         {LexerToken{"(", {1, 3}, LexerTokenType::ParenOpen}},
@@ -122,13 +122,7 @@ TEST(lexerTest, Conditions)
                                         {LexerToken{">=", {1, 17}, LexerTokenType::GreaterEqualToken}},
                                         {LexerToken{"7", {1, 20}, LexerTokenType::IntToken}},
                                         {LexerToken{")", {1, 21}, LexerTokenType::ParenClose}},
-                                        {LexerToken{"}", {1, 22}, LexerTokenType::BraceClose}},
-                                        {LexerToken{"else", {1, 24}, LexerTokenType::ElseToken}},
-                                        {LexerToken{"{", {1, 28}, LexerTokenType::BraceOpen}},
-                                        {LexerToken{"z", {1, 29}, LexerTokenType::VarToken}},
-                                        {LexerToken{"!=", {1, 31}, LexerTokenType::NotEqualToken}},
-                                        {LexerToken{"0.48", {1, 34}, LexerTokenType::FloatToken}},
-                                        {LexerToken{"}", {1, 38}, LexerTokenType::BraceClose}}
+                                        {LexerToken{"}", {1, 22}, LexerTokenType::BraceClose}}
 
     };
     Lexer lex(actual);
