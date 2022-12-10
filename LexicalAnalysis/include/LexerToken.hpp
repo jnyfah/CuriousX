@@ -44,10 +44,7 @@ enum class LexerTokenType
     PrintToken,
 
     IfToken,
-    ElseToken,
-    NotToken,
     StringToken,
-
 
     GreaterThanToken,
     LessThanToken,

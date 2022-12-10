@@ -34,10 +34,6 @@ const char* toString(LexerTokenType t)
 
         case LexerTokenType::IfToken:
             return "IfToken";
-        case LexerTokenType::ElseToken:
-            return "ElseToken";
-        case LexerTokenType::NotToken:
-            return "NotToken";
         case LexerTokenType::StringToken:
             return "StringToken";
 
