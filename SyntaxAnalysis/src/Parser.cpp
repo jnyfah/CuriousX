@@ -143,9 +143,9 @@ std::unique_ptr<Node> Parser::Factor()
     } else if (token[current].type == LexerTokenType::PrintToken)
     {
         return Print();
-    } else if ((token[current].type == LexerTokenType::ParenClose))
+    }else if (token[current].type != LexerTokenType::BraceClose)
     {
-        throw Error("no opening braces", token[current].location);
+        throw Error("no closing braces", token[current].location);
     }
 
     return node;
@@ -231,14 +231,35 @@ std::unique_ptr<Node> Parser::Compare()
         { throw Error("no closing braces after if", token[current].location); }
 
     } else {
-        throw Error("no closing braces before if", token[current].location);
+        throw Error("no opening braces before if", token[current].location);
     }
     
     current++;
-    right = Expression();
+    right = ifStmt();
 
     return makeNode(std::move(left), std::move(right), type);
 }
 
 
 
+std::unique_ptr<Node> Parser::ifStmt() {
+
+    std::unique_ptr<Node> node = std::make_unique<Node>();
+
+    if (token[current].type == LexerTokenType::BraceOpen)
+    { 
+        current++;
+        node = Expression();
+
+        std::cout << token[current].toString() <<std::endl;
+
+        if (token[current].type == LexerTokenType::BraceClose)
+        { current++; }else {
+            throw Error("no opening braces after paren", token[current].location);
+        }
+
+    } else {
+      throw Error("no opening braces after paren", token[current].location);
+    }
+    return node;
+}

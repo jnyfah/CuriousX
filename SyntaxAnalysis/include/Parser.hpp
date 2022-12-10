@@ -31,6 +31,8 @@ class Parser
 
     std::unique_ptr<Node> Compare();
 
+    std::unique_ptr<Node> ifStmt();
+
     bool Parse();
 
     std::vector<std::unique_ptr<Node> > compound;
