@@ -29,16 +29,22 @@ class Parser
 
     std::unique_ptr<Node> Assign(std::unique_ptr<Node> &left);
 
-    std::unique_ptr<Node> Compare();
-
     std::unique_ptr<Node> ifStmt();
 
+    std::unique_ptr<Node> Conditionals();
+
     bool Parse();
+
+
+    size_t sizeOfTree() {
+      return compound.size();
+    }
 
     std::vector<std::unique_ptr<Node> > compound;
 
   private:
-    // std::unique_ptr<Node> root;
+    
+    
 
     std::vector<LexerToken> token;
     size_t current;

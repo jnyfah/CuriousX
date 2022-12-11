@@ -26,12 +26,6 @@ TreeNode {
 }
 
 To do
-- [x] Operator precedence
-- [x] assignment
-- [x] parenthesis
-- [x] mathematical expressions
-- [ ] logical operators
-- [ ] if
-- [ ] else
-- [X] print
-- [x] AST print node function
+Write tests for syntax analysis
+Link trees
+update readme

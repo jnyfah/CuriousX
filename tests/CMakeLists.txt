@@ -4,15 +4,15 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(
-    lexerTest
-    lexerTest.cpp
+    curiousTest
+    curiousTest.cpp
 )
 
 
 target_link_libraries(
-  lexerTest
+  curiousTest
   gtest_main
 )
 
 include(GoogleTest)
-gtest_discover_tests(lexerTest)
+gtest_discover_tests(curiousTest)
