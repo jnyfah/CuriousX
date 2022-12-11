@@ -185,7 +185,7 @@ class Lexer
             {
                 i++;
             }
-            return {data.substr(startPos, i + 1), location, LexerTokenType::StringToken};
+            return {data.substr(startPos + 1, i-1), location, LexerTokenType::StringToken};
         }
 
 

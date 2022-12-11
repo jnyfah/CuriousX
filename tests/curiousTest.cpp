@@ -2,6 +2,7 @@
 
 #include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
+#include "SyntaxAnalysis/include/Parser.hpp"
 
 #ifdef __APPLE__
 namespace fs = std::__fs::filesystem;
@@ -36,7 +37,7 @@ void FileEquality(std::string actuals, std::string expecteds)
 }
 
 
-TEST(lexerTest, VariableAssign)
+TEST(curiousTest, VariableAssign)
 {
     std::string actual = "num1 = 1.5";
 
@@ -55,13 +56,13 @@ TEST(lexerTest, VariableAssign)
 }
 
 
-TEST(lexerTest, PrintData)
+TEST(curiousTest, PrintData)
 {
     std::string actual = "print(#The sum of num1 num2 # sum)";
 
     std::vector<LexerToken> expected = {{LexerToken{"print", {1, 1}, LexerTokenType::PrintToken}},
                                         {LexerToken{"(", {1, 6}, LexerTokenType::ParenOpen}},
-                                        {LexerToken{"#The sum of num1 num2 #", {1, 7}, LexerTokenType::StringToken}},
+                                        {LexerToken{"The sum of num1 num2 ", {1, 7}, LexerTokenType::StringToken}},
                                         {LexerToken{"sum", {1, 31}, LexerTokenType::VarToken}},
                                         {LexerToken{")", {1, 34}, LexerTokenType::ParenClose}}
 
@@ -76,7 +77,7 @@ TEST(lexerTest, PrintData)
 }
 
 
-TEST(lexerTest, Expression)
+TEST(curiousTest, Expression)
 {
     std::string actual = "2 + 3 * 5.87 - (8 / 3)";
 
@@ -105,7 +106,7 @@ TEST(lexerTest, Expression)
 
 
 // Test Conditions
-TEST(lexerTest, Conditions)
+TEST(curiousTest, Conditions)
 {
     std::string actual = "if(x ==5){ if(y >= 7)}";
 
@@ -137,7 +138,7 @@ TEST(lexerTest, Conditions)
 
 
 // Testing Files
-TEST(lexerTest, Files)
+TEST(curiousTest, Files)
 {
     FileHandler filehandler;
     const char* argv[] = {"lexer", "tests\testfile_1.txt", "lkjk"};
@@ -153,3 +154,24 @@ TEST(lexerTest, Files)
     // ASSERT_TRUE(filehandler.LexerFile(m_tokens));
 
 }
+
+
+/*TEST (curiousTest, CountTrees) {
+    std::vector<LexerToken> tokens = {{LexerToken{"2", {1, 1}, LexerTokenType::IntToken}},
+                                      {LexerToken{"+", {1, 3}, LexerTokenType::PlusToken}},
+                                      {LexerToken{"3", {1, 5}, LexerTokenType::IntToken}},
+                                      {LexerToken{"*", {1, 7}, LexerTokenType::MultiplyToken}},
+                                      {LexerToken{"5.87", {1, 9}, LexerTokenType::FloatToken}},
+                                      {LexerToken{"-", {1, 14}, LexerTokenType::MinusToken}},
+                                      {LexerToken{"(", {1, 16}, LexerTokenType::ParenOpen}},
+                                      {LexerToken{"8", {1, 17}, LexerTokenType::IntToken}},
+                                      {LexerToken{"/", {1, 19}, LexerTokenType::DivideToken}},
+                                      {LexerToken{"3", {1, 21}, LexerTokenType::IntToken}},
+                                      {LexerToken{")", {1, 22}, LexerTokenType::ParenClose}}};
+
+    auto ast = new Parser(tokens);
+
+    bool x = ast->Parse();
+    ASSERT_FALSE(false);
+
+}*/

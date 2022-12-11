@@ -30,8 +30,10 @@ To do
 - [x] assignment
 - [x] parenthesis
 - [x] mathematical expressions
-- [ ] logical operators
-- [ ] if
-- [ ] else
+- [x] logical operators
+- [x] if
 - [X] print
 - [x] AST print node function
+- [ ] Write tests for syntax analysis
+- [ ] Link trees
+- [ ] update readme
