@@ -134,7 +134,7 @@ class FileHandler
     {
         if (!node) return;
 
-        int height = output.size();
+        size_t height = output.size();
         std::string SP = " ";
 
         if (p < 0)// Shunt everything non-blank across
