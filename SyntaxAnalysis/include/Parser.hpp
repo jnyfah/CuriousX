@@ -41,7 +41,6 @@ class Parser
     }
 
     std::vector<std::unique_ptr<Node> > compound;
-    
 
   private:
     
