@@ -58,13 +58,14 @@ TEST(curiousTest, VariableAssign)
 
 TEST(curiousTest, PrintData)
 {
-    std::string actual = "print(#The sum of num1 num2 # sum)";
+    std::string actual = "print(x  + y)";
 
     std::vector<LexerToken> expected = {{LexerToken{"print", {1, 1}, LexerTokenType::PrintToken}},
                                         {LexerToken{"(", {1, 6}, LexerTokenType::ParenOpen}},
-                                        {LexerToken{"The sum of num1 num2 ", {1, 7}, LexerTokenType::StringToken}},
-                                        {LexerToken{"sum", {1, 31}, LexerTokenType::VarToken}},
-                                        {LexerToken{")", {1, 34}, LexerTokenType::ParenClose}}
+                                        {LexerToken{"x", {1, 7}, LexerTokenType::VarToken}},
+                                        {LexerToken{"+", {1, 10}, LexerTokenType::PlusToken}},
+                                        {LexerToken{"y", {1, 12}, LexerTokenType::VarToken}},
+                                        {LexerToken{")", {1, 13}, LexerTokenType::ParenClose}}
 
     };
     Lexer lex(actual);
@@ -105,36 +106,7 @@ TEST(curiousTest, Expression)
 }
 
 
-// Test Conditions
-TEST(curiousTest, Conditions)
-{
-    std::string actual = "if(x ==5){ if(y >= 7)}";
 
-    std::vector<LexerToken> expected = {{LexerToken{"if", {1, 1}, LexerTokenType::IfToken}},
-                                        {LexerToken{"(", {1, 3}, LexerTokenType::ParenOpen}},
-                                        {LexerToken{"x", {1, 4}, LexerTokenType::VarToken}},
-                                        {LexerToken{"==", {1, 6}, LexerTokenType::EqualToken}},
-                                        {LexerToken{"5", {1, 8}, LexerTokenType::IntToken}},
-                                        {LexerToken{")", {1, 9}, LexerTokenType::ParenClose}},
-                                        {LexerToken{"{", {1, 10}, LexerTokenType::BraceOpen}},
-                                        {LexerToken{"if", {1, 12}, LexerTokenType::IfToken}},
-                                        {LexerToken{"(", {1, 14}, LexerTokenType::ParenOpen}},
-                                        {LexerToken{"y", {1, 15}, LexerTokenType::VarToken}},
-                                        {LexerToken{">=", {1, 17}, LexerTokenType::GreaterEqualToken}},
-                                        {LexerToken{"7", {1, 20}, LexerTokenType::IntToken}},
-                                        {LexerToken{")", {1, 21}, LexerTokenType::ParenClose}},
-                                        {LexerToken{"}", {1, 22}, LexerTokenType::BraceClose}}
-
-    };
-    Lexer lex(actual);
-    std::vector<LexerToken> m_tokens;
-    for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken())
-    {
-        m_tokens.emplace_back(token);
-    }
-    LexerEquality(m_tokens, expected);
-
-}
 
 
 // Testing Files

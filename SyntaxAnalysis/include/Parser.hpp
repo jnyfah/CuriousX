@@ -29,9 +29,6 @@ class Parser
 
     std::unique_ptr<Node> Assign(std::unique_ptr<Node> &left);
 
-    std::unique_ptr<Node> ifStmt();
-
-    std::unique_ptr<Node> Conditionals();
 
     bool Parse();
 

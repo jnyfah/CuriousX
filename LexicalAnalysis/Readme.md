@@ -16,39 +16,28 @@ where the `SourceLocation` is the location i.e, row and column of a token, the t
 ```c
 enum class LexerTokenType {
 
-  ParenOpen,
-  ParenClose,
-  BraceOpen,
-  BraceClose,
-  FloatToken,
-  IntToken,
-  VarToken,
+    ParenOpen,
+    ParenClose,
+    FloatToken,
+    IntToken,
+    VarToken,
 
-  PlusToken,
-  MinusToken,
-  DivideToken,
-  MultiplyToken,
-  AssignToken,
-  PrintToken,
+    PlusToken,
+    MinusToken,
+    DivideToken,
+    MultiplyToken,
+    AssignToken,
+    PrintToken,
 
-  IfToken,
-  ElseToken,
-  NotToken,
+    StringToken,
 
-  GreaterThanToken,
-  LessThanToken,
-  GreaterEqualToken,
-  LessEqualToken,
-  NotEqualToken,
-  EqualToken,
+    Space,
+    Tab,
+    Newline,
+    Eof,
 
-  SemicolonToken,
-  Space,
-  Tab,
-  Newline,
-  Eof,
 
-  Unknown
+    Unknown
 };
 ```
 
@@ -58,49 +47,44 @@ Some example input files have been provided in (`Utils/input.txt`) so as to see 
 
 ```
 x = 5
-#
-2 + 3 * 5 - (8 / 3)
-x->2.54
-print(x)
+y = 2 + 3 * 5 - (8 / 3)
+z = x + y
+print(z)
+print(#curiousx#)
 ```
 
 Output (`Lexer.cpp`) 
 
 ```
-[x]       VarToken       <line:1, col:0>
-[ ]       Space          <line:1, col:1>
-[=]       EqualToken     <line:1, col:2>
-[ ]       Space          <line:1, col:3>
-[5]       IntToken       <line:1, col:4>
-[#]       unknown        <line:2, col:0>
-[2]       IntToken       <line:3, col:0>
-[ ]       Space          <line:3, col:1>
-[+]       PlusToken      <line:3, col:2>
-[ ]       Space          <line:3, col:3>
-[3]       IntToken       <line:3, col:4>
-[ ]       Space          <line:3, col:5>
-[*]       MultiplyToken  <line:3, col:6>
-[ ]       Space          <line:3, col:7>
-[5]       IntToken       <line:3, col:8>
-[ ]       Space          <line:3, col:9>
-[-]       MinusToken     <line:3, col:11>
-[(]       ParenOpen      <line:3, col:12>
-[8]       IntToken       <line:3, col:13>
-[ ]       Space          <line:3, col:14>
-[/]       DivideToken    <line:3, col:15>
-[ ]       Space          <line:3, col:16>
-[3]       IntToken       <line:3, col:17>
-[)]       ParenClose     <line:3, col:18>
-[x]       VarToken       <line:4, col:0>
-[-]       MinusToken     <line:4, col:2>
-[2.54]    FloatToken     <line:4, col:3>
-[print]   PrintToken     <line:5, col:0>
-[(]       ParenOpen      <line:5, col:5>
-[x]       VarToken       <line:5, col:6>
-[)]       ParenClose     <line:5, col:7>
-
-<<<<<<< HEAD
+[x]    ->   <line:1, col:1>;	 VarToken
+[=]    ->   <line:1, col:3>;	 AssignToken
+[5]    ->   <line:1, col:5>;	 IntToken
+[y]    ->   <line:2, col:1>;	 VarToken
+[=]    ->   <line:2, col:3>;	 AssignToken
+[2]    ->   <line:2, col:5>;	 IntToken
+[+]    ->   <line:2, col:7>;	 PlusToken
+[3]    ->   <line:2, col:9>;	 IntToken
+[*]    ->   <line:2, col:11>;	 MultiplyToken
+[5]    ->   <line:2, col:13>;	 IntToken
+[-]    ->   <line:2, col:15>;	 MinusToken
+[(]    ->   <line:2, col:17>;	 ParenOpen
+[8]    ->   <line:2, col:18>;	 IntToken
+[/]    ->   <line:2, col:20>;	 DivideToken
+[3]    ->   <line:2, col:22>;	 IntToken
+[)]    ->   <line:2, col:23>;	 ParenClose
+[z]    ->   <line:3, col:1>;	 VarToken
+[=]    ->   <line:3, col:3>;	 AssignToken
+[x]    ->   <line:3, col:5>;	 VarToken
+[+]    ->   <line:3, col:7>;	 PlusToken
+[y]    ->   <line:3, col:9>;	 VarToken
+[print] ->   <line:4, col:1>;	 PrintToken
+[(]    ->   <line:4, col:6>;	 ParenOpen
+[z]    ->   <line:4, col:7>;	 VarToken
+[)]    ->   <line:4, col:8>;	 ParenClose
+[print] ->   <line:5, col:1>;	 PrintToken
+[(]    ->   <line:5, col:6>;	 ParenOpen
+[curiousx] ->   <line:5, col:7>;	 StringToken
+[)]    ->   <line:5, col:17>;	 ParenClose
 ```
 
-## TODO
-write unit tests for lexer
+

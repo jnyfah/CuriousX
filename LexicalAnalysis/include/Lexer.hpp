@@ -130,10 +130,6 @@ class Lexer
             return {data.substr(startPos, 1), location, LexerTokenType::ParenOpen};
         if (nchar == ')')
             return {data.substr(startPos, 1), location, LexerTokenType::ParenClose};
-        if (nchar == '{')
-            return {data.substr(startPos, 1), location, LexerTokenType::BraceOpen};
-        if (nchar == '}')
-            return {data.substr(startPos, 1), location, LexerTokenType::BraceClose};
         if (nchar == '+')
             return {data.substr(startPos, 1), location, LexerTokenType::PlusToken};
         if (nchar == '/')
@@ -142,52 +138,8 @@ class Lexer
             return {data.substr(startPos, 1), location, LexerTokenType::MultiplyToken};
         if (nchar == '-')
             return {data.substr(startPos, 1), location, LexerTokenType::MinusToken};
-        if (nchar == '>')
-        {
-            saveCheckpoint();
-            if (next_char() == '=')
-            {
-                return {data.substr(startPos, 2), location, LexerTokenType::GreaterEqualToken};
-            }
-            restoreCheckpoint();
-            return {data.substr(startPos, 1), location, LexerTokenType::GreaterThanToken};
-        }
-        if (nchar == '<')
-        {
-            saveCheckpoint();
-            if (next_char() == '=')
-            {
-                return {data.substr(startPos, 2), location, LexerTokenType::LessEqualToken};
-            }
-            restoreCheckpoint();
-            return {data.substr(startPos, 1), location, LexerTokenType::LessThanToken};
-        }
         if (nchar == '=')
-        {
-            saveCheckpoint();
-            if (next_char() == '=')
-            {
-                return {data.substr(startPos, 2), location, LexerTokenType::EqualToken};
-            }
-            restoreCheckpoint();
             return {data.substr(startPos, 1), location, LexerTokenType::AssignToken};
-        }
-        if ((nchar == '!') &&(next_char() == '='))
-        {  
-            return {data.substr(startPos, 2), location, LexerTokenType::NotEqualToken};
-           
-        }
-
-        if (nchar == '#')
-        {
-            size_t i = 1;
-            while (next_char() != '#')
-            {
-                i++;
-            }
-            return {data.substr(startPos + 1, i-1), location, LexerTokenType::StringToken};
-        }
-
 
         if (!(isAlpha(nchar) || isNumeric(nchar)))
         {
@@ -211,10 +163,6 @@ class Lexer
         if (substr == "print" || substr == "Print")
         {
             return {substr, location, LexerTokenType::PrintToken};
-        }
-        else if (substr == "if")
-        {
-            return {substr, location, LexerTokenType::IfToken};
         }
         return {substr, location, LexerTokenType::VarToken};
     }
