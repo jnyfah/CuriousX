@@ -49,82 +49,175 @@ namespace fs = std::filesystem;
 
 class FileHandler
 {
-public:
-  FileHandler() {}
+  public:
+    FileHandler() {}
 
-  Error error;
+    Error error;
 
-  bool ParseArguments(int argc, const char *argv[])
-  {
-    int start = 0;
+    bool ParseArguments(int argc, const char *argv[])
+    {
+        int start = 0;
 
-    error.CHECK((argc >= 2), "no input file specified \n");
-    filename = argv[++start];
+        error.CHECK((argc >= 2), "no input file specified \n");
+        filename = argv[++start];
 
-    error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
-      "invalid input file path \n");
-
-
-    inputFile.open(filename);
-
-    error.CHECK(inputFile.is_open(), "cannot open input file \n");
+        error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
+          "invalid input file path \n");
 
 
-    return true;
-  }
+        inputFile.open(filename);
 
-  std::string getFileContents()
-  {
-    std::ostringstream sstr;
-    sstr << inputFile.rdbuf();
-    return sstr.str();
-  }
+        error.CHECK(inputFile.is_open(), "cannot open input file \n");
 
-  void LexerFile(std::vector<LexerToken> m_tokens)
-  {
-    std::fstream outputFile;
 
-    outputFile.open("Lexical-analysis.txt", std::ios_base::out);
-
-    error.CHECK(outputFile.is_open(), "failed to create lexical analysis file \n");
-
-    for (auto x : m_tokens) {
-      auto vv = "[" + std::string(x.value) + "]";
-      outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t " << toString(x.type)
-                 << std::endl;
+        return true;
     }
-  }
 
-  void SyntaxFile(std::unique_ptr<Node> &root)
-  {
-    std::fstream outputFile;
-
-    outputFile.open("Syntax-analysis.txt", std::ios_base::out);
-
-    error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
-
-    printTree(std::move(root), 0, outputFile);
-  }
+    std::string getFileContents()
+    {
+        std::ostringstream sstr;
+        sstr << inputFile.rdbuf();
+        return sstr.str();
+    }
 
 
-  void printTree(std::unique_ptr<Node> root, int space, std::ostream &out)
-  {
-    if (root == NULL) return;
-    space += 2;
-    printTree(std::move(root->right), space, out);
-    for (int i = 1; i < space; i++) out << "\t";
-    out << root->type.value << "|----"
-        << "\n\n";
-    printTree(std::move(root->left), space, out);
-  }
+// ===================================================================================================//
+//                            WRITING TO LEXER FILE                                                   //
+// ===================================================================================================//
+    void LexerFile(std::vector<LexerToken> m_tokens)
+    {
+        std::fstream outputFile;
+
+        outputFile.open("Lexical-analysis.txt", std::ios_base::out);
+
+        error.CHECK(outputFile.is_open(), "failed to create lexical analysis file \n");
+
+        for (auto x : m_tokens)
+        {
+            auto vv = "[" + std::string(x.value) + "]";
+            outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t "
+                       << toString(x.type) << std::endl;
+        }
+    }
 
 
-  std::string getFilename() { return filename; }
+// ===================================================================================================//
+//                            WRITING TO SYNTAX FILE                                                  //
+// ===================================================================================================//
+
+    void SyntaxFile(std::vector<std::unique_ptr<Node>> &compound)
+    {
+        std::fstream outputFile;
+        outputFile.open("Syntax-analysis.txt", std::ios_base::out);
+
+        error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
+        for (size_t i = 0; i < compound.size(); i++) { outputFile << printTree(compound[i]); }
+    }
+    std::string getFilename() { return filename; }
 
 
-private:
-  std::string filename;
-  std::fstream inputFile;
+  private:
+    std::string filename;
+    std::fstream inputFile;
+
+
+
+// ===================================================================================================//
+//                            2D TREE VISUALIZER                                                      //
+// ===================================================================================================//
+    void drawsNode(std::vector<std::string> &output,
+      std::vector<std::string> &linkAbove,
+      std::unique_ptr<Node> node,
+      size_t level,
+      int p,
+      char linkChar)
+    {
+        if (!node) return;
+
+        size_t height = output.size();
+        std::string SP = " ";
+
+        if (p < 0)// Shunt everything non-blank across
+        {
+            std::string extra(-p, ' ');
+            for (std::string &s : output)
+                if (!s.empty()) s = extra + s;
+            for (std::string &s : linkAbove)
+                if (!s.empty()) s = extra + s;
+        }
+        if (level < height - 1) p = std::max(p, (int)output[level + 1].size());
+        if (level > 0) p = std::max(p, (int)output[level - 1].size());
+        p = std::max(p, (int)output[level].size());
+
+        // Fill in to left
+        if (node->left)
+        {
+            std::string leftData = SP + node->left->type.value + SP;
+            drawsNode(output, linkAbove, std::move(node->left), level + 1, p - leftData.size(), 'L');
+            p = std::max(p, (int)output[level + 1].size());
+        }
+
+        // Enter this data
+        int space = p - output[level].size();
+        if (space > 0) output[level] += std::string(space, ' ');
+        std::string nodeData = SP + node->type.value + SP;
+        output[level] += nodeData;
+
+        // Add vertical link above
+        space = p + SP.size() - linkAbove[level].size();
+        if (space > 0) linkAbove[level] += std::string(space, ' ');
+        linkAbove[level] += linkChar;
+
+        // Fill in to right
+        if (node->right) drawsNode(output, linkAbove, std::move(node->right), level + 1, output[level].size(), 'R');
+    }
+
+
+
+
+// ===================================================================================================//
+//                            2D TREE PRINT                                                           //
+// ===================================================================================================//
+  std::string printTree(std::unique_ptr<Node> &root)
+    {
+        std::stringstream out;
+        int height = TreeHeight(root);
+        std::vector<std::string> output(height), linkAbove(height);
+        drawsNode(output, linkAbove, std::move(root), 0, 5, ' ');
+
+        // Create link lines
+        for (size_t i = 1; i < height; i++)
+        {
+            for (size_t j = 0; j < linkAbove[i].size(); j++)
+            {
+                if (linkAbove[i][j] != ' ')
+                {
+                    size_t size = output[i - 1].size();
+                    if (size < j + 1) output[i - 1] += std::string(j + 1 - size, ' ');
+                    int jj = j;
+                    if (linkAbove[i][j] == 'L')
+                    {
+                        while (output[i - 1][jj] == ' ') jj++;
+                        for (int k = j + 1; k < jj - 1; k++) output[i - 1][k] = '_';
+                    } else if (linkAbove[i][j] == 'R')
+                    {
+                        while (output[i - 1][jj] == ' ') jj--;
+                        for (int k = j - 1; k > jj + 1; k--) output[i - 1][k] = '_';
+                    }
+                    linkAbove[i][j] = '|';
+                }
+            }
+        }
+
+        // Output
+        for (size_t i = 0; i < height; i++)
+        {
+            if (i) { out << linkAbove[i] << '\n'; }
+            out << output[i] << '\n';
+        }
+        return out.str();
+    }
 };
+
 
 #endif

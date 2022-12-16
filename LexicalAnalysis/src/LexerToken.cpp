@@ -8,10 +8,6 @@ const char* toString(LexerTokenType t)
             return "ParenOpen";
         case LexerTokenType::ParenClose:
             return "ParenClose";
-        case LexerTokenType::BraceOpen:
-            return "BraceOpen";
-        case LexerTokenType::BraceClose:
-            return "BraceClose";
         case LexerTokenType::FloatToken:
             return "FloatToken";
         case LexerTokenType::IntToken:
@@ -32,32 +28,6 @@ const char* toString(LexerTokenType t)
         case LexerTokenType::PrintToken:
             return "PrintToken";
 
-        case LexerTokenType::IfToken:
-            return "IfToken";
-        case LexerTokenType::ElseToken:
-            return "ElseToken";
-        case LexerTokenType::NotToken:
-            return "NotToken";
-        case LexerTokenType::StringToken:
-            return "StringToken";
-        case LexerTokenType::LetToken:
-            return "LetToken";
-
-        case LexerTokenType::GreaterThanToken:
-            return "GreaterThanToken";
-        case LexerTokenType::LessThanToken:
-            return "LessThanToken";
-        case LexerTokenType::GreaterEqualToken:
-            return "GreaterEqualToken";
-        case LexerTokenType::LessEqualToken:
-            return "LessEqualToken";
-        case LexerTokenType::EqualToken:
-            return "EqualToken";
-        case LexerTokenType::NotEqualToken:
-            return "NotEqualToken";
-
-        case LexerTokenType::SemicolonToken:
-            return "Semicolon";
         case LexerTokenType::Space:
             return "Space";
         case LexerTokenType::Tab:

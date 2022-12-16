@@ -16,7 +16,7 @@ CuriousX is a mini subset of C++ language created just for fun and out of curios
 ## Features
 -   Print
 -   Variables (strings, integer and float)
--   if/else statements
+-   if statements
 -   Expressions (add, subtract, divide, and multiply)
 -   Operator precedence
 -   Operator comparisons

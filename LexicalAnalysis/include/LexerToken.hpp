@@ -30,8 +30,6 @@ enum class LexerTokenType
 {
     ParenOpen,
     ParenClose,
-    BraceOpen,
-    BraceClose,
     FloatToken,
     IntToken,
     VarToken,
@@ -43,20 +41,6 @@ enum class LexerTokenType
     AssignToken,
     PrintToken,
 
-    IfToken,
-    ElseToken,
-    NotToken,
-    StringToken,
-    LetToken,
-
-    GreaterThanToken,
-    LessThanToken,
-    GreaterEqualToken,
-    LessEqualToken,
-    NotEqualToken,
-    EqualToken,
-
-    SemicolonToken,
     Space,
     Tab,
     Newline,
