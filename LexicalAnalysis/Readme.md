@@ -13,7 +13,7 @@ struct Token {
 ```
 where the `SourceLocation` is the location i.e, row and column of a token, the type field can be one of these values (from `LexerToken.hpp`):
 
-```c
+```c++
 enum class LexerTokenType {
 
     ParenOpen,
@@ -50,10 +50,9 @@ x = 5
 y = 2 + 3 * 5 - (8 / 3)
 z = x + y
 print(z)
-print(#curiousx#)
 ```
 
-Output (`Lexer.cpp`) 
+Output (`Lexical-analysis.txt`) 
 
 ```
 [x]    ->   <line:1, col:1>;	 VarToken
@@ -81,10 +80,4 @@ Output (`Lexer.cpp`)
 [(]    ->   <line:4, col:6>;	 ParenOpen
 [z]    ->   <line:4, col:7>;	 VarToken
 [)]    ->   <line:4, col:8>;	 ParenClose
-[print] ->   <line:5, col:1>;	 PrintToken
-[(]    ->   <line:5, col:6>;	 ParenOpen
-[curiousx] ->   <line:5, col:7>;	 StringToken
-[)]    ->   <line:5, col:17>;	 ParenClose
 ```
-
-

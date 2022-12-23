@@ -17,6 +17,11 @@ class Parser
         current = 0;
     }
 
+    size_t sizeOfTree() {
+      return compound.size();
+    }
+
+
     std::unique_ptr<Node> root;
 
     std::unique_ptr<Node> Expression();
@@ -32,17 +37,9 @@ class Parser
 
     bool Parse();
 
-
-    size_t sizeOfTree() {
-      return compound.size();
-    }
-
     std::vector<std::unique_ptr<Node> > compound;
 
   private:
-    
-    
-
     std::vector<LexerToken> token;
     size_t current;
     

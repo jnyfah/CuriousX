@@ -144,7 +144,7 @@ class Lexer
         if (!(isAlpha(nchar) || isNumeric(nchar)))
         {
             //return {data.substr(startPos, 1), location, LexerTokenType::Unknown};
-            throw Error("unknown charater at line ", location);
+            throw Error("unknown character at line ", location);
         }
 
         auto substr = next_valid_sequences(startPos);

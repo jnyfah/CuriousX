@@ -111,7 +111,11 @@ class FileHandler
         outputFile.open("Syntax-analysis.txt", std::ios_base::out);
 
         error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
-        for (size_t i = 0; i < compound.size(); i++) { outputFile << printTree(compound[i]); }
+        for (size_t i = 0; i < compound.size(); i++) 
+        { 
+            outputFile << printTree(compound[i]);
+            outputFile << "\n\n\n\n";
+        }
     }
     std::string getFilename() { return filename; }
 
@@ -137,7 +141,7 @@ class FileHandler
         size_t height = output.size();
         std::string SP = " ";
 
-        if (p < 0)// Shunt everything non-blank across
+        if (p < 0)
         {
             std::string extra(-p, ' ');
             for (std::string &s : output)
