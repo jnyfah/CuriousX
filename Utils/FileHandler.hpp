@@ -162,7 +162,7 @@ class FileHandler
         }
 
         // Enter this data
-        int space = p - output[level].size();
+        size_t space = p - output[level].size();
         if (space > 0) output[level] += std::string(space, ' ');
         std::string nodeData = SP + node->type.value + SP;
         output[level] += nodeData;
@@ -198,15 +198,15 @@ class FileHandler
                 {
                     size_t size = output[i - 1].size();
                     if (size < j + 1) output[i - 1] += std::string(j + 1 - size, ' ');
-                    int jj = j;
+                    size_t jj = j;
                     if (linkAbove[i][j] == 'L')
                     {
                         while (output[i - 1][jj] == ' ') jj++;
-                        for (int k = j + 1; k < jj - 1; k++) output[i - 1][k] = '_';
+                        for (size_t k = j + 1; k < jj - 1; k++) output[i - 1][k] = '_';
                     } else if (linkAbove[i][j] == 'R')
                     {
                         while (output[i - 1][jj] == ' ') jj--;
-                        for (int k = j - 1; k > jj + 1; k--) output[i - 1][k] = '_';
+                        for (size_t k = j - 1; k > jj + 1; k--) output[i - 1][k] = '_';
                     }
                     linkAbove[i][j] = '|';
                 }
