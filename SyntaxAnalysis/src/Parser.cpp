@@ -77,6 +77,8 @@ std::unique_ptr<Node> Parser::Term()
 {
     std::unique_ptr<Node> left = Factor();
 
+    if (current >= token.size()) { return left; }
+
     // Parse assign token
     if (token[current].type == LexerTokenType::AssignToken) { return Assign(left); }
 
