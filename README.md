@@ -24,8 +24,8 @@ CuriousX is a mini subset of C++ language created just for fun and out of curios
 -   __Target Architecture:__ X86 and ARM
 
 ## Dependencies
-1. A C++ compiler that supports C++17. See [cppreference.com](https://en.cppreference.com/w/cpp/compiler_support) to see which features are supported by each compiler.
-2. [CMake 3.15+](https://cmake.org/)
+1.  A C++ compiler that supports C++17. See [cppreference.com](https://en.cppreference.com/w/cpp/compiler_support) to see which features are supported by each compiler.
+2.  [CMake 3.15+](https://cmake.org/)
 
 ## Building
 

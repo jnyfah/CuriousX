@@ -1,4 +1,3 @@
-
 ## Lexical Analysis
 The job of the Lexer is to identify the lexical elements, or tokens in the input language.
 Each token scanned will be stored in this structure (from `LexerToken.hpp`):
@@ -41,11 +40,10 @@ enum class LexerTokenType {
 };
 ```
 
-
 ## Some Example Input Files
 Some example input files have been provided in (`Utils/input.txt`) so as to see what tokens the lexer finds in the file
 
-```
+```c++
 x = 5
 y = 2 + 3 * 5 - (8 / 3)
 z = x + y

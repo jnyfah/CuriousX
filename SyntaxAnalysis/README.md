@@ -4,14 +4,14 @@ The syntax analyzer takes tokens from the lexer as input, it checks if the seque
 
 Grammar rules in natural language :
 
-- Expressions can consist of operands (such as numbers or variables) and operators (such as +, -, *, /).
-- Parentheses can be used to group sub-expressions and indicate precedence.
-- Operators have a specific order of precedence (such as multiplication and division before addition and subtraction).
-- Operators with the same precedence have a specific associativity (such as left-to-right or right-to-left).
+-   Expressions can consist of operands (such as numbers or variables) and operators (such as +, -, *, /).
+-   Parentheses can be used to group sub-expressions and indicate precedence.
+-   Operators have a specific order of precedence (such as multiplication and division before addition and subtraction).
+-   Operators with the same precedence have a specific associativity (such as left-to-right or right-to-left).
 
 In a formal notation
 
-```
+```c++
 <expr> ::= <term> {<addop> <term>}
 
 <term> ::= <factor> {<mulop> <factor>}
@@ -25,12 +25,9 @@ In a formal notation
 
 In summary 
 
-- expression is made up of sum of terms
-
-- Term is a product of factors
-
-- Factor is a number or parenthesized sub expression
-
+-   Expression is made up of sum of terms
+-   Term is a product of factors
+-   Factor is a number or parenthesized sub expression
 
 The `Node.hpp` file contains utility function for the tree nodes
 
