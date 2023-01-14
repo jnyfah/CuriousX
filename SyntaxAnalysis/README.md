@@ -47,7 +47,7 @@ x = 5 + 2 * 3
 ```
 
 A parse tree for this expression would have the following structure:
-```
+```sh
                          =
                         / \
                        x   +

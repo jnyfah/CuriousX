@@ -52,7 +52,7 @@ print(z)
 
 Output (`Lexical-analysis.txt`) 
 
-```
+```sh
 [x]    ->   <line:1, col:1>;	 VarToken
 [=]    ->   <line:1, col:3>;	 AssignToken
 [5]    ->   <line:1, col:5>;	 IntToken
