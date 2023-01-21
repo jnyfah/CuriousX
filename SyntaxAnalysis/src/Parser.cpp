@@ -2,7 +2,9 @@
 #include <iostream>
 
 
-
+const std::vector<std::shared_ptr<Node> > Parser::astRoot() {
+    return compound;
+}
 bool Parser::Parse()
 {
     if (current >= token.size()) { return false; }
@@ -10,7 +12,7 @@ bool Parser::Parse()
     while (current < token.size())
     {
         root = Expression();
-        compound.push_back(std::move(root));
+        compound.push_back(root);
     }
 
     if (compound.empty()) { return false; }
@@ -19,14 +21,14 @@ bool Parser::Parse()
 
 
 
-std::unique_ptr<Node> Parser::Assign(std::unique_ptr<Node> &left)
+std::shared_ptr<Node> Parser::Assign(std::shared_ptr<Node> &left)
 {
     LexerToken type = token[current];
     current++;
 
-    std::unique_ptr<Node> right = Expression();
+    std::shared_ptr<Node> right = Expression();
 
-    return makeNode(std::move(left), std::move(right), type);;
+    return makeNode(left, right, type);;
 }
 
 
@@ -38,9 +40,9 @@ std::unique_ptr<Node> Parser::Assign(std::unique_ptr<Node> &left)
  * E -> T+E || T-E || T
  */
 
-std::unique_ptr<Node> Parser::Expression()
+std::shared_ptr<Node> Parser::Expression()
 {
-    std::unique_ptr<Node> left = Term();
+    std::shared_ptr<Node> left = Term();
 
     while (true)
     {
@@ -54,8 +56,8 @@ std::unique_ptr<Node> Parser::Expression()
 
             if (current >= token.size()) { return left; }
 
-            std::unique_ptr<Node> right = Term();
-            left = makeNode(std::move(left), std::move(right), type);
+            std::shared_ptr<Node> right = Term();
+            left = makeNode(left, right, type);
 
         } else {
             return left;
@@ -73,9 +75,9 @@ std::unique_ptr<Node> Parser::Expression()
  * T -> F*T || F/T || F
  */
 
-std::unique_ptr<Node> Parser::Term()
+std::shared_ptr<Node> Parser::Term()
 {
-    std::unique_ptr<Node> left = Factor();
+    std::shared_ptr<Node> left = Factor();
 
     if (current >= token.size()) { return left; }
 
@@ -94,8 +96,8 @@ std::unique_ptr<Node> Parser::Term()
 
             if (current >= token.size()) { return left; }
 
-            std::unique_ptr<Node> right = Factor();
-            left = makeNode(std::move(left), std::move(right), type);
+            std::shared_ptr<Node> right = Factor();
+            left = makeNode(left, right, type);
 
         } else {
             return left;
@@ -111,9 +113,9 @@ std::unique_ptr<Node> Parser::Term()
  *
  * F -> ID || Integer || E
  */
-std::unique_ptr<Node> Parser::Factor()
+std::shared_ptr<Node> Parser::Factor()
 {
-    std::unique_ptr<Node> node = std::make_unique<Node>();
+    std::shared_ptr<Node> node = std::make_shared<Node>();
 
     if (current >= token.size()) { return node; }
 
@@ -129,7 +131,7 @@ std::unique_ptr<Node> Parser::Factor()
     else if (token[current].type == LexerTokenType::ParenOpen)
     {
         current++;
-        std::unique_ptr<Node> left = Expression();
+        std::shared_ptr<Node> left = Expression();
 
         if (token[current].type == LexerTokenType::ParenClose)
         {
@@ -157,9 +159,9 @@ std::unique_ptr<Node> Parser::Factor()
  * Print -> ID || Integer || E || String
  */
 
-std::unique_ptr<Node> Parser::Print()
+std::shared_ptr<Node> Parser::Print()
 {
-    std::unique_ptr<Node> left = std::make_unique<Node>();
+    std::shared_ptr<Node> left = std::make_shared<Node>();
 
     LexerToken type = token[current];
     current++;
@@ -177,7 +179,7 @@ std::unique_ptr<Node> Parser::Print()
 
     current++;
 
-    return makeUnary(std::move(left), type);
+    return makeUnary(left, type);
 }
 
 
