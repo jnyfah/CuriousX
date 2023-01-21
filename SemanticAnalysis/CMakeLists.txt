@@ -1,13 +1,17 @@
 project (SemanticAnalysis)
-include_directories(Utils)
 
-add_library(${PROJECT_NAME} include/Lexer.hpp src/LexerToken.cpp)
+add_library(${PROJECT_NAME} src/semantic.cpp)
 
 target_include_directories( ${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
-target_sources( ${PROJECT_NAME}
-PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
+target_include_directories(${PROJECT_NAME}
+    PUBLIC 
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
         $<INSTALL_INTERFACE:include>                                # in case we will install our lib 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> )
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>      # when we use lib - where to look up public headers
+        ${CMAKE_CURRENT_SOURCE_DIR}/src                             # private headers - only for build lib
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+)
