@@ -14,6 +14,7 @@ struct Node
   std::shared_ptr<Node> left;
   std::shared_ptr<Node> right;
   LexerToken type;
+  std::string inferType = "";
 };
 
 

@@ -18,13 +18,11 @@ class Semantic
 
     void checkExpr(std::shared_ptr<Node> node);
 
-    std::string inferType(std::shared_ptr<Node> node);
+    std::optional<std::string> inferType(std::shared_ptr<Node> node);
 
 
   private:
     symbolTable::Table symboltable;
-
-    void checkTypes(std::shared_ptr<Node> node);
 };
 
 #endif

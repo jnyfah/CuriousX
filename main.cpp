@@ -1,6 +1,6 @@
 #include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
-#include "SemanticAnalysis/include/semantic.hpp"
+#include "SemanticAnalysis/include/Semantic.hpp"
 #include <iostream>
 #include <sstream>
 

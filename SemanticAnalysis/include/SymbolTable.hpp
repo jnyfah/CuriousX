@@ -51,10 +51,11 @@ namespace symbolTable {
         std::shared_ptr<Node> root;
 
       public:
-        void insert(LexerToken node)
+        void insert(LexerToken node, const std::string &inferredType)
         {
 
             auto newNode = std::make_shared<Node>(node);
+            newNode->inferredType = inferredType;
 
             if (root == nullptr)
             {
