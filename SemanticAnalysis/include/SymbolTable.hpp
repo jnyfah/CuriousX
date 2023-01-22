@@ -114,10 +114,6 @@ namespace symbolTable {
             }
         }
 
-        std::shared_ptr<Node> getHead() {
-            return root;
-        }
-
         void printList(std::shared_ptr<Node> head) {
             std::shared_ptr<Node> current = head;
             while (current != nullptr) {
@@ -127,6 +123,11 @@ namespace symbolTable {
             }
             std::cout << std::endl;
         }
+
+        std::shared_ptr<Node> getHead() {
+            return root;
+        }
+
 
     };
 };// namespace symbolTable

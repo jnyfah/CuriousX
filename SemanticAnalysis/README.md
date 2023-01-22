@@ -5,6 +5,7 @@ Division by zero: If the compiler encounters an expression where a division oper
 Undeclared variables: If the compiler encounters a variable that has not been previously declared, it can detect this as an undeclared variable error.
 
 not explicitly typed
+immutable 
 
 add constexpr where necessary
 

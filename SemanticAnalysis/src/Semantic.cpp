@@ -14,8 +14,6 @@ void Semantic::traverse(std::vector<std::shared_ptr<Node>> compound)
             checkAssignments(node, infertype);
         }
     }
-
-    symboltable.printList(symboltable.getHead());
 }
 
 
@@ -82,9 +80,6 @@ void Semantic::checkExpr(std::shared_ptr<Node> node)
 
 std::optional<std::string> Semantic::inferType(std::shared_ptr<Node> node)
 {
-    //if (node->left != nullptr) { inferType(node->left); }
-    //if (node->right != nullptr) { inferType(node->right); }
-
     // check the type of the current node
     if (node->type.type == LexerTokenType::IntToken)
     {
@@ -112,9 +107,6 @@ std::optional<std::string> Semantic::inferType(std::shared_ptr<Node> node)
 
         auto left = inferType(node->left);
         auto right = inferType(node->right);
-
-        //std::cout<< left.value()<<std::endl;
-        //std::cout<< right.value()<<std::endl;
 
         if (left.value() != right.value()) { throw Error("Type mismatch:  at", node->type.location); }
 
