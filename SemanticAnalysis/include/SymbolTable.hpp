@@ -113,6 +113,21 @@ namespace symbolTable {
                 current = current->next;
             }
         }
+
+        std::shared_ptr<Node> getHead() {
+            return root;
+        }
+
+        void printList(std::shared_ptr<Node> head) {
+            std::shared_ptr<Node> current = head;
+            while (current != nullptr) {
+                std::cout << current->node.value << " " << current->inferredType;
+                current = current->next;
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+        }
+
     };
 };// namespace symbolTable
 

@@ -14,7 +14,7 @@ class Semantic
 
     void traverse(std::vector<std::shared_ptr<Node>> compound);
 
-    void checkAssignments(std::shared_ptr<Node> node);
+    void checkAssignments(std::shared_ptr<Node> node, const std::string &inferredType);
 
     void checkExpr(std::shared_ptr<Node> node);
 

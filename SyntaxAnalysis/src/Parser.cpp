@@ -54,7 +54,7 @@ std::shared_ptr<Node> Parser::Expression()
             LexerToken type = token[current];
             current++;
 
-            if (current >= token.size()) { return left; }
+            if (current >= token.size()) { throw Error("Unbalanced Expression, Missing or extra tokens at", left->type.location); }
 
             std::shared_ptr<Node> right = Term();
             left = makeNode(left, right, type);
@@ -94,7 +94,7 @@ std::shared_ptr<Node> Parser::Term()
             LexerToken type = token[current];
             current++;
 
-            if (current >= token.size()) { return left; }
+            if (current >= token.size()) { throw Error("Unbalanced Expression, Missing or extra tokens at", left->type.location); }
 
             std::shared_ptr<Node> right = Factor();
             left = makeNode(left, right, type);
