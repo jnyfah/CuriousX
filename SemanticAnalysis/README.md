@@ -12,6 +12,7 @@ add constexpr where necessary
 1. traverse tree 
 2. check and add variables to list 
 3. type inference.
+4. where to store type infrence ?? AST tree or symbol table 
 
 
 

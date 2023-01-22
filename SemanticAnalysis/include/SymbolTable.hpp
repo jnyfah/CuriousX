@@ -25,6 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <memory>
+#include <optional>
 
 #include "Error.hpp"
 #include "LexicalAnalysis/include/LexerToken.hpp"
@@ -36,9 +37,10 @@ namespace symbolTable {
     {
       public:
         LexerToken node;
+        std::string inferredType;
         std::shared_ptr<Node> next;
 
-        Node(LexerToken node) : node(node), next(nullptr) {}
+        Node(LexerToken node) : node(node), inferredType(""), next(nullptr) {}
     };
 
 
@@ -80,6 +82,35 @@ namespace symbolTable {
                 current = current->next;
             }
             return false;
+        }
+
+        // Get inferred type
+        std::optional<std::string> getInferredType(std::string varName)
+        {
+            auto current = root;
+
+            while (current != nullptr)
+            {
+                if (current->node.value == varName) { return current->inferredType; }
+                current = current->next;
+            }
+            return std::nullopt;
+        }
+
+        // set inferred type
+        void setInferredType(std::string varName, std::string inferredType)
+        {
+            auto current = root;
+
+            while (current != nullptr)
+            {
+                if (current->node.value == varName)
+                {
+                    current->inferredType = inferredType;
+                    return;
+                }
+                current = current->next;
+            }
         }
     };
 };// namespace symbolTable
