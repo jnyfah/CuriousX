@@ -16,7 +16,7 @@ add constexpr where necessary
 4. where to store type inference ?? AST tree or symbol table 
 
 
-
+type enum
 
 
 

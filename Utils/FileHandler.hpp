@@ -165,7 +165,7 @@ void SymbolTable() {
         if (node->left)
         {
             std::string leftData = SP + node->left->type.value + SP;
-            drawsNode(output, linkAbove, node->left, level + 1, p - leftData.size(), 'L');
+            drawsNode(output, linkAbove, node->left, level + 1, int(p - leftData.size()), 'L');
             p = std::max(p, (int)output[level + 1].size());
         }
 
@@ -181,7 +181,7 @@ void SymbolTable() {
         linkAbove[level] += linkChar;
 
         // Fill in to right
-        if (node->right) drawsNode(output, linkAbove, node->right, level + 1, output[level].size(), 'R');
+        if (node->right) drawsNode(output, linkAbove, node->right, level + 1, int(output[level].size()), 'R');
     }
 
 

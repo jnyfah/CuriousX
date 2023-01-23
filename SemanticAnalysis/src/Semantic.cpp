@@ -14,6 +14,8 @@ void Semantic::traverse(std::vector<std::shared_ptr<Node>> compound)
             checkAssignments(node, infertype);
         }
     }
+
+    symboltable.printList(symboltable.getHead());
 }
 
 
@@ -23,11 +25,20 @@ void Semantic::checkAssignments(std::shared_ptr<Node> node, const std::string &i
     if (node->left->type.type != LexerTokenType::VarToken)
     {
         throw Error("Invalid Assignment ", node->left->type.location);
-    }
+   }
     // check if left has been defined if not insert
     if (symboltable.search(node->left->type))
     {
-        throw Error("Duplicate variable declaration at", node->left->type.location);
+        // mutable 
+        // 1. check if infertype is same 
+        if(inferredType != symboltable.getInferredType(node->left->type.value).value()) {
+            throw Error("Duplicate variable declaration at", node->left->type.location);
+        }
+
+        std::cout<< "inferredType" << inferredType <<std::endl;
+        std::cout << "table type"<< symboltable.getInferredType(node->left->type.value).value() <<std::endl;
+
+        //throw Error("Duplicate variable declaration at", node->left->type.location);
     } else
     {
         symboltable.insert(node->left->type, inferredType);
