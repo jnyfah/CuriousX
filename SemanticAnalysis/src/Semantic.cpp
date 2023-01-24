@@ -12,33 +12,34 @@ void Semantic::traverse(std::vector<std::shared_ptr<Node>> compound)
         {
             auto infertype = inferType(node->right).value();
             checkAssignments(node, infertype);
+        } else if (node->type.type == LexerTokenType::PrintToken) {
+            std::cout << "rint!";
+        } else {
+            throw Error ("Invalid Program");
         }
     }
-
-    symboltable.printList(symboltable.getHead());
+     // Print table for debugging ;D
+    //symboltable.printTable(symboltable.getRootNode());
 }
 
 
-void Semantic::checkAssignments(std::shared_ptr<Node> node, const std::string &inferredType)
+void Semantic::checkAssignments(std::shared_ptr<Node> node, const InferredType &inferredType)
 {
     // go left and check if left is var
     if (node->left->type.type != LexerTokenType::VarToken)
     {
         throw Error("Invalid Assignment ", node->left->type.location);
-   }
+    }
     // check if left has been defined if not insert
     if (symboltable.search(node->left->type))
     {
-        // mutable 
-        // 1. check if infertype is same 
-        if(inferredType != symboltable.getInferredType(node->left->type.value).value()) {
+        // mutable
+        // 1. check if type is same
+        if (inferredType != symboltable.getInferredType(node->left->type.value).value())
+        {
             throw Error("Duplicate variable declaration at", node->left->type.location);
         }
 
-        std::cout<< "inferredType" << inferredType <<std::endl;
-        std::cout << "table type"<< symboltable.getInferredType(node->left->type.value).value() <<std::endl;
-
-        //throw Error("Duplicate variable declaration at", node->left->type.location);
     } else
     {
         symboltable.insert(node->left->type, inferredType);
@@ -89,18 +90,19 @@ void Semantic::checkExpr(std::shared_ptr<Node> node)
 
 
 
-std::optional<std::string> Semantic::inferType(std::shared_ptr<Node> node)
+std::optional<InferredType> Semantic::inferType(std::shared_ptr<Node> node)
 {
     // check the type of the current node
     if (node->type.type == LexerTokenType::IntToken)
     {
-        return "int";
+        return InferredType::INTEGER;
 
     } else if (node->type.type == LexerTokenType::FloatToken)
     {
-        return "float";
+        return InferredType::FLOAT;
 
-    }else if (node->type.type == LexerTokenType::VarToken) {
+    } else if (node->type.type == LexerTokenType::VarToken)
+    {
 
         auto inferredType = symboltable.getInferredType(node->type.value);
 
@@ -110,9 +112,11 @@ std::optional<std::string> Semantic::inferType(std::shared_ptr<Node> node)
 
     } else if ((node->type.type == LexerTokenType::PlusToken) || (node->type.type == LexerTokenType::MinusToken)
                || (node->type.type == LexerTokenType::DivideToken)
-               || (node->type.type == LexerTokenType::MultiplyToken)) {
+               || (node->type.type == LexerTokenType::MultiplyToken))
+    {
 
-        if (!(node->left && node->right)) {
+        if (!(node->left && node->right))
+        {
             throw Error("Unbalanced Expression, Missing or extra tokens at", node->type.location);
         }
 
@@ -123,13 +127,10 @@ std::optional<std::string> Semantic::inferType(std::shared_ptr<Node> node)
 
         return left.value();
 
-    }else
+    } else
     {
 
         throw Error("Unbalanced Expression, Missing or extra tokens at", node->type.location);
     }
     return std::nullopt;
 }
-
-
-

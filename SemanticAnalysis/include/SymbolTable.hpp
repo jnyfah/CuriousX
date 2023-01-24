@@ -17,7 +17,7 @@
  */
 
 #ifndef _SYMBOL_TABLE_HPP_
-#define _SYMBOL_TABLE__HPP_
+#define _SYMBOL_TABLE_HPP_
 
 ///////////////////////////////////////////////////////////////////////////
 /// This file contains implementation of the helper logic data structure
@@ -26,9 +26,11 @@
 
 #include <memory>
 #include <optional>
+#include <variant>
 
 #include "Error.hpp"
 #include "LexicalAnalysis/include/LexerToken.hpp"
+#include "SyntaxAnalysis/include/Node.hpp"
 
 
 namespace symbolTable {
@@ -37,10 +39,10 @@ namespace symbolTable {
     {
       public:
         LexerToken node;
-        std::string inferredType;
+        std::variant<InferredType, std::monostate> inferredType;
         std::shared_ptr<Node> next;
 
-        Node(LexerToken node) : node(node), inferredType(""), next(nullptr) {}
+        Node(LexerToken node) : node(node), inferredType(std::monostate{}), next(nullptr) {}
     };
 
 
@@ -51,7 +53,7 @@ namespace symbolTable {
         std::shared_ptr<Node> root;
 
       public:
-        void insert(LexerToken node, const std::string &inferredType)
+        void insert(LexerToken node, const InferredType &inferredType)
         {
 
             auto newNode = std::make_shared<Node>(node);
@@ -86,20 +88,29 @@ namespace symbolTable {
         }
 
         // Get inferred type
-        std::optional<std::string> getInferredType(std::string varName)
+        std::optional<InferredType> getInferredType(std::string varName)
         {
             auto current = root;
 
             while (current != nullptr)
             {
-                if (current->node.value == varName) { return current->inferredType; }
+                if (current->node.value == varName)
+                {
+                    if (std::holds_alternative<InferredType>(current->inferredType))
+                    {
+                        return std::get<InferredType>(current->inferredType);
+                    } else
+                    {
+                        return std::nullopt;
+                    }
+                }
                 current = current->next;
             }
             return std::nullopt;
         }
 
         // set inferred type
-        void setInferredType(std::string varName, std::string inferredType)
+        void setInferredType(std::string varName, InferredType inferredType)
         {
             auto current = root;
 
@@ -114,21 +125,29 @@ namespace symbolTable {
             }
         }
 
-        void printList(std::shared_ptr<Node> head) {
+
+        // Print symbol table helper function to get types
+        std::string to_string(const InferredType& inferredType) {
+            if (inferredType == InferredType::INTEGER) {
+                return "INT";
+            } else if (inferredType == InferredType::FLOAT) {
+                return "FLOAT";
+            }
+            // add cases for other possible values of InferredType
+            return "UNKNOWN";
+        }
+
+        // prints symbol table
+        void printTable(std::shared_ptr<Node> head) {
             std::shared_ptr<Node> current = head;
             while (current != nullptr) {
-                std::cout << current->node.value << " " << current->inferredType;
+                std::cout << current->node.value << " " << to_string(std::get<InferredType>(current->inferredType));
                 current = current->next;
                 std::cout << std::endl;
             }
-            std::cout << std::endl;
         }
 
-        std::shared_ptr<Node> getHead() {
-            return root;
-        }
-
-
+        std::shared_ptr<Node> getRootNode() { return root; }
     };
 };// namespace symbolTable
 
