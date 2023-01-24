@@ -1,6 +1,10 @@
-project (SyntaxAnalysis)
+project (SemanticAnalysis)
 
-add_library(${PROJECT_NAME} src/Parser.cpp)
+add_library(${PROJECT_NAME} src/Semantic.cpp)
+
+target_include_directories( ${PROJECT_NAME}
+    PUBLIC ${PROJECT_SOURCE_DIR}/include
+)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC 
@@ -11,5 +15,3 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/src                             # private headers - only for build lib
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 )
-
-

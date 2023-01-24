@@ -1,5 +1,6 @@
 #include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
+#include "SemanticAnalysis/include/Semantic.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -30,11 +31,15 @@ int main(int argc, const char *argv[])
 
             if (ast->Parse())
             {
-                fileHandler->SyntaxFile(ast->compound);
+                fileHandler->SyntaxFile(ast->astRoot());
             } else {
 
                 throw Error("Parsing failed ");
             }
+            auto sem = new Semantic(ast->astRoot());
+            sem->traverse();
+            // Print table for debugging ;D
+            //sem->printSymbolTree();
         }
     } catch (Error &ex)
     {

@@ -27,6 +27,7 @@ option( CURIOUSX_BUILD_EXAMPLES "Specifies whether to build the examples" OFF )
 
 # -------------------- add subdirectories --------------------
 include_directories(Utils)
+add_subdirectory(SemanticAnalysis)
 add_subdirectory(SyntaxAnalysis)
 add_subdirectory(LexicalAnalysis)
 
@@ -57,4 +58,4 @@ if(CURIOUSX_BUILD_TESTS)
 endif()
 
 
-target_link_libraries( ${PROJECT_NAME} LexicalAnalysis SyntaxAnalysis)
+target_link_libraries( ${PROJECT_NAME} LexicalAnalysis SyntaxAnalysis SemanticAnalysis)

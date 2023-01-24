@@ -13,7 +13,7 @@ class Parser
     explicit Parser(const std::vector<LexerToken>& token)
       : token(token)
     {
-        root = std::make_unique<Node>();
+        root = std::make_shared<Node>();
         current = 0;
     }
 
@@ -22,26 +22,29 @@ class Parser
     }
 
 
-    std::unique_ptr<Node> root;
+    std::shared_ptr<Node> root;
 
-    std::unique_ptr<Node> Expression();
+    std::shared_ptr<Node> Expression();
 
-    std::unique_ptr<Node> Term();
+    std::shared_ptr<Node> Term();
 
-    std::unique_ptr<Node> Factor();
+    std::shared_ptr<Node> Factor();
 
-    std::unique_ptr<Node> Print();
+    std::shared_ptr<Node> Print();
 
-    std::unique_ptr<Node> Assign(std::unique_ptr<Node> &left);
+    std::shared_ptr<Node> Assign(std::shared_ptr<Node> &left);
+
+   const std::vector<std::shared_ptr<Node> > astRoot();
 
 
     bool Parse();
 
-    std::vector<std::unique_ptr<Node> > compound;
+    
 
   private:
     std::vector<LexerToken> token;
     size_t current;
+    std::vector<std::shared_ptr<Node> > compound;
     
 };
 

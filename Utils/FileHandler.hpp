@@ -79,7 +79,15 @@ class FileHandler
         sstr << inputFile.rdbuf();
         return sstr.str();
     }
+// ===================================================================================================//
+//                            DRAW SYMBOL TREE                                                //
+// ===================================================================================================//
 
+void SymbolTable() {
+    std::fstream outputFile;
+
+    outputFile.open("Lexical-analysis.txt", std::ios_base::out);
+}
 
 // ===================================================================================================//
 //                            WRITING TO LEXER FILE                                                   //
@@ -105,7 +113,7 @@ class FileHandler
 //                            WRITING TO SYNTAX FILE                                                  //
 // ===================================================================================================//
 
-    void SyntaxFile(std::vector<std::unique_ptr<Node>> &compound)
+    void SyntaxFile(std::vector<std::shared_ptr<Node>> compound)
     {
         std::fstream outputFile;
         outputFile.open("Syntax-analysis.txt", std::ios_base::out);
@@ -131,7 +139,7 @@ class FileHandler
 // ===================================================================================================//
     void drawsNode(std::vector<std::string> &output,
       std::vector<std::string> &linkAbove,
-      std::unique_ptr<Node> node,
+      std::shared_ptr<Node> node,
       size_t level,
       int p,
       char linkChar)
@@ -157,7 +165,7 @@ class FileHandler
         if (node->left)
         {
             std::string leftData = SP + node->left->type.value + SP;
-            drawsNode(output, linkAbove, std::move(node->left), level + 1, p - leftData.size(), 'L');
+            drawsNode(output, linkAbove, node->left, level + 1, int(p - leftData.size()), 'L');
             p = std::max(p, (int)output[level + 1].size());
         }
 
@@ -173,7 +181,7 @@ class FileHandler
         linkAbove[level] += linkChar;
 
         // Fill in to right
-        if (node->right) drawsNode(output, linkAbove, std::move(node->right), level + 1, output[level].size(), 'R');
+        if (node->right) drawsNode(output, linkAbove, node->right, level + 1, int(output[level].size()), 'R');
     }
 
 
@@ -182,12 +190,12 @@ class FileHandler
 // ===================================================================================================//
 //                            2D TREE PRINT                                                           //
 // ===================================================================================================//
-  std::string printTree(std::unique_ptr<Node> &root)
+  std::string printTree(std::shared_ptr<Node> &root)
     {
         std::stringstream out;
         int height = TreeHeight(root);
         std::vector<std::string> output(height), linkAbove(height);
-        drawsNode(output, linkAbove, std::move(root), 0, 5, ' ');
+        drawsNode(output, linkAbove, root, 0, 5, ' ');
 
         // Create link lines
         for (size_t i = 1; i < height; i++)

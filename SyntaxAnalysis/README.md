@@ -35,8 +35,8 @@ The `Node.hpp` file contains utility function for the tree nodes
 // Node structure
 struct Node
 {
-  std::unique_ptr<Node> left;
-  std::unique_ptr<Node> right;
+  std::shared_ptr<Node> left;
+  std::shared_ptr<Node> right;
   LexerToken type;
 };
 ```
@@ -57,3 +57,5 @@ A parse tree for this expression would have the following structure:
                            2   3
 
 ```
+
+[CuriousX Syntax Analyzer Blog](https://jenniferchukwu.com/posts/syntaxanalysis)
