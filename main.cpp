@@ -36,8 +36,10 @@ int main(int argc, const char *argv[])
 
                 throw Error("Parsing failed ");
             }
-            auto sem = new Semantic();
-            sem->traverse(ast->astRoot());
+            auto sem = new Semantic(ast->astRoot());
+            sem->traverse();
+            // Print table for debugging ;D
+            //sem->printSymbolTree();
         }
     } catch (Error &ex)
     {

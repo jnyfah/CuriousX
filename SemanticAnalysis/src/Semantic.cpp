@@ -2,7 +2,7 @@
 #include "Utils/Error.hpp"
 
 
-void Semantic::traverse(std::vector<std::shared_ptr<Node>> compound)
+void Semantic::traverse()
 {
     for (auto node : compound)
     {
@@ -22,8 +22,6 @@ void Semantic::traverse(std::vector<std::shared_ptr<Node>> compound)
             throw Error("Invalid Program structure ", node->type.location);
         }
     }
-    // Print table for debugging ;D
-    // symboltable.printTable(symboltable.getRootNode());
 }
 
 
@@ -147,8 +145,12 @@ void Semantic::checkPrint(std::shared_ptr<Node> node)
         throw Error("Assignments not allowed in print fuctions ", node->left->type.location);
     }
     auto infertype = inferType(node->left);
-    if(infertype == std::nullopt) {
-        throw Error("unknown type in Print", node->left->type.location);
-    }
+    if (infertype == std::nullopt) { throw Error("unknown type in Print", node->left->type.location); }
     checkExpr(node->left);
 }
+
+
+void Semantic::printSymbolTree() { symboltable.printTable(symboltable.getRootNode()); }
+
+
+symbolTable::Table Semantic::getSymbolTable() const { return symboltable; }

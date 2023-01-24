@@ -1,4 +1,3 @@
 z = 7.99 
 y = z +8.09 
-print(z + 5 + 8 )
-
+print(z + y)

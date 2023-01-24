@@ -57,3 +57,5 @@ A parse tree for this expression would have the following structure:
                            2   3
 
 ```
+
+[CuriousX Syntax Analyzer Blog](https://jenniferchukwu.com/posts/syntaxanalysis)
