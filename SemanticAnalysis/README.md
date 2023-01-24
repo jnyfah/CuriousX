@@ -39,6 +39,3 @@ struct Node
 4.  The inferred types are stored in the AST tree and symbol table for later use.
 5.  This means the output of the semantic analyzer is still an AST tree 😅 but this is an error free, typed inferred AST tree
 
-
-
-
