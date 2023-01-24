@@ -18,6 +18,8 @@ class Semantic
 
     void checkExpr(std::shared_ptr<Node> node);
 
+    void checkPrint(std::shared_ptr<Node> node);
+
     std::optional<InferredType> inferType(std::shared_ptr<Node> node);
 
 

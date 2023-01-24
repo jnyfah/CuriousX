@@ -6,20 +6,24 @@ void Semantic::traverse(std::vector<std::shared_ptr<Node>> compound)
 {
     for (auto node : compound)
     {
-        // std::shared_ptr<Node> node = compound[0];
         if (node == nullptr) { return; }
+
         if (node->type.type == LexerTokenType::AssignToken)
         {
             auto infertype = inferType(node->right).value();
             checkAssignments(node, infertype);
-        } else if (node->type.type == LexerTokenType::PrintToken) {
-            std::cout << "rint!";
-        } else {
-            throw Error ("Invalid Program");
+
+        } else if (node->type.type == LexerTokenType::PrintToken)
+        {
+            // make sure variables in print are already defined and no equal signs allowed
+            checkPrint(node);
+        } else
+        {
+            throw Error("Invalid Program structure ", node->type.location);
         }
     }
-     // Print table for debugging ;D
-    //symboltable.printTable(symboltable.getRootNode());
+    // Print table for debugging ;D
+    // symboltable.printTable(symboltable.getRootNode());
 }
 
 
@@ -133,4 +137,18 @@ std::optional<InferredType> Semantic::inferType(std::shared_ptr<Node> node)
         throw Error("Unbalanced Expression, Missing or extra tokens at", node->type.location);
     }
     return std::nullopt;
+}
+
+
+void Semantic::checkPrint(std::shared_ptr<Node> node)
+{
+    if (node->left->type.type == LexerTokenType::AssignToken)
+    {
+        throw Error("Assignments not allowed in print fuctions ", node->left->type.location);
+    }
+    auto infertype = inferType(node->left);
+    if(infertype == std::nullopt) {
+        throw Error("unknown type in Print", node->left->type.location);
+    }
+    checkExpr(node->left);
 }
