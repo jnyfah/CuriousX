@@ -37,13 +37,14 @@ namespace symbolTable {
 
     class Node
     {
-      public:
-        LexerToken node;
-        std::variant<InferredType, std::monostate> inferredType;
-        std::shared_ptr<Node> next;
+        public:
+            LexerToken node;
+            std::variant<InferredType, std::monostate> inferredType;
+            std::shared_ptr<Node> next;
 
-        Node(LexerToken node) : node(node), inferredType(std::monostate{}), next(nullptr) {}
-    };
+            explicit Node(LexerToken const &node) : node(node), inferredType(std::monostate{}), next(nullptr) {}
+        };
+
 
 
     class Table
@@ -88,7 +89,7 @@ namespace symbolTable {
         }
 
         // Get inferred type
-        std::optional<InferredType> getInferredType(std::string varName)
+        std::optional<InferredType> getInferredType(const std::string &varName)
         {
             auto current = root;
 
@@ -110,7 +111,7 @@ namespace symbolTable {
         }
 
         // set inferred type
-        void setInferredType(std::string varName, InferredType inferredType)
+        void setInferredType(const std::string &varName, InferredType &inferredType)
         {
             auto current = root;
 
