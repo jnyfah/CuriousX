@@ -79,6 +79,4 @@ Output (`Lexical-analysis.txt`)
 [z]    ->   <line:4, col:7>;	 VarToken
 [)]    ->   <line:4, col:8>;	 ParenClose
 ```
-
-
 [CuriousX Lexical Analyzer Blog](https://jenniferchukwu.com/posts/lexicalAnalysis)

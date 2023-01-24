@@ -11,18 +11,15 @@ class Parser
 {
   public:
     explicit Parser(const std::vector<LexerToken>& token)
-      : token(token)
-    {
-        root = std::make_shared<Node>();
-        current = 0;
-    }
+      : token(token), root(std::make_shared<Node>()), current(0)
+    {}
 
     size_t sizeOfTree() {
       return compound.size();
     }
 
 
-    std::shared_ptr<Node> root;
+    
 
     std::shared_ptr<Node> Expression();
 
@@ -42,8 +39,9 @@ class Parser
     
 
   private:
-    std::vector<LexerToken> token;
     size_t current;
+    std::shared_ptr<Node> root;
+    std::vector<LexerToken> token;
     std::vector<std::shared_ptr<Node> > compound;
     
 };

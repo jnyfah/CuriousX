@@ -10,7 +10,7 @@ class Semantic
 {
 
   public:
-    Semantic(std::vector<std::shared_ptr<Node>> compound): compound(compound) {}
+    explicit Semantic(const std::vector<std::shared_ptr<Node>> &compound): compound(compound) {}
 
     void traverse();
 
