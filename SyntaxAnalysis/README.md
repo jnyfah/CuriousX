@@ -58,5 +58,5 @@ A parse tree for this expression would have the following structure:
 
 ```
 
-### To learn more:
-### [CuriousX Syntax Analyzer Blog](https://jenniferchukwu.com/posts/syntaxanalysis)
+__To learn more:__
+#### [CuriousX Syntax Analyzer Blog](https://jenniferchukwu.com/posts/syntaxanalysis)
