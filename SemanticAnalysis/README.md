@@ -39,6 +39,19 @@ struct Node
 4.  The inferred types are stored in the AST tree and symbol table for later use.
 5.  This means the output of the semantic analyzer is still an AST tree 😅 but this is an error free, typed inferred AST tree
 
+the output of the semantic analyisis would be an annotated AST that looks like this:
+```sh
+                         =
+                        / \
+             (INTEGER) x   +
+                          / \
+                         5   *
+                            / \
+                           2   3
+
+```
+it is basically error free AST, where all the variables are infrerred to their types
+
 __To learn more:__
 #### [CuriousX Semantic Analysis Blog](https://jenniferchukwu.com/posts/semanticAnalysis)
 
