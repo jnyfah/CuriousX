@@ -80,4 +80,4 @@ Output (`Lexical-analysis.txt`)
 [)]    ->   <line:4, col:8>;	 ParenClose
 ```
 __To learn more:__
-#### [CuriousX Lexical Analyzer Blog](https://jenniferchukwu.com/posts/lexicalAnalysis)
+## [CuriousX Lexical Analyzer Blog](https://jenniferchukwu.com/posts/lexicalAnalysis)
