@@ -1,6 +1,7 @@
 #include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
 #include "SemanticAnalysis/include/Semantic.hpp"
+#include "CodeGen/include/Codegen.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -36,10 +37,14 @@ int main(int argc, const char *argv[])
 
                 throw Error("Parsing failed ");
             }
-            auto sem = new Semantic(ast->astRoot());
-            sem->traverse();
+            auto sem = new Semantic();
+            sem->traverse(ast->astRoot());
             // Print table for debugging ;D
             //sem->printSymbolTree();
+
+            auto cg = new CodeGen();
+            cg->convert(ast->astRoot());
+            std::cout << cg->output();
         }
     } catch (Error &ex)
     {

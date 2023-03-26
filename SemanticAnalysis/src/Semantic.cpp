@@ -2,7 +2,7 @@
 #include "Utils/Error.hpp"
 
 
-void Semantic::traverse()
+void Semantic::traverse(const std::vector<std::shared_ptr<Node>> &compound)
 {
     for (auto node : compound)
     {
