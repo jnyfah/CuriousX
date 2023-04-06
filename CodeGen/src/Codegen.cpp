@@ -17,6 +17,8 @@ std::string CodeGen::convert(const std::vector<std::shared_ptr<Node>>& compound)
     // Traverse the AST in postfix order
     for (auto& node : compound) {
         traverse(node);
+        output_ += "\n";
+
     }
 
     // Add a return statement to the end of the main function
@@ -90,6 +92,12 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
             reg.free_register(last_reg);
             last_reg = reg_idx;
             break;
+        
+    case LexerTokenType::PrintToken:
+        traverse(node->left);
+        output_ += "\t bl printf\n";
+        reg.free_register(last_reg);
+        break;
         default:
             break;
     }
