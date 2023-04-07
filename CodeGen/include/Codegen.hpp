@@ -2,6 +2,7 @@
 #define CODEGEN_HPP
 
 #include "SyntaxAnalysis/include/Node.hpp"
+#include "SemanticAnalysis/include/SymbolTable.hpp"
 #include "Register.hpp"
 
 #include <vector>
@@ -10,7 +11,7 @@
 class CodeGen 
 {
     public:
-        CodeGen(){
+        CodeGen(symbolTable::Table symboltable): _symboltable(symboltable){
             reg.free_all_registers();
         }
 
@@ -32,6 +33,7 @@ class CodeGen
         std::string output_;
         RegisterAllocator reg;
         int last_reg;
+        symbolTable::Table _symboltable;
 };
 
 #endif

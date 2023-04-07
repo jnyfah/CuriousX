@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <optional>
+#include <set>
 #include <variant>
 
 #include "Error.hpp"
@@ -35,95 +36,55 @@
 
 namespace symbolTable {
 
-    class Node
+    struct Node
     {
-        public:
-            LexerToken node;
-            std::variant<InferredType, std::monostate> inferredType;
-            std::shared_ptr<Node> next;
+        LexerToken node;
+        std::variant<InferredType, std::monostate> inferredType;
 
-            explicit Node(LexerToken const &node) : node(node), inferredType(std::monostate{}), next(nullptr) {}
-        };
+        explicit Node(LexerToken const &node) : node(node), inferredType(std::monostate{}) {}
 
-
+        bool operator<(const Node& other) const {
+            return node.value < other.node.value;
+        }
+    };
 
     class Table
     {
 
       private:
-        std::shared_ptr<Node> root;
+        std::set<Node> nodes;
 
       public:
         void insert(LexerToken node, const InferredType &inferredType)
         {
 
-            auto newNode = std::make_shared<Node>(node);
-            newNode->inferredType = inferredType;
+            auto newNode = Node(node);
+            newNode.inferredType = inferredType;
 
-            if (root == nullptr)
-            {
-                root = newNode;
-            } else if (node.value < root->node.value)
-            {
-                newNode->next = root;
-                root = newNode;
-            } else
-            {
-                auto current = root;
-                while (current->next != nullptr && current->next->node.value < node.value) { current = current->next; }
-                if (current->node.value == node.value) { throw Error(" Warning: Variable Already Defined! "); }
-                newNode->next = current->next;
-                current->next = newNode;
-            }
+            if(!nodes.insert(newNode).second) { throw Error(" Warning: Variable Already Defined! "); }
         }
 
         bool search(LexerToken node)
         {
-            auto current = root;
-            while (current != nullptr)
-            {
-                if (current->node.value == node.value) { return true; }
-                current = current->next;
-            }
-            return false;
+            auto searchNode = Node(node);
+            return nodes.find(searchNode) != nodes.end();
         }
 
         // Get inferred type
         std::optional<InferredType> getInferredType(const std::string &varName)
         {
-            auto current = root;
-
-            while (current != nullptr)
-            {
-                if (current->node.value == varName)
-                {
-                    if (std::holds_alternative<InferredType>(current->inferredType))
+            for (const auto& node: nodes) {
+                if (node.node.value == varName) {
+                    if (std::holds_alternative<InferredType>(node.inferredType))
                     {
-                        return std::get<InferredType>(current->inferredType);
+                        return std::get<InferredType>(node.inferredType);
                     } else
                     {
                         return std::nullopt;
                     }
                 }
-                current = current->next;
             }
             return std::nullopt;
-        }
-
-        // set inferred type
-        void setInferredType(const std::string &varName, InferredType &inferredType)
-        {
-            auto current = root;
-
-            while (current != nullptr)
-            {
-                if (current->node.value == varName)
-                {
-                    current->inferredType = inferredType;
-                    return;
-                }
-                current = current->next;
-            }
         }
 
 
@@ -139,16 +100,16 @@ namespace symbolTable {
         }
 
         // prints symbol table
-        void printTable(std::shared_ptr<Node> head) {
-            std::shared_ptr<Node> current = head;
-            while (current != nullptr) {
-                std::cout << current->node.value << " " << to_string(std::get<InferredType>(current->inferredType));
-                current = current->next;
+        void printTable() {
+            for (const auto& node: nodes) {
+                std::cout << node.node.value << " " << to_string(std::get<InferredType>(node.inferredType));
                 std::cout << std::endl;
             }
         }
 
-        std::shared_ptr<Node> getRootNode() { return root; }
+        std::set<Node> getSymbolTable() {
+            return nodes;
+        }
     };
 };// namespace symbolTable
 
