@@ -22,8 +22,7 @@ std::string CodeGen::convert(const std::vector<std::shared_ptr<Node>>& compound)
     }
 
     // Add a return statement to the end of the main function
-    output_ += "\t MOV r0, #0\n"  // Set the return value to 0
-               "\t bx lr\n";       // Return control to the caller
+    output_ += "\t BX lr\n";       // Return control to the caller
 
     return output_;
 }
@@ -71,10 +70,8 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
             traverse(node->left);
             reg_idx = last_reg;
             traverse(node->right);
-            if (node->left->type.type == LexerTokenType::FloatToken || node->right->type.type == LexerTokenType::FloatToken) {
-                output_ += "\t VADD.F32" + std::to_string(reg_idx) + ", s" + std::to_string(reg_idx) + ", s" + std::to_string(last_reg) + "\n";
-               // output_ += "\t VADD.F32 s0, s0, s1\n";
-                //output_ += "\t VMOV r" + std::to_string(reg_idx) + ", s0\n";
+            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
+                output_ += "\t VADD.F32, s" + std::to_string(reg_idx) + ", s" + std::to_string(last_reg) + "\n";
             } else {
                 output_ += "\t ADD r" + std::to_string(reg_idx) + ", r" + std::to_string(reg_idx) + ", r" + std::to_string(last_reg) + "\n";
             }
@@ -82,22 +79,51 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
             last_reg = reg_idx;
             break;
 
-    case LexerTokenType::MultiplyToken:
-        traverse(node->left);
-        reg_idx = last_reg;
-        traverse(node->right);
-        output_ += "\t MUL r" + std::to_string(reg_idx) + ", r" + std::to_string(reg_idx) + ", r" + std::to_string(last_reg) + "\n";
-        reg.free_register(last_reg);
-        last_reg = reg_idx;
-        break;
+        case LexerTokenType::MultiplyToken:
+            traverse(node->left);
+            reg_idx = last_reg;
+            traverse(node->right);
+            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
+                output_ += "\t VMUL.F32, s" + std::to_string(reg_idx) + ", s" + std::to_string(last_reg) + "\n";
+            } else {
+                output_ += "\t MUL r" + std::to_string(reg_idx) + ", r" + std::to_string(reg_idx) + ", r" + std::to_string(last_reg) + "\n";
+            }
+            reg.free_register(last_reg);
+            last_reg = reg_idx;
+            break;
+        
+        case LexerTokenType::MinusToken:
+            traverse(node->left);
+            reg_idx = last_reg;
+            traverse(node->right);
+            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
+                output_ += "\t VDIV.F32, s" + std::to_string(reg_idx) + ", s" + std::to_string(last_reg) + "\n";
+            } else {
+                output_ += "\t DIV r" + std::to_string(reg_idx) + ", r" + std::to_string(reg_idx) + ", r" + std::to_string(last_reg) + "\n";
+            }
+            reg.free_register(last_reg);
+            last_reg = reg_idx;
+            break;
+
+        case LexerTokenType::DivideToken:
+            traverse(node->left);
+            reg_idx = last_reg;
+            traverse(node->right);
+            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
+                output_ += "\t VDIV.F32, s" + std::to_string(reg_idx) + ", s" + std::to_string(last_reg) + "\n";
+            } else {
+                output_ += "\t DIV r" + std::to_string(reg_idx) + ", r" + std::to_string(reg_idx) + ", r" + std::to_string(last_reg) + "\n";
+            }
+            reg.free_register(last_reg);
+            last_reg = reg_idx;
+            break;
 
 
     case LexerTokenType::PrintToken:
         output_ += "print: \n";
-        output_ += "\t bl printf\n";
         traverse(node->left);
         int reg_idx = reg.alloc_register();
-        output_ += "\t bx lr\n";
+        output_ += "\t BL printf\n";
 
         reg.free_register(reg_idx);
 }

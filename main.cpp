@@ -40,11 +40,11 @@ int main(int argc, const char *argv[])
             auto sem = new Semantic();
             sem->traverse(ast->astRoot());
             // Print table for debugging ;D
-            sem->printSymbolTree();
+            //sem->printSymbolTree();
 
             auto cg = new CodeGen(sem->getSymbolTable());
             cg->convert(ast->astRoot());
-            std::cout << cg->output();
+            fileHandler->CodeGenFile(cg->output());
         }
     } catch (Error &ex)
     {
