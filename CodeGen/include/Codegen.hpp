@@ -23,8 +23,6 @@ class CodeGen
 
         void perform_operation(LexerTokenType op, int reg_idx1, int reg_idx2);
 
-        std::string preamble();
-
         std::string output() {
             return output_;
         }
