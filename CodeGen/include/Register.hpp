@@ -12,7 +12,7 @@ public:
     // Allocate a free register
     int alloc_register() {
         int reg = _free_registers._Find_first();
-        if (reg == _free_registers.size()) {
+        if (reg == -1) {
             // All registers are in use, spill one to memory
             reg = spill_register();
         } else {
@@ -38,67 +38,45 @@ public:
         _spilled_registers.clear();
     }
 
-    // Get the value held by a register
-    int get_register_value(int reg) {
-        if (_spilled_registers.count(reg) > 0) {
-            // Register was spilled, get value from memory
-            return _memory[_spilled_registers[reg]];
-        } else {
-            return _registers[reg];
-        }
+    bool check_free_registers() {
+    return _free_registers.any();
     }
 
-    // Set the value of a register
-    void set_register_value(int reg, int value) {
-        if (_spilled_registers.count(reg) > 0) {
-            // Register was spilled, set value in memory
-            _memory[_spilled_registers[reg]] = value;
-        } else {
-            _registers[reg] = value;
-        }
-    }
-
-    // Get the index of the last allocated register
-    int get_last_allocated_register() const {
-        int last_allocated = 0;
-
-        return last_allocated;
-    }
 
 
 private:
     std::bitset<13> _free_registers; // Available registers
     std::unordered_map<int, int> _spilled_registers; // Spilled registers (register -> memory location)
-    std::vector<int> _registers; // Register values
     std::vector<int> _memory; // Memory to store spilled registers
 
 // Spill a register to memory and return the memory location
     int spill_register() {
-        for (int reg = 0; reg < 13; reg++) {
-            if (_spilled_registers.find(reg) == _spilled_registers.end()) {
-                // Register is not spilled yet, spill it
-                int mem_loc = _memory.size();
-                _memory.push_back(_registers[reg]);
-                _spilled_registers[reg] = mem_loc;
-                _free_registers.reset(reg);
-                return reg;
-            }
-        }
-        // All registers are already spilled, spill the first one
-        auto it = _spilled_registers.begin();
-        int reg = it->first;
-        int mem_loc = it->second;
-        _spilled_registers.erase(it);
-        _memory[mem_loc] = _registers[reg];
-        _spilled_registers[reg] = mem_loc;
+        int reg = _free_registers.flip()._Find_first(); 
+        int mem_location = _memory.size();
+        _memory.push_back(reg);
+        _spilled_registers[reg] = mem_location;
+        _free_registers.reset(reg);
         return reg;
     }
-
-
     // Reload a spilled register from memory
     void reload_register(int reg) {
+        // Retrieve the spilled register value from memory and store it back in the register
         int mem_loc = _spilled_registers[reg];
-        _registers[reg] = _memory[mem_loc];
+        int value = _memory[mem_loc];
         _free_registers.reset(reg);
+        _memory.erase(_memory.begin() + mem_loc);
+        _spilled_registers.erase(reg);
+        _free_registers.set(value);
     }
+
+    unsigned long _findfirst()
+    {
+        for (size_t i = 0; i < _free_registers.size(); ++i) {
+            if (_free_registers.test(i)) {
+            return static_cast<unsigned long>(i);
+            }
+        }
+    return static_cast<unsigned long>(-1);
+    }
+
 };
