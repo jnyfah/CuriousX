@@ -11,8 +11,9 @@
 class CodeGen 
 {
     public:
-        CodeGen(symbolTable::Table symboltable): _symboltable(symboltable){
+        explicit CodeGen(const symbolTable::Table& symboltable): _symboltable(symboltable) {
             reg.free_all_registers();
+            last reg = -1;
         }
 
         std::string convert(const std::vector<std::shared_ptr<Node>> &compound);
