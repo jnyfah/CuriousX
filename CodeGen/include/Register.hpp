@@ -11,7 +11,7 @@ public:
 
     // Allocate a free register
     int alloc_register() {
-        int reg = _free_registers._Find_first();
+        int reg = _findfirst();
         if (reg == -1) {
             // All registers are in use, spill one to memory
             reg = spill_register();
@@ -51,7 +51,7 @@ private:
 
 // Spill a register to memory and return the memory location
     int spill_register() {
-        int reg = _free_registers.flip()._Find_first(); 
+        int reg = _Find_first_unset(); 
         int mem_location = _memory.size();
         _memory.push_back(reg);
         _spilled_registers[reg] = mem_location;
@@ -77,6 +77,15 @@ private:
             }
         }
     return static_cast<unsigned long>(-1);
+    }
+
+    unsigned long _Find_first_unset() {
+        for (size_t i = 0; i < _free_registers.size(); ++i) {
+            if (!_free_registers.test(i)) {
+                return static_cast<unsigned long>(i);
+            }
+        }
+        return static_cast<unsigned long>(-1);
     }
 
 };
