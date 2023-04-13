@@ -125,6 +125,29 @@ void SymbolTable() {
             outputFile << "\n\n\n\n";
         }
     }
+
+
+    void CodeGenFile(const std::string& output)
+    {
+        std::fstream outputFile;
+        outputFile.open("assembly.txt", std::ios_base::out);
+
+        error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
+
+            outputFile << output;
+    }
+
+    void SemanticFile(const std::string& output)
+    {
+        std::fstream outputFile;
+        outputFile.open("symbol-tree.txt", std::ios_base::out);
+
+        error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
+
+            outputFile << output;
+    }
+
+
     std::string getFilename() { return filename; }
 
 

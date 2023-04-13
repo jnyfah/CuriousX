@@ -2,7 +2,7 @@
 #include "Utils/Error.hpp"
 
 
-void Semantic::traverse()
+void Semantic::traverse(const std::vector<std::shared_ptr<Node>> &compound)
 {
     for (auto node : compound)
     {
@@ -150,7 +150,7 @@ void Semantic::checkPrint(std::shared_ptr<Node> node)
 }
 
 
-void Semantic::printSymbolTree() { symboltable.printTable(symboltable.getRootNode()); }
+std::string Semantic::printSymbolTree() { return symboltable.printTable().str(); }
 
 
 symbolTable::Table Semantic::getSymbolTable() const { return symboltable; }

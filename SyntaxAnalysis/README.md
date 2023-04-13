@@ -46,7 +46,7 @@ For example, consider the following expression in our CuriousX:
 x = 5 + 2 * 3
 ```
 
-A parse tree for this expression would have the following structure:
+The parse tree for this expression would have the following structure:
 ```sh
                          =
                         / \

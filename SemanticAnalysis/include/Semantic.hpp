@@ -10,9 +10,9 @@ class Semantic
 {
 
   public:
-    explicit Semantic(const std::vector<std::shared_ptr<Node>> &compound): compound(compound) {}
+    explicit Semantic(){}
 
-    void traverse();
+    void traverse(const std::vector<std::shared_ptr<Node>> &compound);
 
     void checkAssignments(std::shared_ptr<Node> node, const InferredType &inferredType);
 
@@ -22,14 +22,13 @@ class Semantic
 
     std::optional<InferredType> inferType(std::shared_ptr<Node> node);
 
-    void printSymbolTree();
+    std::string printSymbolTree();
 
     symbolTable::Table getSymbolTable() const;
 
 
   private:
     symbolTable::Table symboltable;
-    std::vector<std::shared_ptr<Node>> compound;
 };
 
 #endif

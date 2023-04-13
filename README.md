@@ -20,7 +20,7 @@ CuriousX is designed to mimic the structure of a typical compiler and includes f
 -   Expressions (add, subtract, divide, and multiply)
 -   Operator precedence
 -   Statements
--   __Target Architecture:__ X86 and ARM
+-   __Target Architecture:__ ARMv8
 
 ## Dependencies
 1.  A C++ compiler that supports C++17. See [cppreference.com](https://en.cppreference.com/w/cpp/compiler_support) to see which features are supported by each compiler.
@@ -43,4 +43,65 @@ cd build
 cmake -DCURIOUSX_BUILD_TESTS=ON ..
 cmake --build .
 ctest
+```
+
+## Usage
+Executable is located at the `build` folder
+
+```cmd
+./CuriousX [txt source code file path]
+```
+This generates a `Lexical-analysis.txt` `Syntax-analysis.txt` and an `assembly.txt` files located at the build folder and you can also vie the symbol table if you source code has any.
+
+You can always validate your assembly code with this ARM emulator [miniarm](https://github.com/ebresafegaga/miniarm)
+
+## Examples
+for the source code input:
+
+```py
+a = 2 + 3 * 4
+print(a)
+```
+
+the lexical-analysis output
+```sh
+[a]    ->   <line:1, col:1>;	 VarToken
+[=]    ->   <line:1, col:3>;	 AssignToken
+[2]    ->   <line:1, col:5>;	 IntToken
+[+]    ->   <line:1, col:7>;	 PlusToken
+[3]    ->   <line:1, col:9>;	 IntToken
+[*]    ->   <line:1, col:11>;	 MultiplyToken
+[4]    ->   <line:1, col:13>;	 IntToken
+[print] ->   <line:2, col:1>;	 PrintToken
+[(]    ->   <line:2, col:6>;	 ParenOpen
+[a]    ->   <line:2, col:7>;	 VarToken
+[)]    ->   <line:2, col:8>;	 ParenClose
+```
+
+syntax-analysis output
+```sh
+          =
+        /   \
+       a     +
+            / \
+           2   *
+              / \
+             3   4
+```
+
+and assembly output
+
+```sh
+	 mov r0, #2
+	 mov r1, #3
+	 mov r2, #4
+	 mul r1, r1, r2
+	 add r0, r0, r1
+	 str r0, [sp, #-4]!
+
+print: 
+	 ldr r0, [sp, #0]
+	 bl printf
+
+	 bx lr
 ```
