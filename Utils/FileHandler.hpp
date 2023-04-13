@@ -127,7 +127,7 @@ void SymbolTable() {
     }
 
 
-    void CodeGenFile(std::string output)
+    void CodeGenFile(const std::string& output)
     {
         std::fstream outputFile;
         outputFile.open("assembly.txt", std::ios_base::out);

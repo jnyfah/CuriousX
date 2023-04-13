@@ -55,7 +55,7 @@ namespace symbolTable {
         std::set<Node> nodes;
 
       public:
-        void insert(LexerToken node, const InferredType &inferredType)
+        void insert(const LexerToken& node, const InferredType &inferredType)
         {
 
             auto newNode = Node(node);
@@ -64,7 +64,7 @@ namespace symbolTable {
             if(!nodes.insert(newNode).second) { throw Error(" Warning: Variable Already Defined! "); }
         }
 
-        bool search(LexerToken node)
+        bool search(const LexerToken& node)
         {
             auto searchNode = Node(node);
             return nodes.find(searchNode) != nodes.end();

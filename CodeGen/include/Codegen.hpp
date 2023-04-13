@@ -16,7 +16,7 @@ class CodeGen
             last_reg = -1;
         }
 
-        std::string convert(const std::vector<std::shared_ptr<Node>> &compound);
+        void convert(const std::vector<std::shared_ptr<Node>> &compound);
 
         void traverse(const std::shared_ptr<Node> node);
 
@@ -25,16 +25,16 @@ class CodeGen
         void perform_operation(LexerTokenType op, int reg_idx1, int reg_idx2);
 
         std::string output() {
-            return output_;
+            return output_stream.str();
         }
 
     private:
-        std::string output_;
         RegisterAllocator reg;
         int last_reg;
         symbolTable::Table _symboltable;
         std::unordered_map<std::string, int> _staked_var;
         int sp = -4;
+        std::stringstream output_stream;
 };
 
 #endif
