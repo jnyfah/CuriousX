@@ -8,15 +8,15 @@ The output is written to a std::stringstream object and saved to a file
 
 The code generator supports the following AST nodes:
 
--  AssignNode
--  IntNode
--  FloatNode
--  VarNode
--  PlusNode
--  MinusNode
--  MultiplyNode
--  DivideNode
--  PrintNode
+-   AssignNode
+-   IntNode
+-   FloatNode
+-   VarNode
+-   PlusNode
+-   MinusNode
+-   MultiplyNode
+-   DivideNode
+-   PrintNode
 
 ### Register Allocator
 The register allocator is implemented in `register.hpp`. It manages the allocation and de-allocation of registers during code generation. The register allocator supports a maximum of 1- registers, and it uses a stack-based allocation strategy.

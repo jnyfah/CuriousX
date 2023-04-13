@@ -10,7 +10,7 @@ void CodeGen::convert(const std::vector<std::shared_ptr<Node>>& compound) {
     }
 
     // Add a return statement to the end of the main function
-    output_stream << "\t bx lr\n";
+    output_stream << "\t bx lr";
 }
 
 void CodeGen::traverse(const std::shared_ptr<Node> node) {
