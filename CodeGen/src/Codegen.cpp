@@ -24,9 +24,9 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
             reg_idx = last_reg;
             traverse(node->left);
             if (_symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
-                output_ += "\t vstr s" + std::to_string(reg_idx) + ", [s" + std::to_string(last_reg) + "]\n";
+                output_ += "\t vstr s" + std::to_string(reg_idx) + ", [sp, #-4]!\n";
             }else {
-                output_ += "\t str r" + std::to_string(reg_idx) + ", [r" + std::to_string(last_reg) + "]\n";
+                output_ += "\t str r" + std::to_string(reg_idx) + ", [sp, #-4]!\n";
             }
             reg.free_register(last_reg);
             reg.free_register(reg_idx);
@@ -46,11 +46,16 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
 
         case LexerTokenType::VarToken:
             reg_idx = reg.alloc_register();
-            if (_symboltable.getInferredType(node->type.value) == InferredType::FLOAT) {
-                output_ += "\t vldr s" + std::to_string(reg_idx) + ", =" + node->type.value + "\n";
+            if(_staked_var.find(node->type.value) != _staked_var.end()){
+                if (_symboltable.getInferredType(node->type.value) == InferredType::FLOAT) {
+                    output_ += "\t vldr s" + std::to_string(reg_idx) + ", [sp, #" + std::to_string(_staked_var[node->type.value])+ "]\n";
+                }else {
+                    output_ += "\t ldr r" + std::to_string(reg_idx) + ", [sp, #" + std::to_string(_staked_var[node->type.value])+ "]\n";
+                }
             }else {
-                output_ += "\t ldr r" + std::to_string(reg_idx) + ", =" + node->type.value + "\n";
+                _staked_var[node->type.value]+= (sp+=4);
             }
+            
             last_reg = reg_idx;
             break;
 

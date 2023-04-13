@@ -48,6 +48,7 @@ private:
     std::bitset<13> _free_registers; // Available registers
     std::unordered_map<int, int> _spilled_registers; // Spilled registers (register -> memory location)
     std::vector<int> _memory; // Memory to store spilled registers
+    
 
 // Spill a register to memory and return the memory location
     int spill_register() {

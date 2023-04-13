@@ -33,6 +33,8 @@ class CodeGen
         RegisterAllocator reg;
         int last_reg;
         symbolTable::Table _symboltable;
+        std::unordered_map<std::string, int> _staked_var;
+        int sp = -4;
 };
 
 #endif
