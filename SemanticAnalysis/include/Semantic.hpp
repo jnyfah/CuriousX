@@ -22,7 +22,7 @@ class Semantic
 
     std::optional<InferredType> inferType(std::shared_ptr<Node> node);
 
-    void printSymbolTree();
+    std::string printSymbolTree();
 
     symbolTable::Table getSymbolTable() const;
 

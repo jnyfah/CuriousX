@@ -28,6 +28,7 @@
 #include <optional>
 #include <set>
 #include <variant>
+#include <sstream>
 
 #include "Error.hpp"
 #include "LexicalAnalysis/include/LexerToken.hpp"
@@ -100,11 +101,13 @@ namespace symbolTable {
         }
 
         // prints symbol table
-        void printTable() {
+        std::stringstream printTable() {
+            std::stringstream _output;
             for (const auto& node: nodes) {
-                std::cout << node.node.value << " " << to_string(std::get<InferredType>(node.inferredType));
-                std::cout << std::endl;
+                _output << node.node.value << " " << to_string(std::get<InferredType>(node.inferredType));
+                _output << std::endl;
             }
+            return _output;
         }
 
         std::set<Node> getSymbolTable() {

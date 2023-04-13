@@ -150,7 +150,7 @@ void Semantic::checkPrint(std::shared_ptr<Node> node)
 }
 
 
-void Semantic::printSymbolTree() { symboltable.printTable(); }
+std::string Semantic::printSymbolTree() { return symboltable.printTable().str(); }
 
 
 symbolTable::Table Semantic::getSymbolTable() const { return symboltable; }
