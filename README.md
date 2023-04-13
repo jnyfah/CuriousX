@@ -55,7 +55,6 @@ This generates a `Lexical-analysis.txt` `Syntax-analysis.txt` and an `assembly.t
 
 You can always validate your assembly code with this ARM emulator [miniarm](https://github.com/ebresafegaga/miniarm)
 
-
 ## Examples
 for the source code input:
 
