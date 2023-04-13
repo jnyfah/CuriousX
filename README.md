@@ -57,7 +57,6 @@ You can always validate your assembly code with this ARM emulator [miniarm](http
 
 
 ## Examples
-
 for the source code input:
 
 ```py
