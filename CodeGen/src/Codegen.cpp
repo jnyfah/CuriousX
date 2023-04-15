@@ -38,7 +38,7 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
 
         case LexerTokenType::FloatToken:
             reg_idx = reg.alloc_register();
-            output_stream << "\t vldr s" << reg_idx << ", #" << node->type.value << "\n";
+            output_stream << "\t vmov s" << reg_idx << ", #" << node->type.value << "\n";
             last_reg = reg_idx;
             break;
 
@@ -62,7 +62,7 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
             reg_idx = last_reg;
             traverse(node->right);
             if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
-                output_stream << "\t add.F32, s" << reg_idx << ", s" << last_reg << "\n";
+                output_stream << "\t add.f32, s" << reg_idx << ", s" << last_reg << "\n";
             } else {
                 output_stream << "\t add r" << reg_idx << ", r" << reg_idx << ", r" << last_reg << "\n";
             }

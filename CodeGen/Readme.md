@@ -41,7 +41,7 @@ The AST for this source code is:
 
 ```
 The code generator generates the following assembly code:
-S
+
 ```sh
 	 mov r0, #5
 	 mov r1, #2
