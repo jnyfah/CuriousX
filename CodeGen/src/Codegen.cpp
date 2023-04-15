@@ -38,7 +38,7 @@ void CodeGen::traverse(const std::shared_ptr<Node> node) {
 
         case LexerTokenType::FloatToken:
             reg_idx = reg.alloc_register();
-            output_stream << "\t vldr s" << reg_idx << ", #" << node->type.value << "\n";
+            output_stream << "\t vmov s" << reg_idx << ", #" << node->type.value << "\n";
             last_reg = reg_idx;
             break;
 
