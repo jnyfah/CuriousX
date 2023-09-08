@@ -1,69 +1,32 @@
-/****
- **
- ** @copyright copyright (c) 2022
- **
- **
- ** http://www.boost.org/LICENSE_1_0.txt
- ** (See accompanying file LICENSE_1_0.txt or copy at
- ** http://www.boost.org/LICENSE_1_0.txt)
- **
- **
- ** @author Jennifer Chukwu
- ** @email: <jnyfaah@gmail.com>
- **
- ** see https://github.com/jnyfah/CuriousX for most recent version including documentation.
- ** Project CuriousX...2022
- **
- */
-
-#ifndef __ERROR_HPP_
-#define __ERROR_HPP_
-
-
 #pragma once
 #include <iostream>
 
 #include <exception>
 #include <string>
-
-
-///////////////////////////////////////////////////////////////////////////
-/// This file contains implementation of the helper logic for error handling
-/// used internally.
-///////////////////////////////////////////////////////////////////////////
+#include <exception>
+#include <string>
 
 #include "SourceLocation.hpp"
 
 class Error : public std::exception
 {
-  public:
-    explicit Error(const char* message)
+public:
+    explicit Error(const std::string& message = "An unknown error occurred.")
       : message(message)
     {}
-    Error(const char* message, SourceLocation location)
-      : message(message)
-      , location(location)
+    
+    Error(const std::string& message, SourceLocation location)
+      : message(message + location.toString())
     {}
-    Error() {}
 
-
-    std::string getErrorMessage() const
+    const char* what() const noexcept override
     {
-        return message + location.toString();
+        return message.c_str();
     }
 
-    /// Method to be used for checking required conditions.
-    void CHECK(bool check, const char* message)
-    {
-        if (!check)
-        {
-            throw Error(message);
-        }
-    }
-
-  private:
+private:
     std::string message;
-    SourceLocation location;
 };
 
-#endif
+// This can be a function outside the class.
+

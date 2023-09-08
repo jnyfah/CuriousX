@@ -27,10 +27,11 @@
 #include <memory>
 #include <optional>
 #include <set>
-#include <variant>
 #include <sstream>
+#include <variant>
 
 #include "Error.hpp"
+#include "json.hpp"
 #include "LexicalAnalysis/include/LexerToken.hpp"
 #include "SyntaxAnalysis/include/Node.hpp"
 
@@ -44,9 +45,7 @@ namespace symbolTable {
 
         explicit Node(LexerToken const &node) : node(node), inferredType(std::monostate{}) {}
 
-        bool operator<(const Node& other) const {
-            return node.value < other.node.value;
-        }
+        bool operator<(const Node &other) const { return node.value < other.node.value; }
     };
 
     class Table
@@ -56,16 +55,16 @@ namespace symbolTable {
         std::set<Node> nodes;
 
       public:
-        void insert(const LexerToken& node, const InferredType &inferredType)
+        void insert(const LexerToken &node, const InferredType &inferredType)
         {
 
             auto newNode = Node(node);
             newNode.inferredType = inferredType;
 
-            if(!nodes.insert(newNode).second) { throw Error(" Warning: Variable Already Defined! "); }
+            if (!nodes.insert(newNode).second) { throw Error(" Warning: Variable Already Defined! "); }
         }
 
-        bool search(const LexerToken& node)
+        bool search(const LexerToken &node)
         {
             auto searchNode = Node(node);
             return nodes.find(searchNode) != nodes.end();
@@ -74,8 +73,10 @@ namespace symbolTable {
         // Get inferred type
         std::optional<InferredType> getInferredType(const std::string &varName)
         {
-            for (const auto& node: nodes) {
-                if (node.node.value == varName) {
+            for (const auto &node : nodes)
+            {
+                if (node.node.value == varName)
+                {
                     if (std::holds_alternative<InferredType>(node.inferredType))
                     {
                         return std::get<InferredType>(node.inferredType);
@@ -90,10 +91,13 @@ namespace symbolTable {
 
 
         // Print symbol table helper function to get types
-        std::string to_string(const InferredType& inferredType) {
-            if (inferredType == InferredType::INTEGER) {
+        std::string to_string(const InferredType &inferredType)
+        {
+            if (inferredType == InferredType::INTEGER)
+            {
                 return "INT";
-            } else if (inferredType == InferredType::FLOAT) {
+            } else if (inferredType == InferredType::FLOAT)
+            {
                 return "FLOAT";
             }
             // add cases for other possible values of InferredType
@@ -101,18 +105,35 @@ namespace symbolTable {
         }
 
         // prints symbol table
-        std::stringstream printTable() {
+        std::stringstream printTable()
+        {
             std::stringstream _output;
-            for (const auto& node: nodes) {
+            for (const auto &node : nodes)
+            {
                 _output << node.node.value << " " << to_string(std::get<InferredType>(node.inferredType));
                 _output << std::endl;
             }
             return _output;
         }
 
-        std::set<Node> getSymbolTable() {
-            return nodes;
+        nlohmann::json tableToJson()
+        {
+            nlohmann::json jArray = nlohmann::json::array();
+
+            for (const auto &node : nodes)
+            {
+                nlohmann::json jNode;
+                jNode["value"] = node.node.value;
+                jNode["type"] = to_string(std::get<InferredType>(node.inferredType));
+
+                jArray.push_back(jNode);
+            }
+
+            return jArray;
         }
+
+
+        std::set<Node> getSymbolTable() { return nodes; }
     };
 };// namespace symbolTable
 
