@@ -15,6 +15,8 @@ jobs:
         uses: mymindstorm/setup-emsdk@v11
         with:
           version: latest
+          
+      - name: Verify Emscripten Version
         run: emcc -v
 
       - name: Create Build Directory
