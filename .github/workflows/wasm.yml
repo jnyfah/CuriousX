@@ -1,0 +1,42 @@
+name: Build and Deploy C++ WebAssembly
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Emscripten
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install latest
+        ./emsdk activate latest
+        source ./emsdk_env.sh
+
+    - name: Create Build Directory
+      run: mkdir build
+
+    - name: CMake Configure and Build
+      run: |
+        cd build
+        emcmake cmake ..
+        emmake make
+
+    # If you want to test using emrun before deploying (this won't display anything but will confirm if it runs without errors)
+    - name: Test with emrun
+      run: |
+        cd build/web
+        emrun --no_browser --port 8080 index.html & # Start in background
+        sleep 10 # Give some time for the server to start and serve
+        kill %1 # Kill background job
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@4.1.5
+      with:
+        branch: gh-pages
+        folder: build/web
