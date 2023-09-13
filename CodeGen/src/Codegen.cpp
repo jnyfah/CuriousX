@@ -1,123 +1,206 @@
 #include "../include/Codegen.hpp"
 
-
-void CodeGen::convert(const std::vector<std::shared_ptr<Node>>& compound) {
-
+nlohmann::json CodeGen::convert(const std::vector<std::shared_ptr<Node>> &compound)
+{
+    nlohmann::json jArray = nlohmann::json::array();
     // Traverse the AST in postfix order
-    for (auto& node : compound) {
-        traverse(node);
-        output_stream << "\n";
+    for (auto &node : compound)
+    {
+        jArray.push_back(traverse(node));
     }
 
-    // Add a return statement to the end of the main function
-    output_stream << "\t bx lr";
+    return jArray;
 }
 
-void CodeGen::traverse(const std::shared_ptr<Node> node) {
+
+
+nlohmann::json CodeGen::traverse(const std::shared_ptr<Node> node)
+{
     int reg_idx;
 
-    switch (node->type.type) {
-        case LexerTokenType::AssignToken:
-            traverse(node->right);
-            reg_idx = last_reg;
-            traverse(node->left);
-            if (_symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
-                output_stream << "\t vstr s" << reg_idx << ", [sp, #-4]!\n";
-            }else {
-                output_stream << "\t str r" << reg_idx << ", [sp, #-4]!\n";
+    nlohmann::json instructions = nlohmann::json::array();
+    nlohmann::json instruction;
+
+    switch (node->type.type)
+    {
+    case LexerTokenType::AssignToken: {
+        instruction.clear();
+        nlohmann::json rightInstructions = traverse(node->right);
+        instructions.insert(instructions.end(), rightInstructions.begin(), rightInstructions.end());
+
+        reg_idx = last_reg;
+
+        nlohmann::json leftInstructions = traverse(node->left);
+        instructions.insert(instructions.end(), leftInstructions.begin(), leftInstructions.end());
+
+        if (_symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT)
+        {
+            instruction["command"] = "vstr";
+            instruction["register"] = "s" + std::to_string(reg_idx);
+            instruction["value"] = "[sp, #-4]!";
+        } else
+        {
+            instruction["command"] = "str";
+            instruction["register"] = "r" + std::to_string(reg_idx);
+            instruction["value"] = "[sp, #-4]!";
+        }
+        instructions.push_back(instruction);
+        reg.free_register(last_reg);
+        reg.free_register(reg_idx);
+        break;
+    }
+
+    case LexerTokenType::IntToken:
+        instruction.clear();
+        reg_idx = reg.alloc_register();
+        instruction["command"] = "mov";
+        instruction["register"] = "r" + std::to_string(reg_idx);
+        instruction["value"] = "#" + node->type.value;
+        instructions.push_back(instruction);
+        last_reg = reg_idx;
+        break;
+
+    case LexerTokenType::FloatToken:
+        instruction.clear();
+        reg_idx = reg.alloc_register();
+        instruction["command"] = "vmov";
+        instruction["register"] = "s" + std::to_string(reg_idx);
+        instruction["value"] = "#" + node->type.value;
+        instructions.push_back(instruction);
+        last_reg = reg_idx;
+        break;
+
+    case LexerTokenType::VarToken:
+        instruction.clear();
+        reg_idx = reg.alloc_register();
+        if (_staked_var.find(node->type.value) != _staked_var.end())
+        {
+            if (_symboltable.getInferredType(node->type.value) == InferredType::FLOAT)
+            {
+                instruction["command"] = "vldr";
+                instruction["register"] = "s" + std::to_string(reg_idx);
+                instruction["value"] = "[sp, #" + std::to_string(_staked_var[node->type.value]) + "]";
+            } else
+            {
+                instruction["command"] = "ldr";
+                instruction["register"] = "r" + std::to_string(reg_idx);
+                instruction["value"] = "[sp, #" + std::to_string(_staked_var[node->type.value]) + "]";
             }
-            reg.free_register(last_reg);
-            reg.free_register(reg_idx);
-            break;
+        } else
+        {
+            _staked_var[node->type.value] = (sp += 4);
+        }
+        instructions.push_back(instruction);
+        last_reg = reg_idx;
+        break;
 
-        case LexerTokenType::IntToken:
-            reg_idx = reg.alloc_register();
-            output_stream << "\t mov r" << reg_idx << ", #" << node->type.value << "\n";
-            last_reg = reg_idx;
-            break;
+    case LexerTokenType::PlusToken:
+    case LexerTokenType::MultiplyToken: {
+        instruction.clear();
 
-        case LexerTokenType::FloatToken:
-            reg_idx = reg.alloc_register();
-            output_stream << "\t vmov s" << reg_idx << ", #" << node->type.value << "\n";
-            last_reg = reg_idx;
-            break;
+        nlohmann::json leftInstructions = traverse(node->left);
+        instructions.insert(instructions.end(), leftInstructions.begin(), leftInstructions.end());
 
-        case LexerTokenType::VarToken:
-            reg_idx = reg.alloc_register();
-            if(_staked_var.find(node->type.value) != _staked_var.end()){
-                if (_symboltable.getInferredType(node->type.value) == InferredType::FLOAT) {
-                    output_stream << "\t vldr s" << reg_idx << ", [sp, #" << std::to_string(_staked_var[node->type.value])<< "]\n";
-                }else {
-                    output_stream << "\t ldr r" << reg_idx << ", [sp, #" << std::to_string(_staked_var[node->type.value])<< "]\n";
-                }
-            }else {
-                _staked_var[node->type.value] = (sp +=4);
+        reg_idx = last_reg;
+        nlohmann::json rightInstructions = traverse(node->right);
+        instructions.insert(instructions.end(), rightInstructions.begin(), rightInstructions.end());
+        if (node->left->type.type == LexerTokenType::FloatToken
+            || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT)
+        {
+            if (node->type.type == LexerTokenType::PlusToken)
+            {
+                instruction["command"] = "add.F32";
+                instruction["registers"] = { "s" + std::to_string(reg_idx), "s" + std::to_string(last_reg) };
+            } else
+            {
+                instruction["command"] = "mul.f32";
+                instruction["registers"] = { "s" + std::to_string(reg_idx), "s" + std::to_string(last_reg) };
             }
-            
-            last_reg = reg_idx;
-            break;
 
-        case LexerTokenType::PlusToken:
-            traverse(node->left);
-            reg_idx = last_reg;
-            traverse(node->right);
-            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
-                output_stream << "\t add.F32, s" << reg_idx << ", s" << last_reg << "\n";
-            } else {
-                output_stream << "\t add r" << reg_idx << ", r" << reg_idx << ", r" << last_reg << "\n";
+        } else
+        {
+            if (node->type.type == LexerTokenType::PlusToken)
+            {
+                instruction["command"] = "add";
+                instruction["registers"] = {
+                    "r" + std::to_string(reg_idx), "r" + std::to_string(reg_idx), "r" + std::to_string(last_reg)
+                };
+            } else
+            {
+                instruction["command"] = "mul";
+                instruction["registers"] = {
+                    "r" + std::to_string(reg_idx), "r" + std::to_string(reg_idx), "r" + std::to_string(last_reg)
+                };
             }
-            reg.free_register(last_reg);
-            last_reg = reg_idx;
-            break;
+        }
 
-        case LexerTokenType::MultiplyToken:
-            traverse(node->left);
-            reg_idx = last_reg;
-            traverse(node->right);
-            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
-                output_stream << "\t mul.f32, s" << reg_idx << ", s" << last_reg << "\n";
-            } else {
-                output_stream << "\t mul r" << reg_idx << ", r" << reg_idx << ", r" << last_reg << "\n";
-            }
-            reg.free_register(last_reg);
-            last_reg = reg_idx;
-            break;
-        
-        case LexerTokenType::MinusToken:
-            traverse(node->left);
-            reg_idx = last_reg;
-            traverse(node->right);
-            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
-                output_stream << "\t vsub.f32, s" << reg_idx << ", s" << last_reg << "\n";
-            } else {
-                output_stream << "\t sub r" << reg_idx << ", r" << reg_idx << ", r" << last_reg << "\n";
-            }
-            reg.free_register(last_reg);
-            last_reg = reg_idx;
-            break;
+        instructions.push_back(instruction);
+        reg.free_register(last_reg);
+        last_reg = reg_idx;
+        break;
 
-        case LexerTokenType::DivideToken:
-            traverse(node->left);
-            reg_idx = last_reg;
-            traverse(node->right);
-            if (node->left->type.type == LexerTokenType::FloatToken || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT) {
-                output_stream << "\t vdiv.f32, s" << reg_idx << ", s" << last_reg << "\n";
-            } else {
-                output_stream << "\t div r" << reg_idx << ", r" << reg_idx << ", r" << last_reg << "\n";
-            }
-            reg.free_register(last_reg);
-            last_reg = reg_idx;
-            break;
+    }
 
+    case LexerTokenType::MinusToken:
+    case LexerTokenType::DivideToken: {
+        instruction.clear();
+        nlohmann::json leftInstructions = traverse(node->left);
+        instructions.insert(instructions.end(), leftInstructions.begin(), leftInstructions.end());
+
+        reg_idx = last_reg;
+        nlohmann::json rightInstructions = traverse(node->left);
+        instructions.insert(instructions.end(), rightInstructions.begin(), rightInstructions.end());
+
+        if (node->left->type.type == LexerTokenType::FloatToken
+            || _symboltable.getInferredType(node->left->type.value) == InferredType::FLOAT)
+        {
+            if (node->type.type == LexerTokenType::MinusToken)
+            {
+                instruction["command"] = "vsub.f32";
+                instruction["registers"] = { "s" + std::to_string(reg_idx), "s" + std::to_string(last_reg) };
+            } else
+            {
+                instruction["command"] = "vdiv.f32";
+                instruction["registers"] = { "s" + std::to_string(reg_idx), "s" + std::to_string(last_reg) };
+            }
+
+        } else
+        {
+            if (node->type.type == LexerTokenType::PlusToken)
+            {
+                instruction["command"] = "sub";
+                instruction["registers"] = {
+                    "r" + std::to_string(reg_idx), "r" + std::to_string(reg_idx), "r" + std::to_string(last_reg)
+                };
+            } else
+            {
+                instruction["command"] = "div";
+                instruction["registers"] = {
+                    "r" + std::to_string(reg_idx), "r" + std::to_string(reg_idx), "r" + std::to_string(last_reg)
+                };
+            }
+        }
+        instructions.push_back(instruction);
+        reg.free_register(last_reg);
+        last_reg = reg_idx;
+        break;
+    }
 
     case LexerTokenType::PrintToken:
-        output_stream << "print: \n";
+        instruction.clear();
+        instruction["command"] = "print";
+        instruction["registers"] = { ""};
+        instructions.push_back(instruction);
         traverse(node->left);
+        nlohmann::json leftInstructions = traverse(node->left);
+        instructions.insert(instructions.end(), leftInstructions.begin(), leftInstructions.end());
         int reg_idx = reg.alloc_register();
-        output_stream << "\t bl printf\n";
+        instruction["command"] = "bl";
+        instruction["registers"] = { ""};
+        instruction["value"] = "printf";
+        instructions.push_back(instruction);
 
         reg.free_register(reg_idx);
+    }
+    return instructions;
 }
-
-}
-

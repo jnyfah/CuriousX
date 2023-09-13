@@ -1,8 +1,10 @@
+#include "CodeGen/include/Codegen.hpp"
+#include "Error.hpp"
 #include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
 #include "SemanticAnalysis/include/Semantic.hpp"
-#include "CodeGen/include/Codegen.hpp"
-#include <iostream>
+#include "json.hpp"
+#include <emscripten/bind.h>
 #include <sstream>
 
 #ifdef _MSC_VER
@@ -12,42 +14,89 @@
 #endif
 
 
-int main(int argc, const char *argv[])
+
+nlohmann::json serializeLexerToken(const LexerToken &token)
 {
+    nlohmann::json j;
+    j["type"] = toString(token.type);// if 'type' is an enum, convert to int for serialization
+    j["location"] = token.location.toString();// assuming value is a string or basic type
+    j["value"] = token.value;// ... add other properties as needed ...
+
+    return j;
+}
+
+nlohmann::json nodeToJson(const std::shared_ptr<Node> &node)
+{
+    if (!node) return {};
+
+    nlohmann::json j;
+    j["type"] = serializeLexerToken(node->type);// If you already have a function to serialize LexerToken
+    if (node->left) { j["left"] = nodeToJson(node->left); }
+    if (node->right) { j["right"] = nodeToJson(node->right); }
+    return j;
+}
+
+
+nlohmann::json treesToJson(const std::vector<std::shared_ptr<Node>> &compound)
+{
+    nlohmann::json jsonArray = nlohmann::json::array();
+
+    for (const auto &rootNode : compound) { jsonArray.push_back(nodeToJson(rootNode)); }
+
+    return jsonArray;
+}
+
+
+
+
+std::string processFileContent(const std::string &content)
+{
+    std::ostringstream output;
     try
     {
-        auto fileHandler = new FileHandler;
+        nlohmann::json j;
+        j["lexer"] = nlohmann::json::array();
+        auto lexer = new Lexer(content);
+        std::vector<LexerToken> m_tokens;
 
-        if (fileHandler->ParseArguments(argc, argv))
+        for (auto token = lexer->nextNWToken(); token.type != LexerTokenType::Eof; token = lexer->nextNWToken())
         {
-            auto lexer = new Lexer(fileHandler->getFileContents());
-
-            std::vector<LexerToken> m_tokens;
-
-            for (auto token = lexer->nextNWToken(); token.type != LexerTokenType::Eof; token = lexer->nextNWToken())
-            { m_tokens.emplace_back(token); }
-
-            fileHandler->LexerFile(m_tokens);
-            auto ast = new Parser(m_tokens);
-
-            if (ast->Parse())
-            {
-                fileHandler->SyntaxFile(ast->astRoot());
-            } else {
-
-                throw Error("Parsing failed ");
-            }
-            auto sem = new Semantic();
-            sem->traverse(ast->astRoot());
-            //Print table for debugging ;D
-            fileHandler->SemanticFile(sem->printSymbolTree());
-
-            auto cg = new CodeGen(sem->getSymbolTable());
-            cg->convert(ast->astRoot());
-            fileHandler->CodeGenFile(cg->output());
+            j["lexer"].push_back(serializeLexerToken(token));
+            m_tokens.emplace_back(token);
         }
+
+
+        auto ast = new Parser(m_tokens);
+        if (ast->Parse())
+        {
+            j["syntax"] = treesToJson(ast->astRoot());
+        } else
+        {
+
+            throw Error("Parsing failed ");
+        }
+
+
+        auto sem = new Semantic();
+        sem->traverse(ast->astRoot());
+        // Print table for debugging ;D
+        j["semantic"] = sem->printSymbolTree();
+
+        auto cg = new CodeGen(sem->getSymbolTable());
+        j["codegen"] = cg->convert(ast->astRoot());
+
+
+        output << j.dump();
     } catch (Error &ex)
     {
-        std::cerr << ex.getErrorMessage() << std::endl;
+        nlohmann::json j{
+        {"success", false},
+        {"error", std::string("An error occurred: ") + ex.what()}
+    };
+    output.str(""); // Clearing the stringstream
+    output << j.dump();
     }
+    return output.str();
 }
+
+EMSCRIPTEN_BINDINGS(my_module) { emscripten::function("processFileContent", &processFileContent); }

@@ -17,9 +17,9 @@ class CodeGen
             last_reg = -1;
         }
 
-        void convert(const std::vector<std::shared_ptr<Node>> &compound);
+        nlohmann::json convert(const std::vector<std::shared_ptr<Node>> &compound);
 
-        void traverse(const std::shared_ptr<Node> node);
+        nlohmann::json traverse(const std::shared_ptr<Node> node);
 
         void generateAdd(const std::shared_ptr<Node>& left, const std::shared_ptr<Node>& right);
 

@@ -58,5 +58,11 @@ if(CURIOUSX_BUILD_TESTS)
 
 endif()
 
+# Set the output directory for the executable
+set_target_properties(CuriousX PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/web"
+)
 
 target_link_libraries( ${PROJECT_NAME} LexicalAnalysis SyntaxAnalysis SemanticAnalysis CodeGen)
+set_target_properties(CuriousX PROPERTIES LINK_FLAGS "--bind -s DISABLE_EXCEPTION_CATCHING=0")
+

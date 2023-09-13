@@ -54,24 +54,24 @@ class FileHandler
 
     Error error;
 
-    bool ParseArguments(int argc, const char *argv[])
-    {
-        int start = 0;
+    // bool ParseArguments(int argc, const char *argv[])
+    // {
+    //     int start = 0;
 
-        error.CHECK((argc >= 2), "no input file specified \n");
-        filename = argv[++start];
+    //     error.CHECK((argc >= 2), "no input file specified \n");
+    //     filename = argv[++start];
 
-        error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
-          "invalid input file path \n");
-
-
-        inputFile.open(filename);
-
-        error.CHECK(inputFile.is_open(), "cannot open input file \n");
+    //     error.CHECK((fs::is_regular_file(fs::path(filename)) && fs::path(filename).extension() == ".txt"),
+    //       "invalid input file path \n");
 
 
-        return true;
-    }
+    //     inputFile.open(filename);
+
+    //     error.CHECK(inputFile.is_open(), "cannot open input file \n");
+
+
+    //     return true;
+    // }
 
     std::string getFileContents()
     {
@@ -79,73 +79,73 @@ class FileHandler
         sstr << inputFile.rdbuf();
         return sstr.str();
     }
-// ===================================================================================================//
-//                            DRAW SYMBOL TREE                                                //
-// ===================================================================================================//
+    // ===================================================================================================//
+    //                            DRAW SYMBOL TREE                                                //
+    // ===================================================================================================//
 
-void SymbolTable() {
-    std::fstream outputFile;
-
-    outputFile.open("Lexical-analysis.txt", std::ios_base::out);
-}
-
-// ===================================================================================================//
-//                            WRITING TO LEXER FILE                                                   //
-// ===================================================================================================//
-    void LexerFile(std::vector<LexerToken> m_tokens)
+    void SymbolTable()
     {
         std::fstream outputFile;
 
         outputFile.open("Lexical-analysis.txt", std::ios_base::out);
+    }
 
-        error.CHECK(outputFile.is_open(), "failed to create lexical analysis file \n");
+    // ===================================================================================================//
+    //                            WRITING TO LEXER FILE                                                   //
+    // ===================================================================================================//
+    // void LexerFile(std::vector<LexerToken> m_tokens)
+    // {
+    //     std::fstream outputFile;
 
-        for (auto x : m_tokens)
+    //     outputFile.open("Lexical-analysis.txt", std::ios_base::out);
+
+    //     error.CHECK(outputFile.is_open(), "failed to create lexical analysis file \n");
+
+    //     for (auto x : m_tokens)
+    //     {
+    //         auto vv = "[" + std::string(x.value) + "]";
+    //         outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t "
+    //                    << toString(x.type) << std::endl;
+    //     }
+    // }
+
+
+    // ===================================================================================================//
+    //                            WRITING TO SYNTAX FILE                                                  //
+    // ===================================================================================================//
+
+    std::string SyntaxFileString(std::vector<std::shared_ptr<Node>> compound)
+    {
+        std::ostringstream oss;
+        for (size_t i = 0; i < compound.size(); i++)
         {
-            auto vv = "[" + std::string(x.value) + "]";
-            outputFile << std::left << std::setw(6) << vv << " ->   " << x.location.toString() << ";\t "
-                       << toString(x.type) << std::endl;
+            oss << printTree(compound[i]);
+            oss << "\n\n\n\n";
         }
+        return oss.str();
     }
 
 
-// ===================================================================================================//
-//                            WRITING TO SYNTAX FILE                                                  //
-// ===================================================================================================//
 
-    void SyntaxFile(std::vector<std::shared_ptr<Node>> compound)
-    {
-        std::fstream outputFile;
-        outputFile.open("Syntax-analysis.txt", std::ios_base::out);
+    // void CodeGenFile(const std::string &output)
+    // {
+    //     std::fstream outputFile;
+    //     outputFile.open("assembly.txt", std::ios_base::out);
 
-        error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
-        for (size_t i = 0; i < compound.size(); i++) 
-        { 
-            outputFile << printTree(compound[i]);
-            outputFile << "\n\n\n\n";
-        }
-    }
+    //     error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
 
+    //     outputFile << output;
+    // }
 
-    void CodeGenFile(const std::string& output)
-    {
-        std::fstream outputFile;
-        outputFile.open("assembly.txt", std::ios_base::out);
+    // void SemanticFile(const std::string &output)
+    // {
+    //     std::fstream outputFile;
+    //     outputFile.open("symbol-tree.txt", std::ios_base::out);
 
-        error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
+    //     error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
 
-            outputFile << output;
-    }
-
-    void SemanticFile(const std::string& output)
-    {
-        std::fstream outputFile;
-        outputFile.open("symbol-tree.txt", std::ios_base::out);
-
-        error.CHECK(outputFile.is_open(), "failed to create syntax analysis file \n");
-
-            outputFile << output;
-    }
+    //     outputFile << output;
+    // }
 
 
     std::string getFilename() { return filename; }
@@ -157,9 +157,9 @@ void SymbolTable() {
 
 
 
-// ===================================================================================================//
-//                            2D TREE VISUALIZER                                                      //
-// ===================================================================================================//
+    // ===================================================================================================//
+    //                            2D TREE VISUALIZER                                                      //
+    // ===================================================================================================//
     void drawsNode(std::vector<std::string> &output,
       std::vector<std::string> &linkAbove,
       std::shared_ptr<Node> node,
@@ -210,10 +210,10 @@ void SymbolTable() {
 
 
 
-// ===================================================================================================//
-//                            2D TREE PRINT                                                           //
-// ===================================================================================================//
-  std::string printTree(std::shared_ptr<Node> &root)
+    // ===================================================================================================//
+    //                            2D TREE PRINT                                                           //
+    // ===================================================================================================//
+    std::string printTree(std::shared_ptr<Node> &root)
     {
         std::stringstream out;
         int height = TreeHeight(root);

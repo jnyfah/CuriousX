@@ -6,6 +6,7 @@
 #include <vector>
 
 
+
 class Semantic
 {
 
@@ -22,7 +23,7 @@ class Semantic
 
     std::optional<InferredType> inferType(std::shared_ptr<Node> node);
 
-    std::string printSymbolTree();
+    nlohmann::json printSymbolTree();
 
     symbolTable::Table getSymbolTable() const;
 
