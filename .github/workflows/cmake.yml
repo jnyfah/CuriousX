@@ -8,15 +8,11 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup Emscripten
-      run: |
-        git clone https://github.com/emscripten-core/emsdk.git
-        cd emsdk
-        ./emsdk install latest
-        ./emsdk activate latest
-        source ./emsdk_env.sh
+      uses: mymindstorm/setup-emsdk@v11
+      run: emcc -v
 
     - name: Create Build Directory
       run: mkdir build
