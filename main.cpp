@@ -1,6 +1,5 @@
 #include "CodeGen/include/Codegen.hpp"
 #include "Error.hpp"
-#include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
 #include "SemanticAnalysis/include/Semantic.hpp"
 #include "json.hpp"
@@ -15,12 +14,12 @@
 
 
 
-nlohmann::json serializeLexerToken(const LexerToken &token)
+nlomhann::json serializeLexerToken(const LexerToken &token)
 {
     nlohmann::json j;
-    j["type"] = toString(token.type);// if 'type' is an enum, convert to int for serialization
-    j["location"] = token.location.toString();// assuming value is a string or basic type
-    j["value"] = token.value;// ... add other properties as needed ...
+    j["type"] = toString(token.type);
+    j["location"] = token.location.toString();
+    j["value"] = token.value;
 
     return j;
 }
@@ -30,7 +29,7 @@ nlohmann::json nodeToJson(const std::shared_ptr<Node> &node)
     if (!node) return {};
 
     nlohmann::json j;
-    j["type"] = serializeLexerToken(node->type);// If you already have a function to serialize LexerToken
+    j["type"] = serializeLexerToken(node->type);
     if (node->left) { j["left"] = nodeToJson(node->left); }
     if (node->right) { j["right"] = nodeToJson(node->right); }
     return j;

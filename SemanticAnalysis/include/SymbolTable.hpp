@@ -104,18 +104,6 @@ namespace symbolTable {
             return "UNKNOWN";
         }
 
-        // prints symbol table
-        std::stringstream printTable()
-        {
-            std::stringstream _output;
-            for (const auto &node : nodes)
-            {
-                _output << node.node.value << " " << to_string(std::get<InferredType>(node.inferredType));
-                _output << std::endl;
-            }
-            return _output;
-        }
-
         nlohmann::json tableToJson()
         {
             nlohmann::json jArray = nlohmann::json::array();

@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 
-#include "FileHandler.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
 #include "SyntaxAnalysis/include/Parser.hpp"
 
@@ -29,10 +28,7 @@ void FileEquality(std::string actuals, std::string expecteds)
     std::string lineA, lineB;
     while (std::getline(actual, lineA))
     {
-        while (std::getline(expected, lineB))
-        {
-            EXPECT_EQ(lineA, lineB);
-        }
+        while (std::getline(expected, lineB)) { EXPECT_EQ(lineA, lineB); }
     }
 }
 
@@ -41,9 +37,9 @@ TEST(curiousTest, VariableAssign)
 {
     std::string actual = "num1 = 1.5";
 
-    std::vector<LexerToken> expected = {{LexerToken{"num1", {1, 1}, LexerTokenType::VarToken}},
-                                        {LexerToken{"=", {1, 6}, LexerTokenType::AssignToken}},
-                                        {LexerToken{"1.5", {1, 8}, LexerTokenType::FloatToken}}
+    std::vector<LexerToken> expected = { { LexerToken{ "num1", { 1, 1 }, LexerTokenType::VarToken } },
+        { LexerToken{ "=", { 1, 6 }, LexerTokenType::AssignToken } },
+        { LexerToken{ "1.5", { 1, 8 }, LexerTokenType::FloatToken } }
 
     };
     Lexer lex(actual);
@@ -60,12 +56,12 @@ TEST(curiousTest, PrintData)
 {
     std::string actual = "print(x  + y)";
 
-    std::vector<LexerToken> expected = {{LexerToken{"print", {1, 1}, LexerTokenType::PrintToken}},
-                                        {LexerToken{"(", {1, 6}, LexerTokenType::ParenOpen}},
-                                        {LexerToken{"x", {1, 7}, LexerTokenType::VarToken}},
-                                        {LexerToken{"+", {1, 10}, LexerTokenType::PlusToken}},
-                                        {LexerToken{"y", {1, 12}, LexerTokenType::VarToken}},
-                                        {LexerToken{")", {1, 13}, LexerTokenType::ParenClose}}
+    std::vector<LexerToken> expected = { { LexerToken{ "print", { 1, 1 }, LexerTokenType::PrintToken } },
+        { LexerToken{ "(", { 1, 6 }, LexerTokenType::ParenOpen } },
+        { LexerToken{ "x", { 1, 7 }, LexerTokenType::VarToken } },
+        { LexerToken{ "+", { 1, 10 }, LexerTokenType::PlusToken } },
+        { LexerToken{ "y", { 1, 12 }, LexerTokenType::VarToken } },
+        { LexerToken{ ")", { 1, 13 }, LexerTokenType::ParenClose } }
 
     };
     Lexer lex(actual);
@@ -82,17 +78,17 @@ TEST(curiousTest, Expression)
 {
     std::string actual = "2 + 3 * 5.87 - (8 / 3)";
 
-    std::vector<LexerToken> expected = {{LexerToken{"2", {1, 1}, LexerTokenType::IntToken}},
-                                        {LexerToken{"+", {1, 3}, LexerTokenType::PlusToken}},
-                                        {LexerToken{"3", {1, 5}, LexerTokenType::IntToken}},
-                                        {LexerToken{"*", {1, 7}, LexerTokenType::MultiplyToken}},
-                                        {LexerToken{"5.87", {1, 9}, LexerTokenType::FloatToken}},
-                                        {LexerToken{"-", {1, 14}, LexerTokenType::MinusToken}},
-                                        {LexerToken{"(", {1, 16}, LexerTokenType::ParenOpen}},
-                                        {LexerToken{"8", {1, 17}, LexerTokenType::IntToken}},
-                                        {LexerToken{"/", {1, 19}, LexerTokenType::DivideToken}},
-                                        {LexerToken{"3", {1, 21}, LexerTokenType::IntToken}},
-                                        {LexerToken{")", {1, 22}, LexerTokenType::ParenClose}}
+    std::vector<LexerToken> expected = { { LexerToken{ "2", { 1, 1 }, LexerTokenType::IntToken } },
+        { LexerToken{ "+", { 1, 3 }, LexerTokenType::PlusToken } },
+        { LexerToken{ "3", { 1, 5 }, LexerTokenType::IntToken } },
+        { LexerToken{ "*", { 1, 7 }, LexerTokenType::MultiplyToken } },
+        { LexerToken{ "5.87", { 1, 9 }, LexerTokenType::FloatToken } },
+        { LexerToken{ "-", { 1, 14 }, LexerTokenType::MinusToken } },
+        { LexerToken{ "(", { 1, 16 }, LexerTokenType::ParenOpen } },
+        { LexerToken{ "8", { 1, 17 }, LexerTokenType::IntToken } },
+        { LexerToken{ "/", { 1, 19 }, LexerTokenType::DivideToken } },
+        { LexerToken{ "3", { 1, 21 }, LexerTokenType::IntToken } },
+        { LexerToken{ ")", { 1, 22 }, LexerTokenType::ParenClose } }
 
     };
     Lexer lex(actual);
@@ -102,48 +98,4 @@ TEST(curiousTest, Expression)
         m_tokens.emplace_back(token);
     }
     LexerEquality(m_tokens, expected);
-
 }
-
-
-
-
-
-// Testing Files
-TEST(curiousTest, Files)
-{
-    FileHandler filehandler;
-    const char* argv[] = {"lexer", "tests\testfile_1.txt", "lkjk"};
-    // ASSERT_TRUE(filehandler.ParseArguments(2, argv));
-
-    Lexer lex(filehandler.getFileContents());
-
-    std::vector<LexerToken> m_tokens;
-    for (auto token = lex.nextNWToken(); token.type != LexerTokenType::Eof; token = lex.nextNWToken())
-    {
-        m_tokens.emplace_back(token);
-    }
-    // ASSERT_TRUE(filehandler.LexerFile(m_tokens));
-
-}
-
-
-/*TEST (curiousTest, CountTrees) {
-    std::vector<LexerToken> tokens = {{LexerToken{"2", {1, 1}, LexerTokenType::IntToken}},
-                                      {LexerToken{"+", {1, 3}, LexerTokenType::PlusToken}},
-                                      {LexerToken{"3", {1, 5}, LexerTokenType::IntToken}},
-                                      {LexerToken{"*", {1, 7}, LexerTokenType::MultiplyToken}},
-                                      {LexerToken{"5.87", {1, 9}, LexerTokenType::FloatToken}},
-                                      {LexerToken{"-", {1, 14}, LexerTokenType::MinusToken}},
-                                      {LexerToken{"(", {1, 16}, LexerTokenType::ParenOpen}},
-                                      {LexerToken{"8", {1, 17}, LexerTokenType::IntToken}},
-                                      {LexerToken{"/", {1, 19}, LexerTokenType::DivideToken}},
-                                      {LexerToken{"3", {1, 21}, LexerTokenType::IntToken}},
-                                      {LexerToken{")", {1, 22}, LexerTokenType::ParenClose}}};
-
-    auto ast = new Parser(tokens);
-
-    bool x = ast->Parse();
-    ASSERT_FALSE(false);
-
-}*/
