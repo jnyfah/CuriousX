@@ -31,8 +31,7 @@ jobs:
       # Test to ensure that the web assembly runs without any errors.
       - name: Test WebAssembly with emrun
         run: |
-          cd web
-          emrun --no_browser --port 8080 CuriousX.html & # Start the server in the background
+          emrun --no_browser --port 8080 web/index.html & # Start the server in the background
           sleep 10 # Wait to ensure the server starts
           kill %1 # Terminate the server process
 
