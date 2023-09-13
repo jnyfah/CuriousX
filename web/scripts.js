@@ -261,35 +261,3 @@ function transformJSONToAssembly(commandsArray) {
     return assemblyCode;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
