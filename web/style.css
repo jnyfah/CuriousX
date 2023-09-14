@@ -100,93 +100,7 @@ body.dark {
     border: var(--border-color);
     transition: var(--transition-delay);
 }
-#terminal {
-    width: 100%;
-    margin: 0;
-    background-color: white;
-   /* transition: 0.5s;
-    */
-    border: 1px solid #d2d6de;
-    background-color: var(--terminal-bg-color);
-    transition: var(--transition-delay);
-    border: var(--border-color);
-}
-/* #tool-btn {
-    margin-left: 0.3rem;
-}
-*/
-#hint-btn {
-    transition: .6s ease-out;
-    transform: scale(1);
-}
-.btn-primary, .btn-primary:active, .btn-primary:visited, .btn-primary:focus {
-    background-color: #085fd1;
-    border-color: #085fd1;
-}
-.btn-primary:hover {
-    background-color: #064faf;
-}
-.btn-success:hover, .btn-success:active, .btn-success.hover {
-    background-color: #008d4c !important;
-    color: #fff;
-}
-.btn-danger:hover, .btn-danger:active, .btn-danger.hover {
-    background-color: #dd4b39 !important;
-    color: #fff;
-}
-#share-btn:hover, #share-btn:active, #share-btn.hover {
-    background-color: rgb(100, 100, 100) !important;
-   /* background-color: #085fd1 !important;
-    */
-    color: #fff;
-}
-.ui.fluid.dropdown {
-    float: right;
-    height: 34px !important;
-    margin-right: 0.3rem;
-    width: 15rem !important;
-    transition: 0.5s;
-    background-color: white;
-    color: black;
-    background-color: var(--button-bg-color);
-    color: var(--text-color);
-}
-.ui.selection.dropdown {
-    min-height: 34px !important;
-}
-.ui.dropdown .menu>.item {
-    font-size: inherit;
-    display: flex;
-}
-.ui.dropdown .menu>.item>img {
-    transform: scale(0.8);
-    height: 3rem !important;
-    width: 3.6rem !important;
-    margin-left: -0.1rem !important;
-}
-.ui.selection.dropdown>.dropdown.icon {
-    margin-top: -1.2rem;
-}
-.ui.selection.visible.dropdown>.text:not(.default), .ui.dropdown>.text {
-    display: flex;
-    margin-top: -0.2rem;
-    color: black;
-    color: var(--text-color);
-}
-.ui.selection.dropdown .menu {
-    max-height: 15em !important;
-}
-.ui.dropdown>.text>img {
-   /* margin-top: -0.07rem !important;
-    */
-    width: 3rem !important;
-    transform: scale(0.8);
-}
-@media only screen and (min-width: 768px) {
-    .ui.selection.dropdown .menu {
-        max-height: 25em !important;
-   }
-}
+
 #input_arguments {
     flex: 1;
 }
@@ -277,9 +191,7 @@ body.dark {
     border-bottom: 2px solid white;
     border-bottom: 2px solid var(--nav-tab-active-color);
 }
-#start-term {
-    margin-top: 0.2rem;
-}
+
 #content {
     position: relative;
     width: 60%;
@@ -430,10 +342,7 @@ textarea {
     color: red;
     color: var(--warning-color);
 }
-#info {
-    padding-right: 15px;
-    padding-left: 15px;
-}
+
 .text-content>h1 {
     text-align: center;
 }
