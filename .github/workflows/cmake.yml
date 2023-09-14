@@ -2,6 +2,11 @@ name: Build and Deploy C++ WebAssembly
 
 on:
   push:
+    branches:
+      - main  
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
