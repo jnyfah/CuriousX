@@ -1,10 +1,6 @@
-[![Travis](https://img.shields.io/travis/jnyfah/CuriousX/master.svg?style=flat&logo=travis&color=yellow)](https://app.travis-ci.com/jnyfah/CuriousX)
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/cmake.yml/badge.svg)
-![Github](https://github.com/jnyfah/CuriousX/actions/workflows/unittest.yml/badge.svg)
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/msvc.yml/badge.svg)
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/codeql.yml/badge.svg)
-![GitHub](https://img.shields.io/github/license/jnyfah/CuriousX?color=blue&logo=github)
-![GitHub top language](https://img.shields.io/github/languages/top/jnyfah/CuriousX?color=red)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/400c60bf7e00462d880d5d782adec10e)](https://www.codacy.com/gh/jnyfah/CuriousX/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jnyfah/CuriousX&amp;utm_campaign=Badge_Grade)
 
 # CuriousX: A Miniature Compiler
@@ -13,6 +9,8 @@ CuriousX is a mini subset of C++ language created for fun and educational purpos
 compilers are just one part of the toolchain that help build programs from source code to an executable, to learn more visit [what is CuriousX](https://jenniferchukwu.com/posts/curiousx)
 
 CuriousX is designed to mimic the structure of a typical compiler and includes features such as lexical analysis, syntax analysis, and semantic analysis. Additionally, it includes a visualization of the output from each stage of the compiler.
+
+__Test and check out the [Compiler Playground](https://jnyfah.github.io/CuriousX/)__
 
 ## Features
 -   Print
@@ -25,14 +23,16 @@ CuriousX is designed to mimic the structure of a typical compiler and includes f
 ## Dependencies
 1.  A C++ compiler that supports C++17. See [cppreference.com](https://en.cppreference.com/w/cpp/compiler_support) to see which features are supported by each compiler.
 2.  [CMake 3.15+](https://cmake.org/)
+3.  Compiler toolchain to WebAssembly [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
 
 ## Building
 
 ```cmd
 mkdir build
 cd build
-cmake ..
+emcmake cmake ..
 cmake --build .
+emrun ..\web\index.html
 ```
 
 ## Testing
@@ -40,20 +40,24 @@ To compile and run the tests, you need to turn on the `-DCURIOUSX_BUILD_TESTS` o
 
 ```cmd
 cd build
-cmake -DCURIOUSX_BUILD_TESTS=ON ..
+emcmake cmake -DCURIOUSX_BUILD_TESTS=ON ..
 cmake --build .
 ctest
 ```
 
 ## Usage
-Executable is located at the `build` folder
-
+html file is located at the `web` folder, after building sucessfuly, start the webserver
 ```cmd
-./CuriousX [txt source code file path]
+emrun ..\web\index.html
 ```
-This generates a `Lexical-analysis.txt` `Syntax-analysis.txt` and an `assembly.txt` files located at the build folder and you can also vie the symbol table if you source code has any.
+
+This generates a `Lexical-analysis` `Syntax-analysis` and an `assembly` files outputs on the webpage and you can also view the symbol table if you source code has any.
 
 You can always validate your assembly code with this ARM emulator [miniarm](https://github.com/ebresafegaga/miniarm)
+
+
+or Just visit the __[Compiler Playground](https://jnyfah.github.io/CuriousX/)__ 🫠
+
 
 ## Examples
 for the source code input:

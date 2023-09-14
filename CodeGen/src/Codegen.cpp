@@ -4,10 +4,7 @@ nlohmann::json CodeGen::convert(const std::vector<std::shared_ptr<Node>> &compou
 {
     nlohmann::json jArray = nlohmann::json::array();
     // Traverse the AST in postfix order
-    for (auto &node : compound)
-    {
-        jArray.push_back(traverse(node));
-    }
+    for (auto &node : compound) { jArray.push_back(traverse(node)); }
 
     return jArray;
 }
@@ -138,7 +135,6 @@ nlohmann::json CodeGen::traverse(const std::shared_ptr<Node> node)
         reg.free_register(last_reg);
         last_reg = reg_idx;
         break;
-
     }
 
     case LexerTokenType::MinusToken:
@@ -189,14 +185,14 @@ nlohmann::json CodeGen::traverse(const std::shared_ptr<Node> node)
     case LexerTokenType::PrintToken:
         instruction.clear();
         instruction["command"] = "print";
-        instruction["registers"] = { ""};
+        instruction["registers"] = { "" };
         instructions.push_back(instruction);
         traverse(node->left);
         nlohmann::json leftInstructions = traverse(node->left);
         instructions.insert(instructions.end(), leftInstructions.begin(), leftInstructions.end());
         int reg_idx = reg.alloc_register();
         instruction["command"] = "bl";
-        instruction["registers"] = { ""};
+        instruction["registers"] = { "" };
         instruction["value"] = "printf";
         instructions.push_back(instruction);
 

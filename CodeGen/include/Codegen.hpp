@@ -5,9 +5,6 @@
 #include "SemanticAnalysis/include/SymbolTable.hpp"
 #include "Register.hpp"
 
-#include <vector>
-#include <string>
-#include <sstream>
 
 class CodeGen 
 {
@@ -25,17 +22,12 @@ class CodeGen
 
         void perform_operation(LexerTokenType op, int reg_idx1, int reg_idx2);
 
-        std::string output() {
-            return output_stream.str();
-        }
-
     private:
         RegisterAllocator reg;
         int last_reg;
         symbolTable::Table _symboltable;
         std::unordered_map<std::string, int> _staked_var;
         int sp = -4;
-        std::stringstream output_stream;
 };
 
 #endif

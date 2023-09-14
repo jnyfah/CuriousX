@@ -1,38 +1,4 @@
 
-// ---------------------------
-// Editor Functions
-// ---------------------------
-
-function dispFile(contents) {
-    editor_cnt += 1;
-    editor_index += 1;
-    var id = editor_cnt;
-    active_editor = id;
-
-    editor_session[active_editor - 1] = ace.createEditSession('', "ace/mode/python");
-    editor.setSession(editor_session[active_editor - 1]);
-
-    $('.add-editor').closest('li').before(`
-        <li id="editor-${id}">
-            <a data-toggle="tab">${open_file_name}</a>
-            <span><i class="fa fa-times"></i></span>
-        </li>
-    `);
-
-    active_editor_id = $(".nav-tabs li").children('a').last();
-    active_editor_id.tab('show');
-    editor.session.setValue(contents);
-    editor.focus();
-    update_editor_footer();
-
-    editor.selection.on('changeCursor', function (e) {
-        update_editor_footer();
-    });
-    editor.selection.on('changeSelection', function (e) {
-        update_editor_footer();
-    });
-}
-
 function run_cmake() {
 }
 
@@ -57,6 +23,7 @@ function openFile() {
         reader.onload = function (e) {
             var contents = e.target.result;
             document.getElementById('codeArea').value = contents;
+            updateLineNumbers();
             document.body.removeChild(fileInput);
         };
         reader.readAsText(file);
@@ -131,12 +98,23 @@ function run_cmake() {
     if (content.trim() !== '') {
         try {
             const result = Module.processFileContent(content);
-            //console.log(result);
             displayResults(result);
         } catch (wasmError) {
-            console.error("Error from WAS", wasmError);
-            alert(wasmError);
+            console.error("Error from WASM", wasmError);
+
+            // Hide all tabs
+            document.querySelectorAll('.nav-tabs .nav-item').forEach(tab => tab.style.display = 'none');
+
+            // Show error tab and its content
+            const errorTab = document.getElementById('error-tab').closest('.nav-item');
+            errorTab.style.display = 'block';
+
+            $('#error-tab').tab('show');  // <-- Use jQuery-based approach here
+
+            // Populate the error message
+            document.getElementById('error').textContent = wasmError.toString();
         }
+
     } else {
         alert('Please type some code or upload a file.');
     }
@@ -144,11 +122,17 @@ function run_cmake() {
 
 
 
+
 function displayResults(result) {
+    document.querySelectorAll('.nav-tabs .nav-item').forEach(tab => tab.style.display = 'block');
+
+    // Hide the error tab
+    document.getElementById('error-tab').closest('.nav-item').style.display = 'none';
+
     const resultJSON = JSON.parse(result);
     let lexerContent = "";
     resultJSON.lexer.forEach(item => {
-        lexerContent += `[${item.value}]    ->   ${item.location};\t ${item.type}\n`;
+        lexerContent += `[${item.value}]\t    ->   ${item.location};\t ${item.type}\n`;
     });
 
     document.getElementById('lexer').textContent = lexerContent;
@@ -162,18 +146,18 @@ function displayResults(result) {
         const grid = Array.from({ length: dimensions.height * 2 - 1 }, () => Array.from({ length: dimensions.width }, () => ' '));
 
         buildTree(tree, grid);
-        fullTreeString += grid.map(row => row.join('')).join('\n') + '\n\n'; // Add two newlines between trees
+        fullTreeString += grid.map(row => row.join('')).join('\n') + '\n\n';
     });
 
     // Update the content of the <pre> element
-    document.getElementById('parser').textContent = fullTreeString.trim(); // Remove the last newline
+    document.getElementById('parser').textContent = fullTreeString.trim();
 
     // Update the content of the <pre> element
 
     const assemblyCode = transformJSONToAssembly(resultJSON.codegen);
-document.getElementById('codegen').textContent = assemblyCode;
+    document.getElementById('codegen').textContent = assemblyCode;
 
-
+    $('#lexer-tab').tab('show');
 
 }
 
@@ -216,7 +200,7 @@ function generateTableFromJSON(data) {
     tableString += '  <thead>\n';
     tableString += '    <tr>\n';
     tableString += '      <th>Type</th>\n';
-    tableString += '      <th>Value</th>\n';
+    tableString += '      <th>Variable</th>\n';
     tableString += '    </tr>\n';
     tableString += '  </thead>\n';
     tableString += '  <tbody>\n';
