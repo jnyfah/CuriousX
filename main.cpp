@@ -1,8 +1,6 @@
 #include "CodeGen/include/Codegen.hpp"
-#include "Error.hpp"
 #include "LexicalAnalysis/include/Lexer.hpp"
 #include "SemanticAnalysis/include/Semantic.hpp"
-#include "json.hpp"
 #include <emscripten/bind.h>
 #include <sstream>
 
@@ -11,7 +9,6 @@
 #else
 #include "SyntaxAnalysis/include/Parser.hpp"
 #endif
-
 
 
 nlohmann::json serializeLexerToken(const LexerToken &token)
@@ -35,7 +32,6 @@ nlohmann::json nodeToJson(const std::shared_ptr<Node> &node)
     return j;
 }
 
-
 nlohmann::json treesToJson(const std::vector<std::shared_ptr<Node>> &compound)
 {
     nlohmann::json jsonArray = nlohmann::json::array();
@@ -44,9 +40,6 @@ nlohmann::json treesToJson(const std::vector<std::shared_ptr<Node>> &compound)
 
     return jsonArray;
 }
-
-
-
 
 std::string processFileContent(const std::string &content)
 {
@@ -75,7 +68,6 @@ std::string processFileContent(const std::string &content)
             throw Error("Parsing failed ");
         }
 
-
         auto sem = new Semantic();
         sem->traverse(ast->astRoot());
         // Print table for debugging ;D
@@ -88,12 +80,9 @@ std::string processFileContent(const std::string &content)
         output << j.dump();
     } catch (Error &ex)
     {
-        nlohmann::json j{
-        {"success", false},
-        {"error", std::string("An error occurred: ") + ex.what()}
-    };
-    output.str(""); // Clearing the stringstream
-    output << j.dump();
+        nlohmann::json j{ { "success", false }, { "error", std::string("An error occurred: ") + ex.what() } };
+        output.str("");// Clearing the stringstream
+        output << j.dump();
     }
     return output.str();
 }

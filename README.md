@@ -55,9 +55,7 @@ This generates a `Lexical-analysis` `Syntax-analysis` and an `assembly` files ou
 
 You can always validate your assembly code with this ARM emulator [miniarm](https://github.com/ebresafegaga/miniarm)
 
-
 or Just visit the __[Compiler Playground](https://jnyfah.github.io/CuriousX/)__ 🫠
-
 
 ## Examples
 for the source code input:
