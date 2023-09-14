@@ -54,4 +54,3 @@ it is basically error free AST, where all the variables are infrerred to their t
 
 __To learn more:__
 ## [CuriousX Semantic Analysis Blog](https://jenniferchukwu.com/posts/semanticAnalysis)
-
