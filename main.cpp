@@ -14,7 +14,7 @@
 
 
 
-nlomhann::json serializeLexerToken(const LexerToken &token)
+nlohmann::json serializeLexerToken(const LexerToken &token)
 {
     nlohmann::json j;
     j["type"] = toString(token.type);

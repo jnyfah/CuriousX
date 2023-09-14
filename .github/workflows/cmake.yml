@@ -1,4 +1,4 @@
-name: Build and Deploy C++ WebAssembly to GitHub Pages
+name: Build and Deploy C++ WebAssembly
 
 on:
   push:
