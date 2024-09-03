@@ -1,68 +1,56 @@
-﻿cmake_minimum_required (VERSION 3.13)
+﻿cmake_minimum_required(VERSION 3.25)
+project("CuriousX" VERSION 2.0)
 
-project ("CuriousX")
-
-set(CMAKE_CXX_STANDARD 17)
+# -------------------- Set C++ Standard --------------------------------
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# todo: remove ?
-add_executable (CuriousX "main.cpp")
-
-# -------------------- Enforce cpp 17 --------------------
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-else()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-endif()
-
-
-
-# Todo add option to build test
-
-# -------------------- Options --------------------------------
-option( CURIOUSX_BUILD_TESTS "Specifies whether to build the tests" OFF )
-option( CURIOUSX_BUILD_EXAMPLES "Specifies whether to build the examples" OFF )
-
-# -------------------- add subdirectories --------------------
-include_directories(Utils)
-add_subdirectory(CodeGen)
-add_subdirectory(SemanticAnalysis)
-add_subdirectory(SyntaxAnalysis)
-add_subdirectory(LexicalAnalysis)
-
-
-#add_dependencies(SyntaxAnalysis LexicalAnalysis) # subB waits for subA to build first
-
-if(CURIOUSX_BUILD_TESTS) 
-
-# -------------------- Fetch googletest content--------------------
-  include(FetchContent)
-
-  FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        release-1.12.1
-  )
-
-  FetchContent_GetProperties(googletest)
-
-  if (NOT googletest_POPULATED)
-      FetchContent_Populate(googletest)
-      set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-      add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
-  endif()
-  enable_testing()
-  add_subdirectory(tests)
-
-endif()
-
-# Set the output directory for the executable
-set_target_properties(CuriousX PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/web"
+# -------------------- Specify the source file for each component --------------------------------
+set(SOURCES_LEXER
+    CuriousX/Lexer/LexerToken.cpp
 )
 
-target_link_libraries( ${PROJECT_NAME} LexicalAnalysis SyntaxAnalysis SemanticAnalysis CodeGen)
-set_target_properties(CuriousX PROPERTIES LINK_FLAGS "--bind -s DISABLE_EXCEPTION_CATCHING=0")
+set(SOURCES_PARSER
+    CuriousX/Parser/Parser.cpp
+)
 
+set(SOURCES_SEMANTIC
+    CuriousX/Semantic/Semantic.cpp
+)
+
+set(SOURCES_GEN
+    CuriousX/Gen/Codegen.cpp
+)
+
+
+# -------------------- Include Utility Folder--------------------------------
+add_library(Utils INTERFACE)
+target_include_directories(Utils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Utils)
+
+
+# -------------------- Include Lexer Folder--------------------------------
+add_library(Lexer STATIC ${SOURCES_LEXER})
+target_include_directories(Lexer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Lexer)
+target_link_libraries(Lexer PUBLIC Utils)
+
+# -------------------- Include Parser Folder--------------------------------
+add_library(Parser STATIC ${SOURCES_PARSER})
+target_include_directories(Parser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Parser)
+target_link_libraries(Parser PUBLIC Lexer)
+
+# -------------------- Include Semantic Folder--------------------------------
+add_library(Semantic STATIC ${SOURCES_SEMANTIC})
+target_include_directories(Semantic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Semantic)
+target_link_libraries(Semantic PUBLIC Parser)
+
+# -------------------- Include CodeGen Folder--------------------------------
+add_library(Gen STATIC ${SOURCES_GEN})
+target_include_directories(Gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Gen)
+target_link_libraries(Gen PUBLIC Semantic)
+
+
+# -------------------- Create the main executable and link it to the libraries--------------------------------
+add_executable(CuriousX "CuriousX/main.cpp")
+target_link_libraries(CuriousX PRIVATE Gen)
+target_include_directories(CuriousX PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX)
