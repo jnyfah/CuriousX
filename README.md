@@ -22,31 +22,33 @@ __Test and check out the [Compiler Playground](https://jnyfah.github.io/CuriousX
 
 ## Dependencies
 1.  A C++ compiler that supports C++17. See [cppreference.com](https://en.cppreference.com/w/cpp/compiler_support) to see which features are supported by each compiler.
-2.  [CMake 3.15+](https://cmake.org/)
+2.  [CMake 3.25+](https://cmake.org/)
 3.  Compiler toolchain to WebAssembly [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
 
 ## Building
 
+### Building Without Emscripten (Standard Build)
+```cmd
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+This will compile the project using your default system compiler (e.g., GCC, Clang, or MSVC).
+
+### Building with Emscripten (WebAssembly Deployment)
 ```cmd
 mkdir build
 cd build
 emcmake cmake ..
 cmake --build .
-emrun ..\web\index.html
 ```
+This will configure the project to be compiled using Emscripten, allowing you to deploy it as WebAssembly
 
-## Testing
-To compile and run the tests, you need to turn on the `-DCURIOUSX_BUILD_TESTS` option when building and execute
-
-```cmd
-cd build
-emcmake cmake -DCURIOUSX_BUILD_TESTS=ON ..
-cmake --build .
-ctest
-```
+__Note:__ Emscripten might not compatible with the `Visual Studio generator` due to a lack of `MSBuild` integration. Use `Ninja` or `Makefiles` instead.
 
 ## Usage
-html file is located at the `web` folder, after building sucessfuly, start the webserver
+html file is located at the `web` folder, after building sucessfully, start the webserver
 ```cmd
 emrun ..\web\index.html
 ```

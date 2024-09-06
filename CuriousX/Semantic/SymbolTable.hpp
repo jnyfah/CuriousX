@@ -31,7 +31,7 @@
 #include <variant>
 
 #include "Error.hpp"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 #include "LexerToken.hpp"
 #include "Node.hpp"
 
