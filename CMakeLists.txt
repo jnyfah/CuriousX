@@ -7,13 +7,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # -------------------- Set Compiler Warnings --------------------------------
-# if(MSVC)
-#     add_compile_options(/W4)
-# else()
-#     add_compile_options(-Wall -Wextra -Wpedantic)
-# endif()
+if(MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-# add -Werror and /WX
+#add -Werror and /WX
 
 # -------------------- Fetch Json component --------------------------------
 include(FetchContent)
