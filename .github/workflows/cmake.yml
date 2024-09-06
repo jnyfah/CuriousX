@@ -2,46 +2,53 @@ name: Build and Deploy C++ WebAssembly
 
 on:
   push:
-    branches:
-      - main  
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+
+env:
+  BUILD_TYPE: Release
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v11
-        with:
-          version: latest
-          
-      - name: Verify Emscripten Version
-        run: emcc -v
+    - name: Setup Emscripten
+      uses: mymindstorm/setup-emsdk@v11
+      with:
+        version: latest
 
-      - name: Create Build Directory
-        run: mkdir build
+    - name: Verify Emscripten Version
+      run: emcc -v
 
-      - name: Configure and Build using CMake
-        run: |
-          cd build
-          emcmake cmake ..
-          cmake --build .
+    - name: Create Build Directory
+      run: cmake -E make_directory ${{github.workspace}}/build
 
-      # Test to ensure that the web assembly runs without any errors.
-      - name: Test WebAssembly with emrun
-        run: |
-          emrun --no_browser --port 8080 web/index.html & # Start the server in the background
-          sleep 10 # Wait to ensure the server starts
-          kill %1 # Terminate the server process
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}/build
+      run: emcmake cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
-        with:
-          branch: gh-pages
-          folder: web
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --config ${{env.BUILD_TYPE}}
+
+    - name: Run tests
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+
+    - name: Test WebAssembly with emrun
+      run: |
+        emrun --no_browser --port 8080 web/CuriousX.html &
+        sleep 10
+        curl -sSf http://localhost:8080/CuriousX.html > /dev/null
+        kill %1
+
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: JamesIves/github-pages-deploy-action@4.1.5
+      with:
+        branch: gh-pages
+        folder: web
