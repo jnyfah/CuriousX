@@ -41,9 +41,9 @@ jobs:
 
     - name: Test WebAssembly with emrun
       run: |
-        emrun --no_browser --port 8080 web/CuriousX.html &
+        emrun --no_browser --port 8080 Editor/index.html &
         sleep 10
-        curl -sSf http://localhost:8080/CuriousX.html > /dev/null
+        curl -sSf http://localhost:8080/index.html > /dev/null
         kill %1
 
     - name: Deploy to GitHub Pages

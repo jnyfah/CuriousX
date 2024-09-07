@@ -71,7 +71,7 @@ target_include_directories(CuriousX PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX
 
 if(EMSCRIPTEN)
     set_target_properties(CuriousX PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/web"  
-        LINK_FLAGS "--bind" 
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Editor"  
+        LINK_FLAGS "--bind  -s DISABLE_EXCEPTION_CATCHING=0" 
     )
 endif()
