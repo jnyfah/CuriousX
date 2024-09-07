@@ -31,17 +31,15 @@ __Test and check out the [Compiler Playground](https://jnyfah.github.io/CuriousX
 ```cmd
 mkdir build
 cd build
-cmake ..
-cmake --build .
+cmake -B build -S .
+cmake --build build
 ```
 This will compile the project using your default system compiler (e.g., GCC, Clang, or MSVC).
 
 ### Building with Emscripten (WebAssembly Deployment)
 ```cmd
-mkdir build
-cd build
-emcmake cmake ..
-cmake --build .
+emcmake cmake -B build -S .
+cmake --build build
 ```
 This will configure the project to be compiled using Emscripten, allowing you to deploy it as WebAssembly
 
@@ -50,7 +48,7 @@ __Note:__ Emscripten might not compatible with the `Visual Studio generator` due
 ## Usage
 html file is located at the `web` folder, after building sucessfully, start the webserver
 ```cmd
-emrun ..\web\index.html
+emrun Editor/index.html
 ```
 
 This generates a `Lexical-analysis` `Syntax-analysis` and an `assembly` files outputs on the webpage and you can also view the symbol table if you source code has any.

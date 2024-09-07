@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futuristic Compiler</title>
+    <title>CuriousX</title>
     <link rel="stylesheet" href="style.css">
+    <script src="CuriousX.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Futuristic Compiler</h1>
+            <h1>CuriousX</h1>
             <button id="theme-toggle" aria-label="Toggle theme">
                 <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -32,7 +33,7 @@
                 <div class="button-container">
                     <input type="file" id="file-input" class="file-input" accept=".txt">
                     <label for="file-input" class="file-label">Upload Text File</label>
-                    <button id="compile-button" onclick="run_cmake()">Compile & Run</button>
+                    <button id="compile-button">Compile</button>
                 </div>
                 <textarea id="code-textarea" placeholder="Enter your code here..."></textarea>
             </div>

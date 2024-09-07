@@ -3,8 +3,8 @@ build/
 out/
 cmake-build-*/
 conan-cache/
-web/CuriousX.wasm
-web/CuriousX.js
+Editor/CuriousX.wasm
+Editor/CuriousX.js
 
 # User spesific settings
 CMakeUserPresets.json
