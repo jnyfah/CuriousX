@@ -69,9 +69,8 @@ function formatTreeOutput(syntaxTrees) {
   return syntaxTrees
     .map((tree) => {
       const dimensions = getDimensions(tree);
-      const grid = Array.from(
-        { length: dimensions.height * 2 - 1 },
-        () => Array(dimensions.width).fill(" ")
+      const grid = Array.from({ length: dimensions.height * 2 - 1 }, () =>
+        Array(dimensions.width).fill(" ")
       );
       buildTree(tree, grid);
       return grid.map((row) => row.join("")).join("\n");
@@ -85,7 +84,7 @@ function getDimensions(node) {
   const right = getDimensions(node.right);
   return {
     height: 1 + Math.max(left.height, right.height),
-    width: 1 + left.width + right.width
+    width: 1 + left.width + right.width,
   };
 }
 
@@ -143,7 +142,7 @@ function transformJSONToAssembly(commandsArray) {
             .trim()
         );
       })
-      .filter(Boolean)
+      .filter(Boolean),
   );
 
   return assemblyLines.join("\n") + "\n\tbx lr\n";
@@ -176,7 +175,7 @@ function handleFileUpload(event) {
     reader.onload = function (e) {
       codeTextarea.value = e.target.result;
     };
-    reader.onerror = function (e) {
+    reader.onerror = function () {
       showError("Error reading file");
     };
     reader.readAsText(file);
