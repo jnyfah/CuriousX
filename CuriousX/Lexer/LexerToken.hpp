@@ -42,9 +42,6 @@ enum class LexerTokenType {
     Unknown
 };
 
-//! Converts LexerToken to String
-const char *toString(const LexerTokenType &t);
-
 //! Represents a single token in the expression stream
 struct LexerToken
 {
@@ -52,3 +49,6 @@ struct LexerToken
     SourceLocation location;
     LexerTokenType type;
 };
+
+//! Converts LexerToken to String
+const char *toString(const LexerTokenType &t);
