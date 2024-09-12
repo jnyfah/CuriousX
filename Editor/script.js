@@ -35,14 +35,18 @@ Modules["onRuntimeInitialized"] = function () {
 function handleCompile() {
   const code = codeTextarea.value;
   errorContainer.innerHTML = "";
-
   if (code.trim() !== "") {
     try {
       const result = Module.processFileContent(code);
-      displayResults(JSON.parse(result));
-    } catch (wasmError) {
-      console.error("Error from WASM", wasmError);
-      showError(wasmError.toString());
+      const parsedResult = JSON.parse(result);
+      if (parsedResult.success === false) {
+        // If the operation wasn't successful, throw the error
+        throw new Error(parsedResult.error);
+      }
+      displayResults(parsedResult);
+    } catch (error) {
+      console.error("Error:", error);
+      showError(error.message || error.toString());
     }
   } else {
     showError("Please type some code or upload a file.");
@@ -51,18 +55,34 @@ function handleCompile() {
 
 function displayResults(result) {
   output.lexer = formatLexerOutput(result.lexer);
-  output.trees = formatTreeOutput(result.syntax);
-  output.semantic = generateTableFromJSON(result.semantic);
-  output.codegen = transformJSONToAssembly(result.codegen);
+  // output.trees = formatTreeOutput(result.syntax);
+  // output.semantic = generateTableFromJSON(result.semantic);
+  // output.codegen = transformJSONToAssembly(result.codegen);
 
   updateOutput();
   showAllTabs();
 }
 
 function formatLexerOutput(lexerData) {
-  return lexerData
-    .map((item) => `[${item.value}] -> ${item.location}; ${item.type}`)
-    .join("\n");
+  const header = "Token            Position            Value\n" +
+    "----------------------------------------------------------------------\n";
+
+  const formattedTokens = lexerData.map(item => {
+    const tokenPadded = item.type.padEnd(20);
+    const locationPadded = item.location.padEnd(20);
+    const value = formatValue(item.value);
+
+    return `${tokenPadded}${locationPadded}${value}`;
+  }).join("\n");
+
+  return header + formattedTokens;
+}
+
+function formatValue(value) {
+  if (value === "") return "<empty>";
+  if (value === "\n") return "\\n";
+  if (value === "\t") return "\\t";
+  return `[${value}]`;
 }
 
 function formatTreeOutput(syntaxTrees) {
@@ -70,7 +90,7 @@ function formatTreeOutput(syntaxTrees) {
     .map((tree) => {
       const dimensions = getDimensions(tree);
       const grid = Array.from({ length: dimensions.height * 2 - 1 }, () =>
-        Array(dimensions.width).fill(" ")
+        Array(dimensions.width).fill(" "),
       );
       buildTree(tree, grid);
       return grid.map((row) => row.join("")).join("\n");
@@ -165,7 +185,17 @@ function showAllTabs() {
 }
 
 function showError(message) {
-  errorContainer.innerHTML = `<div class="error-message"><strong>Error:</strong> ${message}</div>`;
+  errorContainer.innerHTML = `<div class="error-message"><strong>Error:</strong> ${escapeHtml(message)}</div>`;
+}
+
+// Helper function to escape HTML special characters
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function handleFileUpload(event) {

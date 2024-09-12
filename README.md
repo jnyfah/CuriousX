@@ -107,3 +107,12 @@ print:
 
 	 bx lr
 ```
+
+TODO:
+- [ ] the sun for the toogle theme
+- [ ] code line numbers
+- [ ] color code area
+- [ ] being able to scroll when input/output overflows
+- [ ] Clearing previous output when exception occurs ( clear output anytime compile is hit ?)
+- [ ] if output file is not provided create one
+- [ ] what if comment is too long

@@ -1,12 +1,14 @@
 # Build directories and binary files
 build/
+builds/
 out/
 cmake-build-*/
 conan-cache/
 Editor/CuriousX.wasm
 Editor/CuriousX.js
+Utils/output.txt
 
-# User spesific settings
+# User specific settings
 CMakeUserPresets.json
 
 # IDE files

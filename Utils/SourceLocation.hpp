@@ -26,6 +26,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <string>
+#include <format>
 
 class SourceLocation
 {
@@ -36,19 +37,19 @@ class SourceLocation
       , col(_col)
     {}
 
-    unsigned getLine()
+    unsigned short getLine() const
     {
         return line;
     }
 
-    unsigned getCol()
+    unsigned short getCol() const 
     {
         return col;
     }
 
     std::string toString() const
     {
-        return "<line:" + std::to_string(line) + ", col:" + std::to_string(col) + ">";
+        return std::format("<line:{}, col:{}>", line, col);
     }
 
 

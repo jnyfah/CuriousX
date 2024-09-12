@@ -1,6 +1,12 @@
 a = 1.9
-b = 2.7
-c = 3.8
-d = 4.8
+if (b == true)
+c = 3.8  # this is a first comment
+if(c != 8){
+  # this is a comment
+}else {
+  d <= 4.8
+  d >= 5 
+}
+y = "my string"
 x = a * b + c / d
 print(x)
