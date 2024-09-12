@@ -116,3 +116,4 @@ TODO:
 - [ ] Clearing previous output when exception occurs ( clear output anytime compile is hit ?)
 - [ ] if output file is not provided create one
 - [ ] what if comment is too long
+- [ ] remove dark mode check pretire for good design

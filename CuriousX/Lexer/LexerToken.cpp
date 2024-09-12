@@ -1,6 +1,6 @@
 #include "LexerToken.hpp"
 
-const char *toString(const LexerTokenType& t)
+const char* toString(const LexerTokenType& t)
 {
     switch (t)
     {
@@ -13,7 +13,6 @@ const char *toString(const LexerTokenType& t)
     case LexerTokenType::BracesClose:
         return "BracesClose";
 
-
     case LexerTokenType::FloatToken:
         return "FloatToken";
     case LexerTokenType::IntToken:
@@ -22,7 +21,7 @@ const char *toString(const LexerTokenType& t)
         return "VarToken";
     case LexerTokenType::StringToken:
         return "StringToken";
-    
+
     case LexerTokenType::IfToken:
         return "IfToken";
     case LexerTokenType::ElseToken:
@@ -56,9 +55,8 @@ const char *toString(const LexerTokenType& t)
     case LexerTokenType::GreaterToken:
         return "GreaterToken";
 
-
     case LexerTokenType::CommentToken:
-        return "Comment";      
+        return "Comment";
     case LexerTokenType::Space:
         return "Space";
     case LexerTokenType::Tab:

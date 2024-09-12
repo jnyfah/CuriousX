@@ -1,24 +1,25 @@
 #pragma once
 
-#include <string_view>
 #include "SourceLocation.hpp"
+#include <string_view>
 
-enum class LexerTokenType {
-    ParenOpen, 
-    ParenClose,  
-    BracesOpen, 
-    BracesClose,  
+enum class LexerTokenType
+{
+    ParenOpen,
+    ParenClose,
+    BracesOpen,
+    BracesClose,
 
-    FloatToken, 
-    IntToken, 
-    VarToken, 
-    StringToken, 
+    FloatToken,
+    IntToken,
+    VarToken,
+    StringToken,
 
-    IfToken, 
-    ElseToken, 
-    BoolToken, 
+    IfToken,
+    ElseToken,
+    BoolToken,
 
-    PlusToken, 
+    PlusToken,
     MinusToken,
     DivideToken,
     MultiplyToken,
@@ -26,18 +27,17 @@ enum class LexerTokenType {
     PrintToken,
 
     EqualToken,
-    NotEqualToken, 
-    LessToken, 
+    NotEqualToken,
+    LessToken,
     LessEqualToken,
     GreaterToken,
     GreaterEqualToken,
 
     CommentToken,
-    Space, 
-    Tab, 
-    Newline, 
-    Eof, 
-
+    Space,
+    Tab,
+    Newline,
+    Eof,
 
     Unknown
 };
@@ -51,4 +51,4 @@ struct LexerToken
 };
 
 //! Converts LexerToken to String
-const char *toString(const LexerTokenType &t);
+const char* toString(const LexerTokenType& t);
