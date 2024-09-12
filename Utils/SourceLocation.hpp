@@ -25,32 +25,20 @@
 /// and column number a token was located at
 ///////////////////////////////////////////////////////////////////////////
 
+#include <format>
 #include <string>
 
 class SourceLocation
 {
   public:
     SourceLocation() = default;
-    SourceLocation(unsigned short _line, unsigned short _col)
-      : line(_line)
-      , col(_col)
-    {}
+    SourceLocation(unsigned short _line, unsigned short _col) : line(_line), col(_col) {}
 
-    unsigned getLine()
-    {
-        return line;
-    }
+    unsigned short getLine() const { return line; }
 
-    unsigned getCol()
-    {
-        return col;
-    }
+    unsigned short getCol() const { return col; }
 
-    std::string toString() const
-    {
-        return "<line:" + std::to_string(line) + ", col:" + std::to_string(col) + ">";
-    }
-
+    std::string toString() const { return std::format("<line:{}, col:{}>", line, col); }
 
   private:
     unsigned short line = 0;
@@ -61,18 +49,9 @@ class SourceLocation
 class SourceRange
 {
   public:
-    SourceRange(SourceLocation start, SourceLocation stop)
-      : start(start)
-      , stop(stop)
-    {}
-    SourceLocation getStart() const
-    {
-        return start;
-    }
-    SourceLocation getEnd() const
-    {
-        return stop;
-    }
+    SourceRange(SourceLocation start, SourceLocation stop) : start(start), stop(stop) {}
+    SourceLocation getStart() const { return start; }
+    SourceLocation getEnd() const { return stop; }
 
   private:
     const SourceLocation start = SourceLocation();

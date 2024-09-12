@@ -1,109 +1,60 @@
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
-#include <stdexcept>
-#include <string>
-
 
 using json = nlohmann::json;
 
 class CompilerOutputParser
 {
   private:
-    static void parseSection(const std::string &section, const json &content, std::ofstream &outputFile)
+    static std::string formatValue(const std::string& value)
     {
-        outputFile << "==== " << section << " ====\n\n";
-
-        if (section == "lexer")
-        {
-            parseLexer(content, outputFile);
-        } else if (section == "codegen")
-        {
-            parseCodegen(content, outputFile);
-        } else if (section == "semantic")
-        {
-            parseSemantic(content, outputFile);
-        } else if (content.is_array())
-        {
-            parseArray(content, outputFile);
-        } else
-        {
-            outputFile << content.dump(4) << "\n";
-        }
-
-        outputFile << "\n\n";
-    }
-
-    static void parseLexer(const json &content, std::ofstream &outputFile)
-    {
-        for (const auto &item : content)
-        {
-            outputFile << "[" << std::left << item["value"].get<std::string>() << "] \t -> " << std::setw(20)
-                       << std::left << item["location"].get<std::string>() << " " << item["type"].get<std::string>()
-                       << "\n";
-        }
-    }
-
-    static void parseCodegen(const json &content, std::ofstream &outputFile)
-    {
-        for (const auto &instruction : content)
-        {
-            for (const auto &item : instruction)
-            {
-                if (item.is_null()) continue;
-                outputFile << item["command"].get<std::string>() << " ";
-                if (item.contains("register")) outputFile << item["register"].get<std::string>() << " ";
-                if (item.contains("value")) outputFile << item["value"].get<std::string>();
-                outputFile << "\n";
-            }
-        }
-    }
-
-    static void parseSemantic(const json &content, std::ofstream &outputFile)
-    {
-        for (const auto &item : content)
-        {
-            outputFile << item["type"].get<std::string>() << " -> " << item["value"].get<std::string>() << "\n";
-        }
-    }
-
-    static void parseArray(const json &content, std::ofstream &outputFile)
-    {
-        for (const auto &item : content) { outputFile << item.dump(4) << "\n"; }
+        if (value.empty())
+            return "<empty>";
+        if (value == "\n")
+            return "\\n";
+        if (value == "\t")
+            return "\\t";
+        return "[" + value + "]";
     }
 
   public:
-    static std::string readInputFile(const std::string &filePath)
+    static std::string readInputFile(const std::string& filePath)
     {
         std::ifstream inputFile(filePath);
-        if (!inputFile.is_open()) { throw std::runtime_error("Unable to open input file: " + filePath); }
+        if (!inputFile.is_open())
+        {
+            throw std::runtime_error("Unable to open input file: " + filePath);
+        }
         std::ostringstream sstr;
         sstr << inputFile.rdbuf();
         return sstr.str();
     }
 
-    static void parseAndSaveJson(const std::string &jsonString, const std::string &outputFilePath)
+    static void formatTokens(const std::string& jsonString, const std::string& outputFile)
     {
-        try
+        nlohmann::json j = nlohmann::json::parse(jsonString);
+        std::ofstream outFile(outputFile);
+        if (!outFile.is_open())
         {
-            json compilerOutput = json::parse(jsonString);
-            std::ofstream outputFile(outputFilePath);
-            if (!outputFile.is_open()) { throw std::runtime_error("Unable to open output file: " + outputFilePath); }
-
-            for (const auto &[section, content] : compilerOutput.items())
-            {
-                parseSection(section, content, outputFile);
-            }
-
-            outputFile.close();
-            std::cout << "Parsing complete. Output written to " << outputFilePath << std::endl;
-        } catch (const json::parse_error &e)
-        {
-            throw std::runtime_error("JSON parsing error: " + std::string(e.what()));
-        } catch (const std::exception &e)
-        {
-            throw std::runtime_error("Error parsing and saving JSON: " + std::string(e.what()));
+            throw std::runtime_error("Unable to open output file: " + outputFile);
         }
+
+        outFile << "==== Lexer Output ====\n\n";
+        outFile << std::left << std::setw(20) << "Token" << std::setw(20) << "Position"
+                << "Value\n";
+        outFile << std::string(70, '-') << "\n";
+
+        for (const auto& token : j["lexer"])
+        {
+            outFile << std::left << std::setw(20) << token["type"].get<std::string>()
+                    << std::setw(20) << std::setw(20) << token["location"].get<std::string>()
+                    << formatValue(token["value"].get<std::string>()) << "\n";
+        }
+
+        outFile.close();
+        std::cout << "Lexer output written to: " << outputFile << std::endl;
     }
 };

@@ -1,32 +1,21 @@
 #pragma once
-#include <iostream>
-
-#include <exception>
-#include <string>
-#include <exception>
-#include <string>
-
 #include "SourceLocation.hpp"
+#include <string>
+#include <string_view>
+#include <utility>
 
 class Error : public std::exception
 {
-public:
-    explicit Error(const std::string& message = "An unknown error occurred.")
-      : message(message)
-    {}
-    
-    Error(const std::string& message, SourceLocation location)
-      : message(message + location.toString())
-    {}
+  public:
+    explicit Error(std::string_view message = "An unknown error occurred.") : message(message) {}
 
-    const char* what() const noexcept override
+    Error(std::string_view message, const SourceLocation& location)
+        : message(message.data() + location.toString())
     {
-        return message.c_str();
     }
 
-private:
+    const char* what() const noexcept override { return message.c_str(); }
+
+  private:
     std::string message;
 };
-
-// This can be a function outside the class.
-

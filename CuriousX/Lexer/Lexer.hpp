@@ -1,116 +1,96 @@
-/****
- **
- ** @copyright copyright (c) 2022
- **
- **
- ** Distributed under the Boost Software License, Version 1.0.
- ** (See accompanying file LICENSE_1_0.txt or copy at
- ** http://www.boost.org/LICENSE_1_0.txt)
- **
- **
- ** @author Jennifer Chukwu
- ** @email: <jnyfaah@gmail.com>
- **
- ** see https://github.com/jnyfah/CuriousX for most recent version including documentation.
- ** Project CuriousX...2022
- **
- */
-
-
-#ifndef LEXER_HPP
-#define LEXER_HPP
+#pragma once
 
 #include <algorithm>
-#include <string>
+#include <optional>
 #include <string_view>
+#include <unordered_map>
 
+#include "Error.hpp"
 #include "LexerToken.hpp"
-#include "SourceLocation.hpp"
-
-
-///////////////////////////////////////////////////////////////////////////
-/// This file contains implementation of Lexical analysis class to scan 
-/// input and get tokens
-///////////////////////////////////////////////////////////////////////////
-
 
 class Lexer
 {
-    std::string data;
-    unsigned checkpoint[3] = {0, 0, 0};
-    unsigned pos = 0;
-    unsigned x_pos = 1;
-    unsigned y_pos = 1;
-
-
   public:
-    explicit Lexer(const std::string& data)
-      : data(data)
-    {}
+    explicit Lexer(std::string_view data) : data(data) {}
 
     LexerToken nextNWToken()
     {
-        auto t = nextToken();
-        while (t.type == LexerTokenType::Space || t.type == LexerTokenType::Tab || t.type == LexerTokenType::Newline)
-            t = doGetNextToken();
+        LexerToken t;
+        do
+        {
+            t = nextToken();
+        } while (t.type == LexerTokenType::Space || t.type == LexerTokenType::Tab ||
+                 t.type == LexerTokenType::Newline);
         return t;
     }
 
-    LexerToken nextToken()
-    {
-        auto&& r = doGetNextToken();
-        return r;
-    }
+    LexerToken nextToken() { return doGetNextToken(); }
 
-    SourceLocation currentLocation() const
-    {
-        return SourceLocation(y_pos, x_pos);
-    }
+    SourceLocation currentLocation() const { return SourceLocation(y_pos, x_pos); }
 
     static bool isInt(std::string_view data)
     {
-        return std::all_of(data.begin(), data.end(), [](auto c) {
-            return c >= '0' && c <= '9';
-        });
+        return std::all_of(data.begin(), data.end(),
+                           [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
     }
 
   private:
-    void saveCheckpoint()
+    std::string_view data;
+    size_t pos = 0;
+    unsigned short x_pos = 1;
+    unsigned short y_pos = 1;
+
+    struct Checkpoint
     {
-        checkpoint[0] = pos;
-        checkpoint[1] = x_pos;
-        checkpoint[2] = y_pos;
-    }
+        size_t pos;
+        unsigned short x_pos;
+        unsigned short y_pos;
+    };
+
+    std::optional<Checkpoint> checkpoint;
+
+    void saveCheckpoint() { checkpoint = Checkpoint{pos, x_pos, y_pos}; }
 
     void restoreCheckpoint()
     {
-        pos = checkpoint[0];
-        x_pos = checkpoint[1];
-        y_pos = checkpoint[2];
+        if (checkpoint)
+        {
+            pos = checkpoint->pos;
+            x_pos = checkpoint->x_pos;
+            y_pos = checkpoint->y_pos;
+            checkpoint.reset();
+        }
     }
 
     char next_char()
     {
         if (pos >= data.size())
-        {
             return '\0';
-        }
-        x_pos++;
-        if (data[pos] == '\n')
+        char c = data[pos++];
+        if (c == '\n')
         {
             y_pos++;
             x_pos = 1;
         }
-        return data[pos++];
+        else
+        {
+            x_pos++;
+        }
+        return c;
     }
 
-    char peek_next_char()
+    char peek_next_char() const { return pos < data.size() ? data[pos] : '\0'; }
+
+    LexerToken handleComment(size_t startPos, const SourceLocation& location)
     {
-        if (pos >= data.size())
+        while (true)
         {
-            return '\0';
+            char c = peek_next_char();
+            if (c == '\n' || c == '\0')
+                break;
+            next_char();
         }
-        return data[pos];
+        return {data.substr(startPos, pos - startPos), location, LexerTokenType::CommentToken};
     }
 
     LexerToken doGetNextToken()
@@ -118,92 +98,116 @@ class Lexer
         const SourceLocation location = currentLocation();
         const auto startPos = pos;
         const char nchar = next_char();
-        if (nchar == '\0')
-            return {{}, location, LexerTokenType::Eof};
-        if (nchar == '\n')
-            return {{}, location, LexerTokenType::Newline};
-        if (nchar == '\t')
-            return {data.substr(startPos, 1), location, LexerTokenType::Tab};
+
+        // Map of single-character tokens
+        static const std::unordered_map<char, std::pair<std::string_view, LexerTokenType>>
+            singleCharTokens = {{'\0', {"\0", LexerTokenType::Eof}},
+                                {'\n', {"\n", LexerTokenType::Newline}},
+                                {'\t', {"\t", LexerTokenType::Tab}},
+                                {'(', {"(", LexerTokenType::ParenOpen}},
+                                {')', {")", LexerTokenType::ParenClose}},
+                                {'{', {"{", LexerTokenType::BracesOpen}},
+                                {'}', {"}", LexerTokenType::BracesClose}},
+                                {'+', {"+", LexerTokenType::PlusToken}},
+                                {'/', {"/", LexerTokenType::DivideToken}},
+                                {'*', {"*", LexerTokenType::MultiplyToken}},
+                                {'-', {"-", LexerTokenType::MinusToken}}};
+
+        // Check for single-character tokens
+        if (auto it = singleCharTokens.find(nchar); it != singleCharTokens.end())
+        {
+            return {it->second.first, location, it->second.second};
+        }
+
         if (nchar == ' ')
             return {fetch_consecutive(startPos, ' '), location, LexerTokenType::Space};
-        if (nchar == '(')
-            return {data.substr(startPos, 1), location, LexerTokenType::ParenOpen};
-        if (nchar == ')')
-            return {data.substr(startPos, 1), location, LexerTokenType::ParenClose};
-        if (nchar == '+')
-            return {data.substr(startPos, 1), location, LexerTokenType::PlusToken};
-        if (nchar == '/')
-            return {data.substr(startPos, 1), location, LexerTokenType::DivideToken};
-        if (nchar == '*')
-            return {data.substr(startPos, 1), location, LexerTokenType::MultiplyToken};
-        if (nchar == '-')
-            return {data.substr(startPos, 1), location, LexerTokenType::MinusToken};
+        if (nchar == '#')
+            return handleComment(startPos, location);
+
+        if (nchar == '!')
+        {
+            if (next_char() == '=')
+                return {data.substr(startPos, 2), location, LexerTokenType::NotEqualToken};
+            throw Error("Unexpected character after '!' at line ", location);
+        }
+
+        if (nchar == '>')
+        {
+            saveCheckpoint();
+            if (next_char() == '=')
+                return {data.substr(startPos, 2), location, LexerTokenType::GreaterEqualToken};
+            restoreCheckpoint();
+            return {">", location, LexerTokenType::GreaterToken};
+        }
+
+        if (nchar == '<')
+        {
+            saveCheckpoint();
+            if (next_char() == '=')
+                return {data.substr(startPos, 2), location, LexerTokenType::LessEqualToken};
+            restoreCheckpoint();
+            return {"<", location, LexerTokenType::LessToken};
+        }
+
         if (nchar == '=')
-            return {data.substr(startPos, 1), location, LexerTokenType::AssignToken};
-
-        if (!(isAlpha(nchar) || isNumeric(nchar)))
         {
-            //return {data.substr(startPos, 1), location, LexerTokenType::Unknown};
-            throw Error("unknown character at line ", location);
+            saveCheckpoint();
+            if (next_char() == '=')
+                return {data.substr(startPos, 2), location, LexerTokenType::EqualToken};
+            restoreCheckpoint();
+            return {"=", location, LexerTokenType::AssignToken};
         }
 
+        if (nchar == '"')
+        {
+            size_t count = 1;
+            while (next_char() != '"')
+                count++;
+            return {data.substr(startPos, count + 1), location, LexerTokenType::StringToken};
+        }
+
+        if (!(std::isalpha(nchar) || std::isdigit(nchar)))
+        {
+            throw Error("Unknown character at line ", location);
+        }
+
+        // Handle numeric and keyword tokens
         auto substr = next_valid_sequences(startPos);
-        // a.fd, 343.352, 334, etc
-        if (std::all_of(substr.begin(), substr.end(), Lexer::isNumeric))
+        if (std::all_of(substr.begin(), substr.end(),
+                        [](char c) { return std::isdigit(c) || c == '.'; }))
         {
-            if (std::all_of(substr.begin(), substr.end(), Lexer::isInteger))
-            {
-                return {substr, location, LexerTokenType::IntToken};
-            }
-            else
-            {
-                return {substr, location, LexerTokenType::FloatToken};
-            }
+            return {substr, location,
+                    substr.find('.') == std::string::npos ? LexerTokenType::IntToken
+                                                          : LexerTokenType::FloatToken};
         }
-        if (substr == "print" || substr == "Print")
+
+        // Map of keyword tokens
+        static const std::unordered_map<std::string_view, LexerTokenType> keywords = {
+            {"print", LexerTokenType::PrintToken}, {"Print", LexerTokenType::PrintToken},
+            {"if", LexerTokenType::IfToken},       {"else", LexerTokenType::ElseToken},
+            {"true", LexerTokenType::BoolToken},   {"false", LexerTokenType::BoolToken}};
+
+        if (auto it = keywords.find(substr); it != keywords.end())
         {
-            return {substr, location, LexerTokenType::PrintToken};
+            return {substr, location, it->second};
         }
+
         return {substr, location, LexerTokenType::VarToken};
     }
 
-
-    std::string fetch_consecutive(int startPos, char ch)
+    // Fetch consecutive occurrences of a character
+    std::string_view fetch_consecutive(size_t startPos, char ch)
     {
-        auto count = 1;
-        for (; peek_next_char() == ch; ++count, next_char())
-            ;
-        return data.substr(startPos, count);
-    }
-
-    std::string next_valid_sequences(int from)
-    {
-        int counts = 0;
-        while (true)
-        {
-            char c = peek_next_char();
-            counts++;
-            if (!(isAlpha(c) || isNumeric(c)))
-                break;
+        while (peek_next_char() == ch)
             next_char();
-        }
-        return data.substr(from, counts);
+        return data.substr(startPos, pos - startPos);
     }
 
-    static bool isNumeric(char c)
+    // Fetch next valid sequence of characters (for identifiers and numbers)
+    std::string_view next_valid_sequences(size_t from)
     {
-        return (c >= '0' && c <= '9') || c == '.';
-    }
-
-    static bool isInteger(char c)
-    {
-        return (c >= '0' && c <= '9');
-    }
-
-    static bool isAlpha(char c)
-    {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '.';
+        while (std::isalnum(peek_next_char()) || peek_next_char() == '.')
+            next_char();
+        return data.substr(from, pos - from);
     }
 };
-
-#endif  // LEXER_HPP
