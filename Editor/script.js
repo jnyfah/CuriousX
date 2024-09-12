@@ -12,220 +12,220 @@ const sunIcon = themeToggle.querySelector(".sun");
 // Initialize state
 let currentTab = "lexer";
 let output = {
-    lexer: "",
-    trees: "",
-    semantic: "",
-    codegen: "",
+  lexer: "",
+  trees: "",
+  semantic: "",
+  codegen: "",
 };
 
 // Event listeners
 compileButton.addEventListener("click", handleCompile);
 tabButtons.forEach((button) => {
-    button.addEventListener("click", () => switchTab(button.dataset.tab));
+  button.addEventListener("click", () => switchTab(button.dataset.tab));
 });
 fileInput.addEventListener("change", handleFileUpload);
 themeToggle.addEventListener("click", toggleTheme);
 
 let Modules = {};
-Modules["onRuntimeInitialized"] = function() {
-    // WASM is ready
-    document.getElementById("run-btn").disabled = false; // enable the Compile button
+Modules["onRuntimeInitialized"] = function () {
+  // WASM is ready
+  document.getElementById("run-btn").disabled = false; // enable the Compile button
 };
 
 function handleCompile() {
-    const code = codeTextarea.value;
-    errorContainer.innerHTML = "";
-    if (code.trim() !== "") {
-        try {
-            const result = Module.processFileContent(code);
-            const parsedResult = JSON.parse(result);
-            if (parsedResult.success === false) {
-                // If the operation wasn't successful, throw the error
-                throw new Error(parsedResult.error);
-            }
-            displayResults(parsedResult);
-        } catch (error) {
-            console.error("Error:", error);
-            showError(error.message || error.toString());
-        }
-    } else {
-        showError("Please type some code or upload a file.");
+  const code = codeTextarea.value;
+  errorContainer.innerHTML = "";
+  if (code.trim() !== "") {
+    try {
+      const result = Module.processFileContent(code);
+      const parsedResult = JSON.parse(result);
+      if (parsedResult.success === false) {
+        // If the operation wasn't successful, throw the error
+        throw new Error(parsedResult.error);
+      }
+      displayResults(parsedResult);
+    } catch (error) {
+      console.error("Error:", error);
+      showError(error.message || error.toString());
     }
+  } else {
+    showError("Please type some code or upload a file.");
+  }
 }
 
 function displayResults(result) {
-    output.lexer = formatLexerOutput(result.lexer);
-    // output.trees = formatTreeOutput(result.syntax);
-    // output.semantic = generateTableFromJSON(result.semantic);
-    // output.codegen = transformJSONToAssembly(result.codegen);
+  output.lexer = formatLexerOutput(result.lexer);
 
-    updateOutput();
-    showAllTabs();
+  updateOutput();
+  showAllTabs();
 }
 
 function formatLexerOutput(lexerData) {
-    const header = "Token            Position            Value\n" +
-        "----------------------------------------------------------------------\n";
+  const header =
+    "Token            Position            Value\n" +
+    "----------------------------------------------------------------------\n";
 
-    const formattedTokens = lexerData.map(item => {
-        const tokenPadded = item.type.padEnd(20);
-        const locationPadded = item.location.padEnd(20);
-        const value = formatValue(item.value);
+  const formattedTokens = lexerData.map((item) => {
+    const tokenPadded = item.type.padEnd(20);
+    const locationPadded = item.location.padEnd(20);
+    const value = formatValue(item.value);
 
-        return `${tokenPadded}${locationPadded}${value}`;
-    });
+    return `${tokenPadded}${locationPadded}${value}`;
+  });
 
-    return header + formattedTokens;
+  return header + formattedTokens;
 }
 
 function formatValue(value) {
-    if (value === "") return "<empty>";
-    if (value === "\n") return "\\n";
-    if (value === "\t") return "\\t";
-    return `[${value}]`;
+  if (value === "") return "<empty>";
+  if (value === "\n") return "\\n";
+  if (value === "\t") return "\\t";
+  return `[${value}]`;
 }
 
 function formatTreeOutput(syntaxTrees) {
-    return syntaxTrees
-        .map((tree) => {
-            const dimensions = getDimensions(tree);
-            const grid = Array.from({
-                    length: dimensions.height * 2 - 1
-                }, () =>
-                Array(dimensions.width).fill(" "),
-            );
-            buildTree(tree, grid);
-            return grid.map((row) => row.join("")).join("\n");
-        })
-        .join("\n\n");
+  return syntaxTrees
+    .map((tree) => {
+      const dimensions = getDimensions(tree);
+      const grid = Array.from(
+        {
+          length: dimensions.height * 2 - 1,
+        },
+        () => Array(dimensions.width).fill(" "),
+      );
+      buildTree(tree, grid);
+      return grid.map((row) => row.join("")).join("\n");
+    })
+    .join("\n\n");
 }
 
 function getDimensions(node) {
-    if (!node) return {
-        height: 0,
-        width: 0
-    };
-    const left = getDimensions(node.left);
-    const right = getDimensions(node.right);
+  if (!node)
     return {
-        height: 1 + Math.max(left.height, right.height),
-        width: 1 + left.width + right.width,
+      height: 0,
+      width: 0,
     };
+  const left = getDimensions(node.left);
+  const right = getDimensions(node.right);
+  return {
+    height: 1 + Math.max(left.height, right.height),
+    width: 1 + left.width + right.width,
+  };
 }
 
 function buildTree(node, grid, row = 0, col = 0) {
-    if (!node) return;
-    const leftDims = getDimensions(node.left);
-    const midCol = col + leftDims.width;
+  if (!node) return;
+  const leftDims = getDimensions(node.left);
+  const midCol = col + leftDims.width;
 
-    grid[row][midCol] = node.type.value;
+  grid[row][midCol] = node.type.value;
 
-    if (node.left) {
-        grid[row + 1][midCol - 1] = "/";
-        buildTree(node.left, grid, row + 2, col);
-    }
+  if (node.left) {
+    grid[row + 1][midCol - 1] = "/";
+    buildTree(node.left, grid, row + 2, col);
+  }
 
-    if (node.right) {
-        grid[row + 1][midCol + 1] = "\\";
-        buildTree(node.right, grid, row + 2, midCol + 1);
-    }
+  if (node.right) {
+    grid[row + 1][midCol + 1] = "\\";
+    buildTree(node.right, grid, row + 2, midCol + 1);
+  }
 }
 
 function generateTableFromJSON(data) {
-    let tableString = "<table border='1'>\n";
-    tableString += "  <thead>\n";
+  let tableString = "<table border='1'>\n";
+  tableString += "  <thead>\n";
+  tableString += "    <tr>\n";
+  tableString += "      <th>Type</th>\n";
+  tableString += "      <th>Variable</th>\n";
+  tableString += "    </tr>\n";
+  tableString += "  </thead>\n";
+  tableString += "  <tbody>\n";
+
+  data.forEach((item) => {
     tableString += "    <tr>\n";
-    tableString += "      <th>Type</th>\n";
-    tableString += "      <th>Variable</th>\n";
+    tableString += `      <td>${item.type}</td>\n`;
+    tableString += `      <td>${item.value}</td>\n`;
     tableString += "    </tr>\n";
-    tableString += "  </thead>\n";
-    tableString += "  <tbody>\n";
+  });
 
-    data.forEach((item) => {
-        tableString += "    <tr>\n";
-        tableString += `      <td>${item.type}</td>\n`;
-        tableString += `      <td>${item.value}</td>\n`;
-        tableString += "    </tr>\n";
-    });
+  tableString += "  </tbody>\n";
+  tableString += "</table>\n";
 
-    tableString += "  </tbody>\n";
-    tableString += "</table>\n";
-
-    return tableString;
+  return tableString;
 }
 
 function transformJSONToAssembly(commandsArray) {
-    const assemblyLines = commandsArray.flatMap((commandGroup) =>
-        commandGroup
-        .map((command) => {
-            if (!command) return "";
-            return (
-                "\t" +
-                Object.values(command)
-                .map((val) => (Array.isArray(val) ? val.join(", ") : val))
-                .join(" ")
-                .trim()
-            );
-        })
-        .filter(Boolean),
-    );
+  const assemblyLines = commandsArray.flatMap((commandGroup) =>
+    commandGroup
+      .map((command) => {
+        if (!command) return "";
+        return (
+          "\t" +
+          Object.values(command)
+            .map((val) => (Array.isArray(val) ? val.join(", ") : val))
+            .join(" ")
+            .trim()
+        );
+      })
+      .filter(Boolean),
+  );
 
-    return assemblyLines.join("\n") + "\n\tbx lr\n";
+  return assemblyLines.join("\n") + "\n\tbx lr\n";
 }
 
 function switchTab(tab) {
-    currentTab = tab;
-    tabButtons.forEach((button) => {
-        button.classList.toggle("active", button.dataset.tab === tab);
-    });
-    updateOutput();
+  currentTab = tab;
+  tabButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === tab);
+  });
+  updateOutput();
 }
 
 function updateOutput() {
-    outputDisplay.textContent = output[currentTab];
+  outputDisplay.textContent = output[currentTab];
 }
 
 function showAllTabs() {
-    tabButtons.forEach((tab) => (tab.style.display = "block"));
+  tabButtons.forEach((tab) => (tab.style.display = "block"));
 }
 
 function showError(message) {
-    errorContainer.innerHTML = `<div class="error-message"><strong>Error:</strong> ${escapeHtml(message)}</div>`;
+  errorContainer.innerHTML = `<div class="error-message"><strong>Error:</strong> ${escapeHtml(message)}</div>`;
 }
 
 // Helper function to escape HTML special characters
 function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            codeTextarea.value = e.target.result;
-        };
-        reader.onerror = function() {
-            showError("Error reading file");
-        };
-        reader.readAsText(file);
-    }
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      codeTextarea.value = e.target.result;
+    };
+    reader.onerror = function () {
+      showError("Error reading file");
+    };
+    reader.readAsText(file);
+  }
 }
 
 function toggleTheme() {
-    document.documentElement.classList.toggle("dark");
-    updateThemeIcon();
+  document.documentElement.classList.toggle("dark");
+  updateThemeIcon();
 }
 
 function updateThemeIcon() {
-    const isDark = document.documentElement.classList.contains("dark");
-    moonIcon.style.display = isDark ? "none" : "block";
-    sunIcon.style.display = isDark ? "block" : "none";
+  const isDark = document.documentElement.classList.contains("dark");
+  moonIcon.style.display = isDark ? "none" : "block";
+  sunIcon.style.display = isDark ? "block" : "none";
 }
 
 // Initial theme icon update
