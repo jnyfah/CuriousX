@@ -1,12 +1,5 @@
-a = 1.9
-if (b == true)
-c = 3.8  # this is a first comment
-if(c != 8){
-  # this is a comment
-}else {
-  d <= 4.8
-  d >= 5 
-}
-y = "my string"
-x = a * b + c / d
-print(x)
+a = 2  # comment
+e = 3 * (6+9) /6
+b = 5 
+c = a / b
+d = true

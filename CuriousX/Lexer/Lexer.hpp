@@ -5,7 +5,6 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "Error.hpp"
 #include "LexerToken.hpp"
 
 class Lexer
@@ -19,20 +18,11 @@ class Lexer
         do
         {
             t = nextToken();
-        } while (t.type == LexerTokenType::Space || t.type == LexerTokenType::Tab ||
-                 t.type == LexerTokenType::Newline);
+        } while (t.type == LexerTokenType::Space || t.type == LexerTokenType::Tab);
         return t;
     }
 
     LexerToken nextToken() { return doGetNextToken(); }
-
-    SourceLocation currentLocation() const { return SourceLocation(y_pos, x_pos); }
-
-    static bool isInt(std::string_view data)
-    {
-        return std::all_of(data.begin(), data.end(),
-                           [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
-    }
 
   private:
     std::string_view data;
@@ -81,6 +71,14 @@ class Lexer
 
     char peek_next_char() const { return pos < data.size() ? data[pos] : '\0'; }
 
+    SourceLocation currentLocation() const { return SourceLocation(y_pos, x_pos); }
+
+    static bool isInt(std::string_view data)
+    {
+        return std::all_of(data.begin(), data.end(),
+                           [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
+    }
+
     LexerToken handleComment(size_t startPos, const SourceLocation& location)
     {
         while (true)
@@ -102,7 +100,7 @@ class Lexer
         // Map of single-character tokens
         static const std::unordered_map<char, std::pair<std::string_view, LexerTokenType>>
             singleCharTokens = {{'\0', {"\0", LexerTokenType::Eof}},
-                                {'\n', {"\n", LexerTokenType::Newline}},
+                                {'\n', {"\\n", LexerTokenType::Newline}},
                                 {'\t', {"\t", LexerTokenType::Tab}},
                                 {'(', {"(", LexerTokenType::ParenOpen}},
                                 {')', {")", LexerTokenType::ParenClose}},
@@ -128,7 +126,7 @@ class Lexer
         {
             if (next_char() == '=')
                 return {data.substr(startPos, 2), location, LexerTokenType::NotEqualToken};
-            throw Error("Unexpected character after '!' at line ", location);
+            throw Error(" Lexical Error- Unexpected character after '!' at line ", location);
         }
 
         if (nchar == '>')
@@ -168,7 +166,7 @@ class Lexer
 
         if (!(std::isalpha(nchar) || std::isdigit(nchar)))
         {
-            throw Error("Unknown character at line ", location);
+            throw Error(" Lexical Error- Unknown character at line ", location);
         }
 
         // Handle numeric and keyword tokens

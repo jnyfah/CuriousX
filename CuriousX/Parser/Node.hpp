@@ -1,51 +1,83 @@
-#ifndef NODE_HPP
-#define NODE_HPP
-
-#include <iomanip>
-#include <memory>
-#include <queue>
-#include <variant>
-
-#include "Error.hpp"
 #include "LexerToken.hpp"
+#include "CompilerOutputParser.hpp"
+#include <memory>
+#include <vector>
 
-enum class InferredType { INTEGER, FLOAT };
-
-struct Node
+enum class NodeType
 {
-    std::shared_ptr<Node> left;
-    std::shared_ptr<Node> right;
-    LexerToken type;
-    std::variant<InferredType, std::monostate> inferredType;
+    BinaryOperation,
+    ConditionalOperation,
+    PrintProgram,
 };
 
-// Build and return a generic AST node
-inline std::shared_ptr<Node> makeNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right, const LexerToken &type)
+class ASTNode
 {
-    std::shared_ptr<Node> node = std::make_shared<Node>();
+  public:
+    ASTNode(const LexerToken& token) : token(token) {}
+    virtual ~ASTNode() = default;
+    virtual NodeType getType() const = 0;
+    LexerToken token;
+};
 
-    node->left = left;
-    node->right = right;
-    node->type = type;
-    node->inferredType = std::monostate{};
-
-    return node;
-}
-
-// Make an AST leaf node
-inline std::shared_ptr<Node> makeLeaf(const LexerToken &type) { return (makeNode(nullptr, nullptr, type)); }
-
-// Make a unary AST node: only one child
-inline std::shared_ptr<Node> makeUnary(std::shared_ptr<Node> left, const LexerToken &type)
+class BinaryNode : public ASTNode
 {
-    return (makeNode(left, nullptr, type));
-}
+  public:
+    BinaryNode(std::unique_ptr<ASTNode> left, std::unique_ptr<ASTNode> right,
+               const LexerToken& token)
+        : ASTNode(token), left(std::move(left)), right(std::move(right))
+    {
+    }
+    NodeType getType() const override { return NodeType::BinaryOperation; }
+    std::unique_ptr<ASTNode> left;
+    std::unique_ptr<ASTNode> right;
+};
 
-// Get height of tree
-inline int TreeHeight(std::shared_ptr<Node> node)
+class ConditionalNode : public ASTNode
 {
-    if (!node) return 0;
-    return 1 + std::max(TreeHeight(node->left), TreeHeight(node->right));
-}
+  public:
+    ConditionalNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> ifNode,
+                    std::unique_ptr<ASTNode> elseNode, const LexerToken& token)
+        : ASTNode(token), condition(std::move(condition)), ifNode(std::move(ifNode)),
+          elseNode(std::move(elseNode))
+    {
+    }
+    NodeType getType() const override { return NodeType::ConditionalOperation; }
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> ifNode;
+    std::unique_ptr<ASTNode> elseNode;
+};
 
-#endif
+class TreeNode : public ASTNode
+{
+  public:
+    TreeNode(std::vector<std::unique_ptr<ASTNode>> children, const LexerToken& token)
+        : ASTNode(token), children(std::move(children))
+    {
+    }
+    NodeType getType() const override { return NodeType::PrintProgram; }
+    std::vector<std::unique_ptr<ASTNode>> children;
+};
+
+class ASTNodeFactory
+{
+  public:
+    static std::unique_ptr<BinaryNode> createBinaryNode(std::unique_ptr<ASTNode> left,
+                                                     std::unique_ptr<ASTNode> right,
+                                                     const LexerToken& token)
+    {
+        return std::make_unique<BinaryNode>(std::move(left), std::move(right), token);
+    }
+    static std::unique_ptr<ASTNode> createConditionalNode(std::unique_ptr<ASTNode> condition,
+                                                          std::unique_ptr<ASTNode> ifNode,
+                                                          std::unique_ptr<ASTNode> elseNode,
+                                                          const LexerToken& token)
+    {
+        return std::make_unique<ConditionalNode>(std::move(condition), std::move(ifNode),
+                                                 std::move(elseNode), token);
+    }
+    static std::unique_ptr<TreeNode> createTreeNode(std::vector<std::unique_ptr<ASTNode>> children,
+                                                   const LexerToken& token)
+    {
+        return std::make_unique<TreeNode>(std::move(children), token);
+    }
+};

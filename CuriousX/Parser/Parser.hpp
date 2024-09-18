@@ -1,51 +1,52 @@
-#ifndef PARSER_HPP
-#define PARSER_HPP
-
-#include <vector>
+#pragma once
 
 #include "Error.hpp"
+#include "Lexer.hpp"
 #include "Node.hpp"
-
+#include <vector>
 
 class Parser
 {
   public:
-    explicit Parser(const std::vector<LexerToken>& token)
-      : token(token), root(std::make_shared<Node>()), current(0)
-    {}
-
-    size_t sizeOfTree() {
-      return compound.size();
+    explicit Parser(std::string_view data) : lexer(std::make_unique<Lexer>(data))
+    {
+        LexerToken t;
+        t.location = {0, 0};
+        t.type = LexerTokenType::ProgramToken;
+        t.value = "Program";
+        root = ASTNodeFactory::createTreeNode({}, t);
     }
 
+    bool ParseTokens();
 
-    
+    std::unique_ptr<ASTNode> Statement(LexerToken& token);
 
-    std::shared_ptr<Node> Expression();
+    std::unique_ptr<ASTNode> Factor(LexerToken& token);
 
-    std::shared_ptr<Node> Term();
+    std::unique_ptr<ASTNode> Expression(LexerToken& token);
+    std::unique_ptr<ASTNode> Term(LexerToken& token);
 
-    std::shared_ptr<Node> Factor();
+    std::unique_ptr<ASTNode> Assign(std::unique_ptr<ASTNode>& left, LexerToken& token);
 
-    std::shared_ptr<Node> Print();
+    bool isValidFactorStart(LexerTokenType type);
 
-    std::shared_ptr<Node> Assign(std::shared_ptr<Node> &left);
+    //   std::shared_ptr<Node> Expression();
 
-   const std::vector<std::shared_ptr<Node> > astRoot();
+    //   std::shared_ptr<Node> Term();
 
+    //   std::shared_ptr<Node> Factor();
 
-    bool Parse();
+    //   std::shared_ptr<Node> Print();
 
-    
+    //   std::shared_ptr<Node> Assign(std::shared_ptr<Node> &left);
+
+    //  const std::vector<std::shared_ptr<Node> > astRoot();
+
+    //   bool Parse();
 
   private:
-    size_t current;
-    std::shared_ptr<Node> root;
-    std::vector<LexerToken> token;
-    std::vector<std::shared_ptr<Node> > compound;
-    
+    std::unique_ptr<TreeNode> root;
+    std::unique_ptr<Lexer> lexer;
+
+    // std::shared_ptr<TreeNode> dummy_root;
 };
-
-
-
-#endif

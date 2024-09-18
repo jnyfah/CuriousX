@@ -3,15 +3,22 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
+#include "LexerToken.hpp"
 
 using json = nlohmann::json;
 
 class CompilerOutputParser
 {
   private:
+    CompilerOutputParser()
+    {
+        jsonOutput["Lexer"] = nlohmann::json::array();
+        jsonOutput["success"] = true;
+    }
+
     static std::string formatValue(const std::string& value)
     {
-        if (value.empty())
+        if (value.empty())                               
             return "<empty>";
         if (value == "\n")
             return "\\n";
@@ -20,7 +27,18 @@ class CompilerOutputParser
         return "[" + value + "]";
     }
 
+    nlohmann::json jsonOutput;
+
   public:
+    static CompilerOutputParser& getInstance()
+    {
+        static CompilerOutputParser instance;
+        return instance;
+    }
+
+    CompilerOutputParser(const CompilerOutputParser&) = delete;
+    CompilerOutputParser& operator=(const CompilerOutputParser) = delete;
+
     static std::string readInputFile(const std::string& filePath)
     {
         std::ifstream inputFile(filePath);
@@ -32,6 +50,8 @@ class CompilerOutputParser
         sstr << inputFile.rdbuf();
         return sstr.str();
     }
+
+    std::string getJson() const { return jsonOutput.dump(); }
 
     static void formatTokens(const std::string& jsonString, const std::string& outputFile)
     {
@@ -56,5 +76,26 @@ class CompilerOutputParser
 
         outFile.close();
         std::cout << "Lexer output written to: " << outputFile << std::endl;
+    }
+
+    nlohmann::json serializeLexerToken(const LexerToken& token)
+    {
+        nlohmann::json j;
+        j["type"] = toString(token.type);
+        j["location"] = token.location.toString();
+        j["value"] = token.value;
+
+        return j;
+    }
+
+    void setErrorOutput(const Error& ex)
+    {
+        jsonOutput["success"] = false;
+        jsonOutput["error"] = std::string("An error occurred: ") + ex.what();
+    }
+
+    void SetLexerOutput(const LexerToken& token)
+    {
+        jsonOutput["lexer"].push_back(serializeLexerToken(token));
     }
 };
