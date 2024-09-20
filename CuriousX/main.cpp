@@ -41,6 +41,7 @@ int main(int argc, const char* argv[])
     {
         std::string jsonString = processFileContent(CompilerOutputParser::getInstance().readInputFile(argv[1]));
         CompilerOutputParser::getInstance().formatTokens(jsonString, argv[2]);
+        std::cout<<jsonString;
     }
     catch (const std::exception& e)
     {

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Error.hpp"
-#include "Lexer.hpp"
-#include "Node.hpp"
+#include "CompilerOutputParser.hpp"
 #include <vector>
 
 class Parser

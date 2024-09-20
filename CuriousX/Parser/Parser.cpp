@@ -21,6 +21,8 @@ bool Parser::ParseTokens()
         }
     } while (token.type != LexerTokenType::Eof);
 
+    CompilerOutputParser::getInstance().setASTOutput(root);
+
     return !root->children.empty();
 }
 

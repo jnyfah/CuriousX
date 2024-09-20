@@ -12,7 +12,7 @@ const sunIcon = themeToggle.querySelector(".sun");
 // Initialize state
 let currentTab = "lexer";
 let output = {
-  lexer: "",
+  Lexer: "",
   trees: "",
   semantic: "",
   codegen: "",
@@ -52,9 +52,10 @@ function handleCompile() {
     showError("Please type some code or upload a file.");
   }
 }
-
+var res;
 function displayResults(result) {
-  output.lexer = formatLexerOutput(result.lexer);
+  output.lexer = formatLexerOutput(result.Lexer);
+  output.trees = generateAsciiTree(result.AST);
 
   updateOutput();
   showAllTabs();
@@ -70,10 +71,10 @@ function formatLexerOutput(lexerData) {
     const locationPadded = item.location.padEnd(20);
     const value = formatValue(item.value);
 
-    return `${tokenPadded}${locationPadded}${value}`;
+    return `${tokenPadded}${locationPadded}${value}\n`;
   });
 
-  return header + formattedTokens;
+  return header + formattedTokens.join('');
 }
 
 function formatValue(value) {
@@ -83,95 +84,6 @@ function formatValue(value) {
   return `[${value}]`;
 }
 
-function formatTreeOutput(syntaxTrees) {
-  return syntaxTrees
-    .map((tree) => {
-      const dimensions = getDimensions(tree);
-      const grid = Array.from(
-        {
-          length: dimensions.height * 2 - 1,
-        },
-        () => Array(dimensions.width).fill(" "),
-      );
-      buildTree(tree, grid);
-      return grid.map((row) => row.join("")).join("\n");
-    })
-    .join("\n\n");
-}
-
-function getDimensions(node) {
-  if (!node)
-    return {
-      height: 0,
-      width: 0,
-    };
-  const left = getDimensions(node.left);
-  const right = getDimensions(node.right);
-  return {
-    height: 1 + Math.max(left.height, right.height),
-    width: 1 + left.width + right.width,
-  };
-}
-
-function buildTree(node, grid, row = 0, col = 0) {
-  if (!node) return;
-  const leftDims = getDimensions(node.left);
-  const midCol = col + leftDims.width;
-
-  grid[row][midCol] = node.type.value;
-
-  if (node.left) {
-    grid[row + 1][midCol - 1] = "/";
-    buildTree(node.left, grid, row + 2, col);
-  }
-
-  if (node.right) {
-    grid[row + 1][midCol + 1] = "\\";
-    buildTree(node.right, grid, row + 2, midCol + 1);
-  }
-}
-
-function generateTableFromJSON(data) {
-  let tableString = "<table border='1'>\n";
-  tableString += "  <thead>\n";
-  tableString += "    <tr>\n";
-  tableString += "      <th>Type</th>\n";
-  tableString += "      <th>Variable</th>\n";
-  tableString += "    </tr>\n";
-  tableString += "  </thead>\n";
-  tableString += "  <tbody>\n";
-
-  data.forEach((item) => {
-    tableString += "    <tr>\n";
-    tableString += `      <td>${item.type}</td>\n`;
-    tableString += `      <td>${item.value}</td>\n`;
-    tableString += "    </tr>\n";
-  });
-
-  tableString += "  </tbody>\n";
-  tableString += "</table>\n";
-
-  return tableString;
-}
-
-function transformJSONToAssembly(commandsArray) {
-  const assemblyLines = commandsArray.flatMap((commandGroup) =>
-    commandGroup
-      .map((command) => {
-        if (!command) return "";
-        return (
-          "\t" +
-          Object.values(command)
-            .map((val) => (Array.isArray(val) ? val.join(", ") : val))
-            .join(" ")
-            .trim()
-        );
-      })
-      .filter(Boolean),
-  );
-
-  return assemblyLines.join("\n") + "\n\tbx lr\n";
-}
 
 function switchTab(tab) {
   currentTab = tab;
@@ -182,7 +94,7 @@ function switchTab(tab) {
 }
 
 function updateOutput() {
-  outputDisplay.textContent = output[currentTab];
+    outputDisplay.textContent = output[currentTab] || '';
 }
 
 function showAllTabs() {
@@ -230,3 +142,40 @@ function updateThemeIcon() {
 
 // Initial theme icon update
 updateThemeIcon();
+
+
+
+function generateAsciiTree(node, prefix = "", isLast = true, isRoot = true) {
+  if (!node) return "";
+  let result = "";
+ 
+  if (!isRoot) {
+    result += prefix;
+    result += isLast ? "└── " : "├── ";
+  }
+  // Get node value
+  const nodeValue = getNodeValue(node);
+  result += nodeValue + "\n";
+  // Get children
+  const children = getNodeChildren(node);
+  // Generate subtrees
+  children.forEach((child, index) => {
+    const isLastChild = index === children.length - 1;
+    const newPrefix = prefix + (isLast ? "    " : "│   ");
+    result += generateAsciiTree(child, newPrefix, isLastChild, false);
+  });
+  return result;
+}
+
+function getNodeValue(node) {
+  if (typeof node === 'string') return node;
+  if (node.token && node.token.value) return `${node.token.value}`;
+  return 'Unknown';
+}
+
+function getNodeChildren(node) {
+  if (Array.isArray(node.children)) return node.children;
+  if (node.left || node.right) return [node.left, node.right].filter(Boolean);
+  return [];
+}
+

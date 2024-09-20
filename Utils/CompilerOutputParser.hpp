@@ -1,9 +1,14 @@
+#pragma once
+
+#include "Error.hpp"
+#include "Lexer.hpp"
+#include "Node.hpp"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
-#include "LexerToken.hpp"
+
 
 using json = nlohmann::json;
 
@@ -18,7 +23,7 @@ class CompilerOutputParser
 
     static std::string formatValue(const std::string& value)
     {
-        if (value.empty())                               
+        if (value.empty())
             return "<empty>";
         if (value == "\n")
             return "\\n";
@@ -74,8 +79,48 @@ class CompilerOutputParser
                     << formatValue(token["value"].get<std::string>()) << "\n";
         }
 
+        outFile << "==== AST Output ====\n\n";
+
+         drawASTNode(j["AST"], outFile, 0);
+
         outFile.close();
-        std::cout << "Lexer output written to: " << outputFile << std::endl;
+        std::cout << "output written to: " << outputFile << std::endl;
+    }
+
+    static void drawASTNode(const nlohmann::json& node, std::ofstream& outFile, int depth)
+    {
+        if (node.is_null())
+            return;
+
+        std::string indent(depth * 2, ' ');
+        outFile << indent << "└─ ";
+
+        // Print token information
+        outFile << node["token"]["value"].get<std::string>()
+                 << "\n";
+
+        // Handle different node types
+        if (node.contains("children"))
+        {
+            for (const auto& child : node["children"])
+            {
+                drawASTNode(child, outFile, depth + 1);
+            }
+        }
+        else if (node.contains("left") && node.contains("right"))
+        {
+            drawASTNode(node["left"], outFile, depth + 1);
+            drawASTNode(node["right"], outFile, depth + 1);
+        }
+        else if (node.contains("condition") && node.contains("ifNode") && node.contains("elseNode"))
+        {
+            outFile << indent << "  ├─ Condition:\n";
+            drawASTNode(node["condition"], outFile, depth + 2);
+            outFile << indent << "  ├─ If Branch:\n";
+            drawASTNode(node["ifNode"], outFile, depth + 2);
+            outFile << indent << "  └─ Else Branch:\n";
+            drawASTNode(node["elseNode"], outFile, depth + 2);
+        }
     }
 
     nlohmann::json serializeLexerToken(const LexerToken& token)
@@ -96,6 +141,82 @@ class CompilerOutputParser
 
     void SetLexerOutput(const LexerToken& token)
     {
-        jsonOutput["lexer"].push_back(serializeLexerToken(token));
+        jsonOutput["Lexer"].push_back(serializeLexerToken(token));
+    }
+
+    void setASTOutput(const std::unique_ptr<TreeNode>& root)
+    {
+        jsonOutput["AST"] = nodeToJson(root);
+    }
+
+    static std::string getNodeTypeName(NodeType type)
+    {
+        switch (type)
+        {
+        case NodeType::BinaryOperation:
+            return "BinaryOperation";
+        case NodeType::ConditionalOperation:
+            return "ConditionalOperation";
+        case NodeType::PrintProgram:
+            return "PrintProgram";
+        // Add cases for other node types
+        default:
+            return "Unknown";
+        }
+    }
+
+    nlohmann::json nodeToJson(const std::unique_ptr<TreeNode>& node)
+    {
+        if (!node)
+            return nullptr;
+
+        nlohmann::json j;
+        j["type"] = getNodeTypeName(node->getType());
+        j["token"] = {{"type", toString(node->token.type)},
+                      {"value", node->token.value},
+                      {"location", node->token.location.toString()}};
+
+        j["children"] = nlohmann::json::array();
+        for (const auto& child : node->children)
+        {
+            j["children"].push_back(nodeToJson(child));
+        }
+
+        return j;
+    }
+
+    nlohmann::json nodeToJson(const std::unique_ptr<ASTNode>& node)
+    {
+        if (!node)
+            return nullptr;
+
+        nlohmann::json j;
+        j["type"] = getNodeTypeName(node->getType());
+        j["token"] = {{"type", toString(node->token.type)},
+                      {"value", node->token.value},
+                      {"location", node->token.location.toString()}};
+
+        switch (node->getType())
+        {
+        case NodeType::BinaryOperation:
+        {
+            const auto& binaryNode = static_cast<const BinaryNode&>(*node);
+            j["left"] = nodeToJson(binaryNode.left);
+            j["right"] = nodeToJson(binaryNode.right);
+            break;
+        }
+        case NodeType::ConditionalOperation:
+        {
+            const auto& condNode = static_cast<const ConditionalNode&>(*node);
+            j["condition"] = nodeToJson(condNode.condition);
+            j["ifNode"] = nodeToJson(condNode.ifNode);
+            j["elseNode"] = nodeToJson(condNode.elseNode);
+            break;
+        }
+        case NodeType::PrintProgram:
+        break;
+        }
+
+        return j;
     }
 };
