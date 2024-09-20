@@ -72,7 +72,7 @@ class CompilerOutputParser
                 << "Value\n";
         outFile << std::string(70, '-') << "\n";
 
-        for (const auto& token : j["lexer"])
+        for (const auto& token : j["Lexer"])
         {
             outFile << std::left << std::setw(20) << token["type"].get<std::string>()
                     << std::setw(20) << std::setw(20) << token["location"].get<std::string>()

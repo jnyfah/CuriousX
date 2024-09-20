@@ -24,27 +24,17 @@ class Parser
     std::unique_ptr<ASTNode> Expression(LexerToken& token);
     std::unique_ptr<ASTNode> Term(LexerToken& token);
 
+    std::unique_ptr<ASTNode> Conditional(LexerToken& token);
+
     std::unique_ptr<ASTNode> Assign(std::unique_ptr<ASTNode>& left, LexerToken& token);
+
+    std::unique_ptr<ASTNode> ComparisonExpression(LexerToken& token);
 
     bool isValidFactorStart(LexerTokenType type);
 
-    //   std::shared_ptr<Node> Expression();
-
-    //   std::shared_ptr<Node> Term();
-
-    //   std::shared_ptr<Node> Factor();
-
-    //   std::shared_ptr<Node> Print();
-
-    //   std::shared_ptr<Node> Assign(std::shared_ptr<Node> &left);
-
-    //  const std::vector<std::shared_ptr<Node> > astRoot();
-
-    //   bool Parse();
+    void advanceToken(LexerToken& token);
 
   private:
     std::unique_ptr<TreeNode> root;
     std::unique_ptr<Lexer> lexer;
-
-    // std::shared_ptr<TreeNode> dummy_root;
 };

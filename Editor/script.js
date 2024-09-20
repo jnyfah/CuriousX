@@ -52,7 +52,7 @@ function handleCompile() {
     showError("Please type some code or upload a file.");
   }
 }
-var res;
+
 function displayResults(result) {
   output.lexer = formatLexerOutput(result.Lexer);
   output.trees = generateAsciiTree(result.AST);
