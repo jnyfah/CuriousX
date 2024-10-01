@@ -11,7 +11,7 @@ std::string processFileContent(const std::string& content)
     try
     {
         Parser parse(content);
-        parse.ParseTokens();
+        parse.parseTokens();
         
         output << CompilerOutputParser::getInstance().getJson();
     }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Error.hpp"
 #include "Lexer.hpp"
 #include "Node.hpp"
 #include <fstream>
@@ -8,7 +7,6 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
-
 
 using json = nlohmann::json;
 
@@ -81,7 +79,7 @@ class CompilerOutputParser
 
         outFile << "==== AST Output ====\n\n";
 
-         drawASTNode(j["AST"], outFile, 0);
+        drawASTNode(j["AST"], outFile, 0);
 
         outFile.close();
         std::cout << "output written to: " << outputFile << std::endl;
@@ -96,8 +94,7 @@ class CompilerOutputParser
         outFile << indent << "└─ ";
 
         // Print token information
-        outFile << node["token"]["value"].get<std::string>()
-                 << "\n";
+        outFile << node["token"]["value"].get<std::string>() << "\n";
 
         // Handle different node types
         if (node.contains("children"))
@@ -116,7 +113,7 @@ class CompilerOutputParser
         {
             outFile << indent << "  ├─ Condition:\n";
             drawASTNode(node["condition"], outFile, depth + 2);
-            outFile << indent << "  ├─ If Branch:\n";
+            outFile << indent << "  ├─ then Branch:\n";
             drawASTNode(node["ifNode"], outFile, depth + 2);
             outFile << indent << "  └─ Else Branch:\n";
             drawASTNode(node["elseNode"], outFile, depth + 2);
@@ -159,7 +156,6 @@ class CompilerOutputParser
             return "ConditionalOperation";
         case NodeType::PrintProgram:
             return "PrintProgram";
-        // Add cases for other node types
         default:
             return "Unknown";
         }
@@ -214,7 +210,14 @@ class CompilerOutputParser
             break;
         }
         case NodeType::PrintProgram:
-        break;
+            const auto& printNode = static_cast<const TreeNode&>(*node);
+            j["children"] = nlohmann::json::array();
+            for (const auto& child : printNode.children)
+            {
+                j["children"].push_back(nodeToJson(child));
+            }
+            break;
+            break;
         }
 
         return j;

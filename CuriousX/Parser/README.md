@@ -33,11 +33,20 @@ The `Node.hpp` file contains utility function for the tree nodes
 
 ```c++
 // Node structure
-struct Node
+enum class NodeType
 {
-  std::shared_ptr<Node> left;
-  std::shared_ptr<Node> right;
-  LexerToken type;
+    BinaryOperation,
+    ConditionalOperation,
+    PrintProgram,
+};
+
+class ASTNode
+{
+  public:
+    ASTNode(const LexerToken& token) : token(token) {}
+    virtual ~ASTNode() = default;
+    virtual NodeType getType() const = 0;
+    LexerToken token;
 };
 ```
 For example, consider the following expression in our CuriousX:
@@ -61,9 +70,3 @@ The parse tree for this expression would have the following structure:
 __To learn more:__
 ## [CuriousX Syntax Analyzer Blog](https://jenniferchukwu.com/posts/syntaxanalysis)
 
-
-TODO
-- parsing ifs 
-- if and print must be in new line 
-- no else without if 
--

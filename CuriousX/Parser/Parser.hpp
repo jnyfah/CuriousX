@@ -6,35 +6,32 @@
 class Parser
 {
   public:
-    explicit Parser(std::string_view data) : lexer(std::make_unique<Lexer>(data))
+    explicit Parser(std::string_view data) : m_lexer(std::make_unique<Lexer>(data))
     {
-        LexerToken t;
-        t.location = {0, 0};
-        t.type = LexerTokenType::ProgramToken;
-        t.value = "Program";
-        root = ASTNodeFactory::createTreeNode({}, t);
+        m_root =
+            ASTNodeFactory::createTreeNode({}, {"Program", {0, 0}, LexerTokenType::ProgramToken});
+        m_prevToken = {"Program", {0, 0}, LexerTokenType::ProgramToken};
     }
 
-    bool ParseTokens();
+    bool parseTokens();
 
-    std::unique_ptr<ASTNode> Statement(LexerToken& token);
-
-    std::unique_ptr<ASTNode> Factor(LexerToken& token);
-
-    std::unique_ptr<ASTNode> Expression(LexerToken& token);
-    std::unique_ptr<ASTNode> Term(LexerToken& token);
-
-    std::unique_ptr<ASTNode> Conditional(LexerToken& token);
-
-    std::unique_ptr<ASTNode> Assign(std::unique_ptr<ASTNode>& left, LexerToken& token);
-
-    std::unique_ptr<ASTNode> ComparisonExpression(LexerToken& token);
-
-    bool isValidFactorStart(LexerTokenType type);
-
-    void advanceToken(LexerToken& token);
+    std::unique_ptr<ASTNode> parseStatement(LexerToken& token);
+    std::unique_ptr<ASTNode> parseFactor(LexerToken& token);
+    std::unique_ptr<ASTNode> parseExpression(LexerToken& token);
+    std::unique_ptr<ASTNode> parseTerm(LexerToken& token);
+    std::unique_ptr<ASTNode> parseConditional(LexerToken& token);
+    std::unique_ptr<ASTNode> parseAssignment(std::unique_ptr<ASTNode>& left, LexerToken& token);
+    std::unique_ptr<ASTNode> parseComparisonExpression(LexerToken& token);
+    std::unique_ptr<ASTNode> parseBlock(LexerToken& token);
+    std::unique_ptr<ASTNode> parsePrintStatement(LexerToken& token);
 
   private:
-    std::unique_ptr<TreeNode> root;
-    std::unique_ptr<Lexer> lexer;
+    bool isValidFactorStart(LexerTokenType type);
+    void advanceToken(LexerToken& token);
+    bool expectNewlineOrEOF(const LexerToken& token) const;
+    void advancePastNewlines(LexerToken& token);
+
+    std::unique_ptr<TreeNode> m_root;
+    std::unique_ptr<Lexer> m_lexer;
+    LexerToken m_prevToken;
 };

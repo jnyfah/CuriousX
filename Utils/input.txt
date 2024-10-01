@@ -1,5 +1,11 @@
-a = 2  # comment
-e = 3 * (6+9) /6 if(a == 3) 
+x + 5
+if (x == 5) 
 {
-    y = 500
+if (x == 5) 
+{
+    x +3
 }
+} else {
+    x +0
+}
+print(x)
