@@ -74,7 +74,7 @@ function formatLexerOutput(lexerData) {
     return `${tokenPadded}${locationPadded}${value}\n`;
   });
 
-  return header + formattedTokens.join('');
+  return header + formattedTokens.join("");
 }
 
 function formatValue(value) {
@@ -94,7 +94,7 @@ function switchTab(tab) {
 }
 
 function updateOutput() {
-    outputDisplay.textContent = output[currentTab] || '';
+    outputDisplay.textContent = output[currentTab] || "";
 }
 
 function showAllTabs() {
@@ -143,8 +143,6 @@ function updateThemeIcon() {
 // Initial theme icon update
 updateThemeIcon();
 
-
-
 function generateAsciiTree(node, prefix = "", isLast = true, isRoot = true) {
   if (!node) return "";
   let result = "";
@@ -168,9 +166,9 @@ function generateAsciiTree(node, prefix = "", isLast = true, isRoot = true) {
 }
 
 function getNodeValue(node) {
-  if (typeof node === 'string') return node;
+  if (typeof node === "string") return node;
   if (node.token && node.token.value) return `${node.token.value}`;
-  return 'Unknown';
+  return "Unknown";
 }
 
 function getNodeChildren(node) {

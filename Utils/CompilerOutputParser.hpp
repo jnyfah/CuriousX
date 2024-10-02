@@ -217,7 +217,6 @@ class CompilerOutputParser
                 j["children"].push_back(nodeToJson(child));
             }
             break;
-            break;
         }
 
         return j;

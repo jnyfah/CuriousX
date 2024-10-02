@@ -6,11 +6,12 @@
 class Parser
 {
   public:
-    explicit Parser(std::string_view data) : m_lexer(std::make_unique<Lexer>(data))
+    explicit Parser(std::string_view data)
+        : m_lexer(std::make_unique<Lexer>(data)),
+          m_root(ASTNodeFactory::createTreeNode({},
+                                                {"Program", {0, 0}, LexerTokenType::ProgramToken})),
+          m_prevToken({"Program", {0, 0}, LexerTokenType::ProgramToken})
     {
-        m_root =
-            ASTNodeFactory::createTreeNode({}, {"Program", {0, 0}, LexerTokenType::ProgramToken});
-        m_prevToken = {"Program", {0, 0}, LexerTokenType::ProgramToken};
     }
 
     bool parseTokens();
