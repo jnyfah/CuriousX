@@ -13,7 +13,7 @@ bool Parser::parseTokens()
         }
         if (!expectNewlineOrEOF(token))
         {
-            throw Error("Expected new line or end of file at ", token.location);
+            throw Error("Expected new line before " + std::string(token.value) + " at ", token.location);
         }
         advancePastNewlines(token);
     }
@@ -136,10 +136,25 @@ std::unique_ptr<ASTNode> Parser::parseFactor(LexerToken& token)
         return expr;
     }
 
-    if (token.type == LexerTokenType::ElseToken)
-        throw Error("Expected if before Else at ", token.location);
+    switch (token.type)
+    {
+    case LexerTokenType::ElseToken:
+        throw Error("Unexpected 'else' keyword. 'else' must be preceded by 'if' at ",
+                    token.location);
 
-    throw Error("Unexpected token at ", token.location);
+    case LexerTokenType::ParenClose:
+        throw Error(
+            "Unexpected closing parenthesis ')'. Did you forget an opening parenthesis or is this an empty parenthesis? At ",
+            token.location);
+
+    case LexerTokenType::Eof:
+        throw Error("Unexpected end of file. Expression is incomplete at ", token.location);
+
+    default:
+        throw Error("Unexpected token '" + std::string(token.value)+
+                        "' in factor. Expected a value, variable, or '(' at ",
+                    token.location);
+    }
 }
 
 std::unique_ptr<ASTNode> Parser::parseConditional(LexerToken& token)
@@ -147,7 +162,8 @@ std::unique_ptr<ASTNode> Parser::parseConditional(LexerToken& token)
     if (m_prevToken.type != LexerTokenType::Newline &&
         m_prevToken.type != LexerTokenType::ProgramToken)
     {
-        throw Error("'if' statement must start on a new line at ", token.location);
+        throw Error("'if' statement cannot start a program and must start on a new line at ",
+                    token.location);
     }
 
     auto op = token;

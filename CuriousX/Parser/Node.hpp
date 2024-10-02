@@ -1,5 +1,4 @@
 #include "LexerToken.hpp"
-#include "CompilerOutputParser.hpp"
 #include <memory>
 #include <vector>
 
@@ -62,8 +61,8 @@ class ASTNodeFactory
 {
   public:
     static std::unique_ptr<BinaryNode> createBinaryNode(std::unique_ptr<ASTNode> left,
-                                                     std::unique_ptr<ASTNode> right,
-                                                     const LexerToken& token)
+                                                        std::unique_ptr<ASTNode> right,
+                                                        const LexerToken& token)
     {
         return std::make_unique<BinaryNode>(std::move(left), std::move(right), token);
     }
@@ -76,7 +75,7 @@ class ASTNodeFactory
                                                  std::move(elseNode), token);
     }
     static std::unique_ptr<TreeNode> createTreeNode(std::vector<std::unique_ptr<ASTNode>> children,
-                                                   const LexerToken& token)
+                                                    const LexerToken& token)
     {
         return std::make_unique<TreeNode>(std::move(children), token);
     }
