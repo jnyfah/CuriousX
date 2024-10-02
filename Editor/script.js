@@ -94,7 +94,7 @@ function switchTab(tab) {
 }
 
 function updateOutput() {
-    outputDisplay.textContent = output[currentTab] || "";
+  outputDisplay.textContent = output[currentTab] || "";
 }
 
 function showAllTabs() {
@@ -176,4 +176,3 @@ function getNodeChildren(node) {
   if (node.left || node.right) return [node.left, node.right].filter(Boolean);
   return [];
 }
-
