@@ -1,38 +1,25 @@
-#include "CompilerOutputParser.hpp"
-#include "Lexer.hpp"
+
+#include "Parser.hpp"
 #include <sstream>
+#include <iostream>
 
-nlohmann::json serializeLexerToken(const LexerToken& token)
-{
-    nlohmann::json j;
-    j["type"] = toString(token.type);
-    j["location"] = token.location.toString();
-    j["value"] = token.value;
 
-    return j;
-}
 
 std::string processFileContent(const std::string& content)
 {
     std::ostringstream output;
     try
     {
-        nlohmann::json j;
-        j["lexer"] = nlohmann::json::array();
-        Lexer lexer(content);
-        for (auto token = lexer.nextNWToken(); token.type != LexerTokenType::Eof;
-             token = lexer.nextNWToken())
-        {
-            j["lexer"].push_back(serializeLexerToken(token));
-        }
-        output << j.dump();
+        Parser parse(content);
+        parse.parseTokens();
+        
+        output << CompilerOutputParser::getInstance().getJson();
     }
     catch (const Error& ex)
     {
-        nlohmann::json j{{"success", false},
-                         {"error", std::string("An error occurred: ") + ex.what()}};
-        output.str("");
-        output << j.dump();
+        CompilerOutputParser::getInstance().setErrorOutput(ex);
+        output << CompilerOutputParser::getInstance().getJson();
+        std::cout<<ex.what();
     }
     return output.str();
 }
@@ -52,8 +39,9 @@ int main(int argc, const char* argv[])
     }
     try
     {
-        std::string jsonString = processFileContent(CompilerOutputParser::readInputFile(argv[1]));
-        CompilerOutputParser::formatTokens(jsonString, argv[2]);
+        std::string jsonString = processFileContent(CompilerOutputParser::getInstance().readInputFile(argv[1]));
+        CompilerOutputParser::getInstance().formatTokens(jsonString, argv[2]);
+        std::cout<<jsonString;
     }
     catch (const std::exception& e)
     {

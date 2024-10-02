@@ -1,12 +1,11 @@
-a = 1.9
-if (b == true)
-c = 3.8  # this is a first comment
-if(c != 8){
-  # this is a comment
-}else {
-  d <= 4.8
-  d >= 5 
+x + 5
+if (x == 5) 
+{
+if (x == 5) 
+{
+    x +3
 }
-y = "my string"
-x = a * b + c / d
+} else {
+    x +0
+}
 print(x)
