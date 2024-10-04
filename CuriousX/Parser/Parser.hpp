@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CompilerOutputParser.hpp"
+#include "Semantic.hpp"
 #include <vector>
 
 class Parser
@@ -10,7 +11,7 @@ class Parser
         : m_lexer(std::make_unique<Lexer>(data)),
           m_root(ASTNodeFactory::createTreeNode({},
                                                 {"Program", {0, 0}, LexerTokenType::ProgramToken})),
-          m_prevToken({"Program", {0, 0}, LexerTokenType::ProgramToken})
+          m_prevToken({"Program", {0, 0}, LexerTokenType::ProgramToken}), m_semantic()
     {
     }
 
@@ -35,4 +36,5 @@ class Parser
     std::unique_ptr<TreeNode> m_root;
     std::unique_ptr<Lexer> m_lexer;
     LexerToken m_prevToken;
+    Semantic m_semantic;
 };

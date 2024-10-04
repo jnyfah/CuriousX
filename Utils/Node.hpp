@@ -1,3 +1,5 @@
+#pragma once
+
 #include "LexerToken.hpp"
 #include <memory>
 #include <vector>

@@ -1,35 +1,38 @@
-#ifndef SEMANTIC_HPP
-#define SEMANTIC_HPP
 
-#include "SymbolTable.hpp"
+
 #include "Node.hpp"
+#include "SymbolTable.hpp"
 #include <vector>
-
-
 
 class Semantic
 {
 
   public:
-    explicit Semantic(){}
+    explicit Semantic() : m_symboltable(), flag(false) {}
 
-    void traverse(const std::vector<std::shared_ptr<Node>> &compound);
-
-    void checkAssignments(std::shared_ptr<Node> node, const InferredType &inferredType);
-
-    void checkExpr(std::shared_ptr<Node> node);
-
-    void checkPrint(std::shared_ptr<Node> node);
-
-    std::optional<InferredType> inferType(std::shared_ptr<Node> node);
-
-    nlohmann::json printSymbolTree();
-
-    symbolTable::Table getSymbolTable() const;
-
+    bool analyze(const ASTNode& node);
+    void analyzeBinaryOperation(const BinaryNode& node);
+    void analyzeAssignment(const BinaryNode& node);
+    void analyzeExpression(const BinaryNode& node);
+    void checkDivisionByZero(const ASTNode& node);
+    InferredType inferType(const ASTNode& node);
+    InferredType inferTypeFromVariable(const ASTNode& node);
+    InferredType inferTypeFromOperation(const BinaryNode& node);
+    InferredType inferTypeFromCondition(const BinaryNode& node);
+    void analyzeConditionalOperation(const ConditionalNode& node);
 
   private:
-    symbolTable::Table symboltable;
+    SymbolTable m_symboltable;
+    bool flag;
 };
 
-#endif
+// Binary semantic ??
+// print semantic ??
+// conditional semantic ??
+
+// check assignment
+// check expresion validation
+// symbol table to make sure variable has been defined
+// no implicit conversion allowed
+// if should have actual conditionals in it s expression
+//

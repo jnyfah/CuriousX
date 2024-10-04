@@ -1,128 +1,61 @@
-/****
- **
- ** @copyright copyright (c) 2022
- **
- **
- ** Distributed under the Boost Software License, Version 1.0.
- ** (See accompanying file LICENSE_1_0.txt or copy at
- ** http://www.boost.org/LICENSE_1_0.txt)
- **
- **
- ** @author Jennifer Chukwu
- ** @email: <jnyfaah@gmail.com>
- **
- ** see https://github.com/jnyfah/CuriousX for most recent version including documentation.
- ** Project CuriousX...2022
- **
- */
-
-#ifndef _SYMBOL_TABLE_HPP_
-#define _SYMBOL_TABLE_HPP_
-
-///////////////////////////////////////////////////////////////////////////
-/// This file contains implementation of the helper logic data structure
-/// that allows us to check if a symbol was already defined
-///////////////////////////////////////////////////////////////////////////
-
-#include <memory>
 #include <optional>
-#include <set>
-#include <sstream>
-#include <variant>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
 
-#include "Error.hpp"
-#include "nlohmann/json.hpp"
-#include "LexerToken.hpp"
 #include "Node.hpp"
 
+enum class InferredType
+{
+    INTEGER,
+    FLOAT,
+    STRING,
+    BOOL
+};
 
-namespace symbolTable {
+struct Symbol
+{
+    InferredType type;
+    LexerToken token;
 
-    struct Node
+    Symbol(InferredType t, const LexerToken& tok) : type(t), token(tok) {}
+};
+
+class SymbolTable
+{
+  private:
+    std::unordered_map<std::string, Symbol> symbols;
+
+  public:
+    void insert(const std::string& name, InferredType type, const LexerToken& token)
     {
-        LexerToken node;
-        std::variant<InferredType, std::monostate> inferredType;
+        auto [it, inserted] = symbols.try_emplace(name, Symbol(type, token));
+        if (!inserted)
+        {
+            throw ("Error: Variable '" + name + "' already defined at " +
+                                     token.location.toString());
+        }
+    }
 
-        explicit Node(LexerToken const &node) : node(node), inferredType(std::monostate{}) {}
+    bool contains(const std::string& name) const { return symbols.find(name) != symbols.end(); }
 
-        bool operator<(const Node &other) const { return node.value < other.node.value; }
-    };
-
-    class Table
+    std::optional<InferredType> getType(const std::string& name) const
     {
-
-      private:
-        std::set<Node> nodes;
-
-      public:
-        void insert(const LexerToken &node, const InferredType &inferredType)
+        auto it = symbols.find(name);
+        if (it != symbols.end())
         {
-
-            auto newNode = Node(node);
-            newNode.inferredType = inferredType;
-
-            if (!nodes.insert(newNode).second) { throw Error(" Warning: Variable Already Defined! "); }
+            return it->second.type;
         }
+        return std::nullopt;
+    }
 
-        bool search(const LexerToken &node)
+    std::optional<LexerToken> getToken(const std::string& name) const
+    {
+        auto it = symbols.find(name);
+        if (it != symbols.end())
         {
-            auto searchNode = Node(node);
-            return nodes.find(searchNode) != nodes.end();
+            return it->second.token;
         }
-
-        // Get inferred type
-        std::optional<InferredType> getInferredType(const std::string &varName)
-        {
-            for (const auto &node : nodes)
-            {
-                if (node.node.value == varName)
-                {
-                    if (std::holds_alternative<InferredType>(node.inferredType))
-                    {
-                        return std::get<InferredType>(node.inferredType);
-                    } else
-                    {
-                        return std::nullopt;
-                    }
-                }
-            }
-            return std::nullopt;
-        }
-
-
-        // Print symbol table helper function to get types
-        std::string to_string(const InferredType &inferredType)
-        {
-            if (inferredType == InferredType::INTEGER)
-            {
-                return "INT";
-            } else if (inferredType == InferredType::FLOAT)
-            {
-                return "FLOAT";
-            }
-            // add cases for other possible values of InferredType
-            return "UNKNOWN";
-        }
-
-        nlohmann::json tableToJson()
-        {
-            nlohmann::json jArray = nlohmann::json::array();
-
-            for (const auto &node : nodes)
-            {
-                nlohmann::json jNode;
-                jNode["value"] = node.node.value;
-                jNode["type"] = to_string(std::get<InferredType>(node.inferredType));
-
-                jArray.push_back(jNode);
-            }
-
-            return jArray;
-        }
-
-
-        std::set<Node> getSymbolTable() { return nodes; }
-    };
-};// namespace symbolTable
-
-#endif
+        return std::nullopt;
+    }
+};

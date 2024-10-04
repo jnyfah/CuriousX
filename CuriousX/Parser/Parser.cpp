@@ -7,9 +7,12 @@ bool Parser::parseTokens()
 
     while (token.type != LexerTokenType::Eof)
     {
+        
         if (auto node = parseStatement(token))
         {
-            m_root->children.push_back(std::move(node));
+            // call semantic.analyze here and  pass node? but node is a unique ptr ??
+            m_semantic.analyze(*node);
+            m_root->children.emplace_back(std::move(node));
         }
         if (!expectNewlineOrEOF(token))
         {
@@ -255,7 +258,7 @@ std::unique_ptr<ASTNode> Parser::parsePrintStatement(LexerToken& token)
     auto expression = parseExpression(token);
 
     std::vector<std::unique_ptr<ASTNode>> children;
-    children.push_back(std::move(expression));
+    children.emplace_back(std::move(expression));
 
     return ASTNodeFactory::createTreeNode(std::move(children), printToken);
 }
