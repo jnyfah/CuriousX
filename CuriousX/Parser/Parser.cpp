@@ -94,9 +94,7 @@ std::unique_ptr<ASTNode> Parser::parseTerm(LexerToken& token)
         return left;
 
     if (token.type == LexerTokenType::AssignToken)
-    {
-    }
-    return parseAssignment(left, token);
+        return parseAssignment(left, token);
 
     while (token.type == LexerTokenType::MultiplyToken || token.type == LexerTokenType::DivideToken)
     {
