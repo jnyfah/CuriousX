@@ -52,8 +52,7 @@ class ScopedSymbolTable
         auto& currentScope = scopes[currentScopeLevel];
         if (currentScope.find(name) != currentScope.end())
         {
-            throw("Error: Variable '" + name + "' already defined at " +
-                  declarationToken.location.toString());
+            throw Error("Unable to infer type", declarationToken.location, ErrorType::SEMANTIC);
         }
         currentScope[name] = SymbolInfo{type, declarationToken, currentScopeLevel};
     }
@@ -99,5 +98,10 @@ class ScopedSymbolTable
             }
         }
         return std::nullopt;
+    }
+
+    const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable()
+    {
+        return scopes;
     }
 };

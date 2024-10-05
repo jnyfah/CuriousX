@@ -126,7 +126,7 @@ class Lexer
         {
             if (next_char() == '=')
                 return {data.substr(startPos, 2), location, LexerTokenType::NotEqualToken};
-            throw Error(" Lexical Error- Unexpected character after '!' at line ", location);
+            throw Error("Lexical Error- Unexpected character after '!' at line ", location, ErrorType::LEXICAL);
         }
 
         if (nchar == '>')
@@ -162,7 +162,7 @@ class Lexer
             auto t = next_char();
             while (t != '"') {
                 if (t == '\0' || t == '\n')
-                    throw Error("Unclosed string literal", location);
+                    throw Error("Unclosed string literal", location, ErrorType::LEXICAL);
                 count++;
                 t = next_char();
             }     
@@ -171,7 +171,7 @@ class Lexer
 
         if (!(std::isalpha(nchar) || std::isdigit(nchar)))
         {
-            throw Error(" Lexical Error- Unknown character at line ", location);
+            throw Error(" Lexical Error- Unknown character at line ", location, ErrorType::LEXICAL);
         }
 
         // Handle numeric and keyword tokens

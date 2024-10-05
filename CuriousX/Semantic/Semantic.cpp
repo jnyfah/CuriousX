@@ -1,19 +1,12 @@
 #include "Semantic.hpp"
 #include <cmath>
-#include <iostream>
 #include <limits>
 
-// if can start a program
+// if can start a program ?
 // division by zero
-
-// write good error messages if its semantic or syntax
-// unable to infer assign (is this needed ?)
-// print cannot take condition but can take assign?
-// asigning to expresion allowed
 
 bool Semantic::analyze(const ASTNode& node)
 {
-
     switch (node.getType())
     {
     case NodeType::BinaryOperation:
@@ -52,7 +45,7 @@ void Semantic::analyzeAssignment(const BinaryNode& node)
 {
     if (node.left->token.type != LexerTokenType::VarToken)
     {
-        throw Error("Invalid assignment: left side must be a variable ", node.left->token.location);
+        throw Error("Invalid assignment: left side must be a variable", node.left->token.location);
     }
     const std::string& varName = std::string(node.left->token.value);
     InferredType rightType = inferType(*node.right);
@@ -62,7 +55,7 @@ void Semantic::analyzeAssignment(const BinaryNode& node)
         auto existingType = m_symboltable.lookup(varName);
         if (existingType != rightType)
         {
-            throw Error("Type mismatch in assignment ", node.left->token.location);
+            throw Error("Type mismatch in assignment", node.left->token.location);
         }
     }
     else
@@ -97,10 +90,8 @@ InferredType Semantic::inferType(const ASTNode& node)
     case LexerTokenType::LessEqualToken:
     case LexerTokenType::LessToken:
         return inferTypeFromCondition(static_cast<const BinaryNode&>(node));
-        // case LexerTokenType::AssignToken:
-
     default:
-        throw Error("Unable to infer type", node.token.location);
+        throw Error("Unable to infer type", node.token.location, ErrorType::SEMANTIC);
     }
 }
 
@@ -109,7 +100,7 @@ InferredType Semantic::inferTypeFromVariable(const ASTNode& node)
     auto type = m_symboltable.lookup(std::string(node.token.value));
     if (!type)
     {
-        throw Error("Variable not defined ", node.token.location);
+        throw Error("Variable not defined", node.token.location, ErrorType::SEMANTIC);
     }
     flag = true;
 
@@ -120,7 +111,8 @@ InferredType Semantic::inferTypeFromOperation(const BinaryNode& node)
 {
     if (!node.left || !node.right)
     {
-        throw Error("Unbalanced expression, missing operand", node.token.location);
+        throw Error("Unbalanced expression, missing operand", node.token.location,
+                    ErrorType::SEMANTIC);
     }
     // // check division by zero
     // if (node.token.type == LexerTokenType::DivideToken) checkDivisionByZero(*node.right);
@@ -130,12 +122,12 @@ InferredType Semantic::inferTypeFromOperation(const BinaryNode& node)
 
     if (leftType != rightType)
     {
-        throw Error("Type mismatch in operation at ", node.token.location);
+        throw Error("Type mismatch in operation", node.token.location, ErrorType::SEMANTIC);
     }
 
     if (leftType == InferredType::STRING || rightType == InferredType::STRING)
     {
-        throw Error("no Binary Operations on Strings ", node.token.location);
+        throw Error("Binary Operations not allowed on strings", node.token.location, ErrorType::SEMANTIC);
     }
 
     return leftType;
@@ -145,13 +137,14 @@ InferredType Semantic::inferTypeFromCondition(const BinaryNode& node)
 {
     if (!node.left || !node.right)
     {
-        throw Error("Unbalanced expression, missing operand", node.token.location);
+        throw Error("Unbalanced expression, missing operand", node.token.location,
+                    ErrorType::SEMANTIC);
     }
     InferredType leftType = inferType(*node.left);
     InferredType rightType = inferType(*node.right);
     if (leftType != rightType)
     {
-        throw Error("Type mismatch in operation at ", node.token.location);
+        throw Error("Type mismatch in operation", node.token.location, ErrorType::SEMANTIC);
     }
 
     return leftType;
@@ -163,17 +156,17 @@ void Semantic::analyzeExpression(const BinaryNode& node)
     InferredType leftType = inferType(*node.left);
     if (rightType != leftType)
     {
-        throw Error("Type mismatch in operation at ", node.token.location);
+        throw Error("Type mismatch in operation", node.token.location, ErrorType::SEMANTIC);
     }
     if (!flag)
-        throw Error("literal Expressions not allowed ", node.token.location);
+        throw Error("literal Expressions not allowed", node.token.location, ErrorType::SEMANTIC);
 }
 
 void Semantic::analyzeConditionalOperation(const ConditionalNode& node)
 {
     if (!isValidConditionType(node.condition->token))
     {
-        throw Error("Expected a boolean expression ", node.condition->token.location);
+        throw Error("Expected a boolean expression", node.condition->token.location);
     }
     inferType(*node.condition);
     analyzeBlockOperation(*node.ifNode);
@@ -206,4 +199,9 @@ void Semantic::analyzeBlockOperation(const TreeNode& node)
         analyze(*statement);
     }
     m_symboltable.exitScope();
+}
+
+const std::vector<std::unordered_map<std::string, SymbolInfo>> Semantic::getSymbolTable()
+{
+    return m_symboltable.getSymbolTable();
 }

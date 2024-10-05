@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CompilerOutputParser.hpp"
 #include "Semantic.hpp"
 #include <vector>
 
@@ -27,6 +26,7 @@ class Parser
     std::unique_ptr<TreeNode> parseBlock(LexerToken& token, LexerToken what);
     std::unique_ptr<ASTNode> parsePrintStatement(LexerToken& token);
     std::unique_ptr<ASTNode> parsePrintExpression(LexerToken& token);
+    std::unique_ptr<ASTNode> parsePrintTerm(LexerToken& token);
 
   private:
     bool isValidFactorStart(LexerTokenType type);
@@ -34,8 +34,8 @@ class Parser
     bool expectNewlineOrEOF(const LexerToken& token) const;
     void advancePastNewlines(LexerToken& token);
 
-    std::unique_ptr<TreeNode> m_root;
     std::unique_ptr<Lexer> m_lexer;
+    std::unique_ptr<TreeNode> m_root;
     LexerToken m_prevToken;
     Semantic m_semantic;
 };
