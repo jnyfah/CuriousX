@@ -7,16 +7,15 @@ bool Parser::parseTokens()
 
     while (token.type != LexerTokenType::Eof)
     {
-        
         if (auto node = parseStatement(token))
         {
-            // call semantic.analyze here and  pass node? but node is a unique ptr ??
-            m_semantic.analyze(*node);
+            // m_semantic.analyze(*node);
             m_root->children.emplace_back(std::move(node));
         }
         if (!expectNewlineOrEOF(token))
         {
-            throw Error("Expected new line before " + std::string(token.value) + " at ", token.location);
+            throw Error("Expected new line before " + std::string(token.value) + " at ",
+                        token.location);
         }
         advancePastNewlines(token);
     }
@@ -37,13 +36,19 @@ void Parser::advancePastNewlines(LexerToken& token)
         advanceToken(token);
 }
 
+void Parser::advanceToken(LexerToken& token)
+{
+    m_prevToken = token;
+    token = m_lexer->nextNWToken();
+    CompilerOutputParser::getInstance().SetLexerOutput(token);
+}
+
 std::unique_ptr<ASTNode> Parser::parseStatement(LexerToken& token)
 {
     std::shared_ptr<ASTNode> Node;
 
     switch (token.type)
     {
-        // edge case if comment is the last line
     case LexerTokenType::CommentToken:
     case LexerTokenType::Newline:
         advanceToken(token);
@@ -55,21 +60,6 @@ std::unique_ptr<ASTNode> Parser::parseStatement(LexerToken& token)
     default:
         return parseExpression(token);
     }
-}
-
-std::unique_ptr<ASTNode> Parser::parseAssignment(std::unique_ptr<ASTNode>& left, LexerToken& token)
-{
-    auto type = token;
-    advanceToken(token);
-    std::unique_ptr<ASTNode> right = parseExpression(token);
-    return ASTNodeFactory::createBinaryNode(std::move(left), std::move(right), type);
-}
-
-bool Parser::isValidFactorStart(LexerTokenType type)
-{
-    return type == LexerTokenType::VarToken || type == LexerTokenType::FloatToken ||
-           type == LexerTokenType::IntToken || type == LexerTokenType::StringToken ||
-           type == LexerTokenType::BoolToken;
 }
 
 /**
@@ -104,7 +94,9 @@ std::unique_ptr<ASTNode> Parser::parseTerm(LexerToken& token)
         return left;
 
     if (token.type == LexerTokenType::AssignToken)
-        return parseAssignment(left, token);
+    {
+    }
+    return parseAssignment(left, token);
 
     while (token.type == LexerTokenType::MultiplyToken || token.type == LexerTokenType::DivideToken)
     {
@@ -115,6 +107,14 @@ std::unique_ptr<ASTNode> Parser::parseTerm(LexerToken& token)
         advanceToken(token);
     }
     return left;
+}
+
+std::unique_ptr<ASTNode> Parser::parseAssignment(std::unique_ptr<ASTNode>& left, LexerToken& token)
+{
+    auto type = token;
+    advanceToken(token);
+    std::unique_ptr<ASTNode> right = parseExpression(token);
+    return ASTNodeFactory::createBinaryNode(std::move(left), std::move(right), type);
 }
 
 /**
@@ -146,18 +146,28 @@ std::unique_ptr<ASTNode> Parser::parseFactor(LexerToken& token)
                     token.location);
 
     case LexerTokenType::ParenClose:
-        throw Error(
-            "Unexpected closing parenthesis ')'. Did you forget an opening parenthesis or is this an empty parenthesis? At ",
-            token.location);
+        throw Error("Unexpected closing parenthesis ')'. Did you forget an opening parenthesis or "
+                    "is this an empty parenthesis? At ",
+                    token.location);
 
     case LexerTokenType::Eof:
+        throw Error("Assignment is not allowed within print statement at ", token.location);
+
+    case LexerTokenType::AssignToken:
         throw Error("Unexpected end of file. Expression is incomplete at ", token.location);
 
     default:
-        throw Error("Unexpected token '" + std::string(token.value)+
+        throw Error("Unexpected token '" + std::string(token.value) +
                         "' in factor. Expected a value, variable, or '(' at ",
                     token.location);
     }
+}
+
+bool Parser::isValidFactorStart(LexerTokenType type)
+{
+    return type == LexerTokenType::VarToken || type == LexerTokenType::FloatToken ||
+           type == LexerTokenType::IntToken || type == LexerTokenType::StringToken ||
+           type == LexerTokenType::BoolToken;
 }
 
 std::unique_ptr<ASTNode> Parser::parseConditional(LexerToken& token)
@@ -169,49 +179,27 @@ std::unique_ptr<ASTNode> Parser::parseConditional(LexerToken& token)
                     token.location);
     }
 
-    auto op = token;
-
     // condition
+    auto op = token;
     advanceToken(token);
     auto cond = parseComparisonExpression(token);
 
     // then block
     advanceToken(token);
-    auto then = parseBlock(token);
+    auto then = parseBlock(token, {"then", {0, 0}, LexerTokenType::ElseToken});
 
-    // else
-    std::unique_ptr<ASTNode> elseBlock = nullptr;
+    // else block
+    std::unique_ptr<TreeNode> elseBlock = nullptr;
     while (token.type == LexerTokenType::Newline)
         advanceToken(token);
     if (token.type == LexerTokenType::ElseToken)
     {
         advanceToken(token);
-        elseBlock = parseBlock(token);
+        elseBlock = parseBlock(token, {"Else", {0, 0}, LexerTokenType::ElseToken});
     }
 
     return ASTNodeFactory::createConditionalNode(std::move(cond), std::move(then),
                                                  std::move(elseBlock), op);
-}
-
-std::unique_ptr<ASTNode> Parser::parseBlock(LexerToken& token)
-{
-    while (token.type == LexerTokenType::Newline)
-        advanceToken(token);
-
-    if (token.type != LexerTokenType::BracesOpen)
-        throw Error("Expected opening braces after condition at ", token.location);
-
-    advanceToken(token); // Consume '{'
-    auto block = parseStatement(token);
-
-    while (token.type == LexerTokenType::Newline)
-        advanceToken(token);
-
-    if (token.type != LexerTokenType::BracesClose)
-        throw Error("Expected closing braces after condition at ", token.location);
-    advanceToken(token);
-
-    return block;
 }
 
 std::unique_ptr<ASTNode> Parser::parseComparisonExpression(LexerToken& token)
@@ -220,7 +208,6 @@ std::unique_ptr<ASTNode> Parser::parseComparisonExpression(LexerToken& token)
         throw Error("Expected opening parenthesis at ", token.location);
 
     advanceToken(token);
-
     auto left = parseExpression(token);
 
     if (token.type == LexerTokenType::GreaterToken || token.type == LexerTokenType::LessToken ||
@@ -239,12 +226,41 @@ std::unique_ptr<ASTNode> Parser::parseComparisonExpression(LexerToken& token)
     return left;
 }
 
-void Parser::advanceToken(LexerToken& token)
+std::unique_ptr<TreeNode> Parser::parseBlock(LexerToken& token, LexerToken what)
 {
-    m_prevToken = token;
-    token = m_lexer->nextNWToken();
-    CompilerOutputParser::getInstance().SetLexerOutput(token);
+    while (token.type == LexerTokenType::Newline)
+        advanceToken(token);
+
+    std::vector<std::unique_ptr<ASTNode>> statements;
+    LexerToken blockToken = what;
+
+    if (token.type != LexerTokenType::BracesOpen)
+        throw Error("Expected opening braces for block at ", token.location);
+
+    advanceToken(token); // Consume '{'
+
+    while (token.type != LexerTokenType::BracesClose)
+    {
+        while (token.type == LexerTokenType::Newline)
+            advanceToken(token);
+
+        if (token.type == LexerTokenType::BracesClose)
+            break;
+
+        auto statement = parseStatement(token);
+        statements.push_back(std::move(statement));
+
+        while (token.type == LexerTokenType::Newline)
+            advanceToken(token);
+    }
+
+    if (token.type != LexerTokenType::BracesClose)
+        throw Error("Expected closing braces at end of block at ", token.location);
+
+    advanceToken(token); // Consume '}'
+    return ASTNodeFactory::createTreeNode(std::move(statements), blockToken);
 }
+
 /**
  * @ Print out a number, string, variable or even expression
  *

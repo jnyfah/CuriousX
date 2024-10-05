@@ -1,17 +1,15 @@
 #include "Semantic.hpp"
-#include "Error.hpp"
 #include <cmath>
 #include <iostream>
 #include <limits>
 
 // if can start a program
-// correct parser readme
-// fix includes too much circular
-// missing closing quotes for string ??
-// having just literal expressions starting a program or even anywhere
-// performing binary operations on strings not allowed (done)
 // division by zero
-// scope variables defined in the then block
+
+// write good error messages if its semantic or syntax
+// unable to infer assign (is this needed ?)
+// print cannot take condition but can take assign?
+// asigning to expresion allowed
 
 bool Semantic::analyze(const ASTNode& node)
 {
@@ -22,9 +20,10 @@ bool Semantic::analyze(const ASTNode& node)
         analyzeBinaryOperation(static_cast<const BinaryNode&>(node));
         break;
     case NodeType::ConditionalOperation:
-        //analyzeConditionalOperation(static_cast<const ConditionalNode&>(node));
+        analyzeConditionalOperation(static_cast<const ConditionalNode&>(node));
         break;
-    case NodeType::PrintProgram:
+    case NodeType::BlockOperation:
+        analyzeBlockOperation(static_cast<const TreeNode&>(node));
         break;
     default:
         break;
@@ -38,6 +37,10 @@ void Semantic::analyzeBinaryOperation(const BinaryNode& node)
     if (node.token.type == LexerTokenType::AssignToken)
     {
         analyzeAssignment(node);
+    }
+    else if (node.token.type == LexerTokenType::VarToken)
+    {
+        inferType(node);
     }
     else
     {
@@ -56,7 +59,7 @@ void Semantic::analyzeAssignment(const BinaryNode& node)
 
     if (m_symboltable.contains(varName))
     {
-        auto existingType = m_symboltable.getType(varName);
+        auto existingType = m_symboltable.lookup(varName);
         if (existingType != rightType)
         {
             throw Error("Type mismatch in assignment ", node.left->token.location);
@@ -94,8 +97,7 @@ InferredType Semantic::inferType(const ASTNode& node)
     case LexerTokenType::LessEqualToken:
     case LexerTokenType::LessToken:
         return inferTypeFromCondition(static_cast<const BinaryNode&>(node));
-    //case LexerTokenType::AssignToken:
-
+        // case LexerTokenType::AssignToken:
 
     default:
         throw Error("Unable to infer type", node.token.location);
@@ -104,10 +106,10 @@ InferredType Semantic::inferType(const ASTNode& node)
 
 InferredType Semantic::inferTypeFromVariable(const ASTNode& node)
 {
-    auto type = m_symboltable.getType(std::string(node.token.value));
+    auto type = m_symboltable.lookup(std::string(node.token.value));
     if (!type)
     {
-        throw Error("Variable not defined", node.token.location);
+        throw Error("Variable not defined ", node.token.location);
     }
     flag = true;
 
@@ -164,14 +166,44 @@ void Semantic::analyzeExpression(const BinaryNode& node)
         throw Error("Type mismatch in operation at ", node.token.location);
     }
     if (!flag)
-        throw Error("no variable", node.token.location);
+        throw Error("literal Expressions not allowed ", node.token.location);
 }
 
 void Semantic::analyzeConditionalOperation(const ConditionalNode& node)
 {
+    if (!isValidConditionType(node.condition->token))
+    {
+        throw Error("Expected a boolean expression ", node.condition->token.location);
+    }
     inferType(*node.condition);
-     inferType(*node.ifNode);
-     if (node.elseNode)
-         inferType(*node.elseNode);
+    analyzeBlockOperation(*node.ifNode);
+    if (node.elseNode)
+        analyzeBlockOperation(*node.elseNode);
 }
 
+bool Semantic::isValidConditionType(const LexerToken& token)
+{
+    return (token.type == LexerTokenType::EqualToken ||
+            token.type == LexerTokenType::GreaterEqualToken ||
+            token.type == LexerTokenType::GreaterToken ||
+            token.type == LexerTokenType::LessEqualToken ||
+            token.type == LexerTokenType::LessToken || token.type == LexerTokenType::NotEqualToken);
+}
+
+bool Semantic::isValidBinaryType(const LexerToken& token)
+{
+    return (token.type == LexerTokenType::PlusToken || token.type == LexerTokenType::MinusToken ||
+            token.type == LexerTokenType::MultiplyToken ||
+            token.type == LexerTokenType::DivideToken);
+}
+
+void Semantic::analyzeBlockOperation(const TreeNode& node)
+{
+    m_symboltable.enterScope();
+
+    for (const auto& statement : node.children)
+    {
+        analyze(*statement);
+    }
+    m_symboltable.exitScope();
+}

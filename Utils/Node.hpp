@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LexerToken.hpp"
+#include "Lexer.hpp"
 #include <memory>
 #include <vector>
 
@@ -8,7 +8,7 @@ enum class NodeType
 {
     BinaryOperation,
     ConditionalOperation,
-    PrintProgram,
+    BlockOperation,
 };
 
 class ASTNode
@@ -33,21 +33,6 @@ class BinaryNode : public ASTNode
     std::unique_ptr<ASTNode> right;
 };
 
-class ConditionalNode : public ASTNode
-{
-  public:
-    ConditionalNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> ifNode,
-                    std::unique_ptr<ASTNode> elseNode, const LexerToken& token)
-        : ASTNode(token), condition(std::move(condition)), ifNode(std::move(ifNode)),
-          elseNode(std::move(elseNode))
-    {
-    }
-    NodeType getType() const override { return NodeType::ConditionalOperation; }
-    std::unique_ptr<ASTNode> condition;
-    std::unique_ptr<ASTNode> ifNode;
-    std::unique_ptr<ASTNode> elseNode;
-};
-
 class TreeNode : public ASTNode
 {
   public:
@@ -55,9 +40,26 @@ class TreeNode : public ASTNode
         : ASTNode(token), children(std::move(children))
     {
     }
-    NodeType getType() const override { return NodeType::PrintProgram; }
+    NodeType getType() const override { return NodeType::BlockOperation; }
     std::vector<std::unique_ptr<ASTNode>> children;
 };
+
+class ConditionalNode : public ASTNode
+{
+  public:
+    ConditionalNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<TreeNode> ifNode,
+                    std::unique_ptr<TreeNode> elseNode, const LexerToken& token)
+        : ASTNode(token), condition(std::move(condition)), ifNode(std::move(ifNode)),
+          elseNode(std::move(elseNode))
+    {
+    }
+    NodeType getType() const override { return NodeType::ConditionalOperation; }
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<TreeNode> ifNode;
+    std::unique_ptr<TreeNode> elseNode;
+};
+
+
 
 class ASTNodeFactory
 {
@@ -69,8 +71,8 @@ class ASTNodeFactory
         return std::make_unique<BinaryNode>(std::move(left), std::move(right), token);
     }
     static std::unique_ptr<ASTNode> createConditionalNode(std::unique_ptr<ASTNode> condition,
-                                                          std::unique_ptr<ASTNode> ifNode,
-                                                          std::unique_ptr<ASTNode> elseNode,
+                                                          std::unique_ptr<TreeNode> ifNode,
+                                                          std::unique_ptr<TreeNode> elseNode,
                                                           const LexerToken& token)
     {
         return std::make_unique<ConditionalNode>(std::move(condition), std::move(ifNode),

@@ -159,8 +159,13 @@ class Lexer
         if (nchar == '"')
         {
             size_t count = 1;
-            while (next_char() != '"')
+            auto t = next_char();
+            while (t != '"') {
+                if (t == '\0' || t == '\n')
+                    throw Error("Unclosed string literal", location);
                 count++;
+                t = next_char();
+            }     
             return {data.substr(startPos, count + 1), location, LexerTokenType::StringToken};
         }
 

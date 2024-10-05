@@ -24,8 +24,9 @@ class Parser
     std::unique_ptr<ASTNode> parseConditional(LexerToken& token);
     std::unique_ptr<ASTNode> parseAssignment(std::unique_ptr<ASTNode>& left, LexerToken& token);
     std::unique_ptr<ASTNode> parseComparisonExpression(LexerToken& token);
-    std::unique_ptr<ASTNode> parseBlock(LexerToken& token);
+    std::unique_ptr<TreeNode> parseBlock(LexerToken& token, LexerToken what);
     std::unique_ptr<ASTNode> parsePrintStatement(LexerToken& token);
+    std::unique_ptr<ASTNode> parsePrintExpression(LexerToken& token);
 
   private:
     bool isValidFactorStart(LexerTokenType type);

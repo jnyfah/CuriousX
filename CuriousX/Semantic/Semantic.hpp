@@ -1,6 +1,5 @@
+#pragma once
 
-
-#include "Node.hpp"
 #include "SymbolTable.hpp"
 #include <vector>
 
@@ -20,19 +19,11 @@ class Semantic
     InferredType inferTypeFromOperation(const BinaryNode& node);
     InferredType inferTypeFromCondition(const BinaryNode& node);
     void analyzeConditionalOperation(const ConditionalNode& node);
+    bool isValidConditionType(const LexerToken& type);
+    void analyzeBlockOperation(const TreeNode& node);
+    bool isValidBinaryType(const LexerToken& token);
 
   private:
-    SymbolTable m_symboltable;
+    ScopedSymbolTable m_symboltable;
     bool flag;
 };
-
-// Binary semantic ??
-// print semantic ??
-// conditional semantic ??
-
-// check assignment
-// check expresion validation
-// symbol table to make sure variable has been defined
-// no implicit conversion allowed
-// if should have actual conditionals in it s expression
-//

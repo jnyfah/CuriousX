@@ -1,5 +1,6 @@
+#pragma once
+
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
@@ -13,48 +14,89 @@ enum class InferredType
     BOOL
 };
 
-struct Symbol
+struct SymbolInfo
 {
     InferredType type;
     LexerToken token;
-
-    Symbol(InferredType t, const LexerToken& tok) : type(t), token(tok) {}
+    int scopeLevel;
 };
 
-class SymbolTable
+class ScopedSymbolTable
 {
   private:
-    std::unordered_map<std::string, Symbol> symbols;
+    std::vector<std::unordered_map<std::string, SymbolInfo>> scopes;
+    int currentScopeLevel;
 
   public:
-    void insert(const std::string& name, InferredType type, const LexerToken& token)
+    ScopedSymbolTable() : currentScopeLevel(-1)
     {
-        auto [it, inserted] = symbols.try_emplace(name, Symbol(type, token));
-        if (!inserted)
+        enterScope(); // Create global scope
+    }
+    void enterScope()
+    {
+        scopes.emplace_back();
+        currentScopeLevel++;
+    }
+
+    void exitScope()
+    {
+        if (currentScopeLevel > 0)
         {
-            throw ("Error: Variable '" + name + "' already defined at " +
-                                     token.location.toString());
+            scopes.pop_back();
+            currentScopeLevel--;
         }
     }
 
-    bool contains(const std::string& name) const { return symbols.find(name) != symbols.end(); }
-
-    std::optional<InferredType> getType(const std::string& name) const
+    void insert(const std::string& name, InferredType type, const LexerToken& declarationToken)
     {
-        auto it = symbols.find(name);
-        if (it != symbols.end())
+        auto& currentScope = scopes[currentScopeLevel];
+        if (currentScope.find(name) != currentScope.end())
         {
-            return it->second.type;
+            throw("Error: Variable '" + name + "' already defined at " +
+                  declarationToken.location.toString());
+        }
+        currentScope[name] = SymbolInfo{type, declarationToken, currentScopeLevel};
+    }
+
+    bool contains(const std::string& name) const { return lookup(name).has_value(); }
+
+    std::optional<InferredType> lookup(const std::string& name) const
+    {
+        for (int i = currentScopeLevel; i >= 0; i--)
+        {
+            auto it = scopes[i].find(name);
+            if (it != scopes[i].end())
+            {
+                return it->second.type;
+            }
         }
         return std::nullopt;
     }
 
-    std::optional<LexerToken> getToken(const std::string& name) const
+    bool remove(const std::string& name)
     {
-        auto it = symbols.find(name);
-        if (it != symbols.end())
+        auto& currentScope = scopes[currentScopeLevel];
+        return currentScope.erase(name) > 0;
+    }
+
+    void clear()
+    {
+        scopes.clear();
+        currentScopeLevel = -1;
+        enterScope();
+    }
+
+    int getCurrentScopeLevel() const { return currentScopeLevel; }
+
+    std::optional<InferredType> lookupCurrentScope(const std::string& name) const
+    {
+        for (int i = currentScopeLevel; i >= 0; i--)
         {
-            return it->second.token;
+            auto it = scopes[currentScopeLevel].find(name);
+            if (it != scopes[currentScopeLevel].end())
+            {
+                return it->second.type;
+            }
         }
         return std::nullopt;
     }

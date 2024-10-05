@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Lexer.hpp"
-#include "Node.hpp"
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
+#include <iostream>
+
+#include "Node.hpp"
 
 using json = nlohmann::json;
 
@@ -111,11 +111,8 @@ class CompilerOutputParser
         }
         else if (node.contains("condition") && node.contains("ifNode") && node.contains("elseNode"))
         {
-            outFile << indent << "  ├─ Condition:\n";
             drawASTNode(node["condition"], outFile, depth + 2);
-            outFile << indent << "  ├─ then Branch:\n";
             drawASTNode(node["ifNode"], outFile, depth + 2);
-            outFile << indent << "  └─ Else Branch:\n";
             drawASTNode(node["elseNode"], outFile, depth + 2);
         }
     }
@@ -154,8 +151,8 @@ class CompilerOutputParser
             return "BinaryOperation";
         case NodeType::ConditionalOperation:
             return "ConditionalOperation";
-        case NodeType::PrintProgram:
-            return "PrintProgram";
+        case NodeType::BlockOperation:
+            return "BlockOperation";
         default:
             return "Unknown";
         }
@@ -209,7 +206,7 @@ class CompilerOutputParser
             j["elseNode"] = nodeToJson(condNode.elseNode);
             break;
         }
-        case NodeType::PrintProgram:
+        case NodeType::BlockOperation:
             const auto& printNode = static_cast<const TreeNode&>(*node);
             j["children"] = nlohmann::json::array();
             for (const auto& child : printNode.children)
