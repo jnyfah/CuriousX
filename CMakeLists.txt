@@ -42,23 +42,25 @@ set(SOURCES_GEN
 
 
 #------------ Include Utility Folder--------------------------------
-add_library(Utils INTERFACE)
-target_include_directories(Utils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Utils)
+add_library(CompilerUtils INTERFACE)
+target_include_directories(CompilerUtils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/CompilerUtils)
 
 # -------------------- Include Lexer Folder--------------------------------
 add_library(Lexer STATIC ${SOURCES_LEXER})
 target_include_directories(Lexer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Lexer)
-target_link_libraries(Lexer PUBLIC Utils nlohmann_json::nlohmann_json)
+target_link_libraries(Lexer PUBLIC CompilerUtils nlohmann_json::nlohmann_json)
+
+# -------------------- Include Semantic Folder--------------------------------
+add_library(Semantic STATIC ${SOURCES_SEMANTIC})
+target_include_directories(Semantic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Semantic)
+target_link_libraries(Semantic PUBLIC Lexer)
 
 # -------------------- Include Parser Folder--------------------------------
 add_library(Parser STATIC ${SOURCES_PARSER})
 target_include_directories(Parser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Parser)
-target_link_libraries(Parser PUBLIC Lexer)
+target_link_libraries(Parser PUBLIC Semantic)
 
-# # -------------------- Include Semantic Folder--------------------------------
-# add_library(Semantic STATIC ${SOURCES_SEMANTIC})
-# target_include_directories(Semantic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Semantic)
-# target_link_libraries(Semantic PUBLIC Parser)
+
 
 # # -------------------- Include CodeGen Folder--------------------------------
 # add_library(Gen STATIC ${SOURCES_GEN})
@@ -73,7 +75,7 @@ target_include_directories(CuriousX PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX
 
 if(EMSCRIPTEN)
     set_target_properties(CuriousX PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Editor"  
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/CompilerEditor"  
         LINK_FLAGS "--bind  -s DISABLE_EXCEPTION_CATCHING=0" 
     )
 endif()

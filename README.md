@@ -48,7 +48,7 @@ __Note:__ Emscripten might not compatible with the `Visual Studio generator` due
 ## Usage
 html file is located at the `web` folder, after building sucessfully, start the webserver
 ```cmd
-emrun Editor/index.html
+emrun CompilerEditor/index.html
 ```
 
 This generates a `Lexical-analysis` `Syntax-analysis` and an `assembly` files outputs on the webpage and you can also view the symbol table if you source code has any.

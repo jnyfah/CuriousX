@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Lexer.hpp"
-#include "Node.hpp"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
+
+#include "Node.hpp"
+#include "SymbolTable.hpp"
 
 using json = nlohmann::json;
 
@@ -78,8 +79,10 @@ class CompilerOutputParser
         }
 
         outFile << "==== AST Output ====\n\n";
-
         drawASTNode(j["AST"], outFile, 0);
+
+        outFile << "==== Symbol Output ====\n\n";
+        drawTable(j["SymbolTable"], outFile);
 
         outFile.close();
         std::cout << "output written to: " << outputFile << std::endl;
@@ -111,11 +114,8 @@ class CompilerOutputParser
         }
         else if (node.contains("condition") && node.contains("ifNode") && node.contains("elseNode"))
         {
-            outFile << indent << "  ├─ Condition:\n";
             drawASTNode(node["condition"], outFile, depth + 2);
-            outFile << indent << "  ├─ then Branch:\n";
             drawASTNode(node["ifNode"], outFile, depth + 2);
-            outFile << indent << "  └─ Else Branch:\n";
             drawASTNode(node["elseNode"], outFile, depth + 2);
         }
     }
@@ -133,7 +133,7 @@ class CompilerOutputParser
     void setErrorOutput(const Error& ex)
     {
         jsonOutput["success"] = false;
-        jsonOutput["error"] = std::string("An error occurred: ") + ex.what();
+        jsonOutput["error"] = ex.what();
     }
 
     void SetLexerOutput(const LexerToken& token)
@@ -141,9 +141,29 @@ class CompilerOutputParser
         jsonOutput["Lexer"].push_back(serializeLexerToken(token));
     }
 
-    void setASTOutput(const std::unique_ptr<TreeNode>& root)
+    void setASTOutput(const std::unique_ptr<TreeNode>& root,
+                      const std::vector<std::unordered_map<std::string, SymbolInfo>>& table)
     {
         jsonOutput["AST"] = nodeToJson(root);
+        jsonOutput["SymbolTable"] = tableToJson(table);
+    }
+
+    nlohmann::json
+    tableToJson(const std::vector<std::unordered_map<std::string, SymbolInfo>>& table)
+    {
+        nlohmann::json jArray = nlohmann::json::array();
+        nlohmann::json j;
+
+        for (const auto& node : table)
+        {
+            for (auto it : node)
+            {
+                j["value"] = it.first;
+                j["type"] = getInferredTypeDescription(it.second.type);
+                jArray.push_back(j);
+            }
+        }
+        return jArray;
     }
 
     static std::string getNodeTypeName(NodeType type)
@@ -154,8 +174,8 @@ class CompilerOutputParser
             return "BinaryOperation";
         case NodeType::ConditionalOperation:
             return "ConditionalOperation";
-        case NodeType::PrintProgram:
-            return "PrintProgram";
+        case NodeType::BlockOperation:
+            return "BlockOperation";
         default:
             return "Unknown";
         }
@@ -209,7 +229,7 @@ class CompilerOutputParser
             j["elseNode"] = nodeToJson(condNode.elseNode);
             break;
         }
-        case NodeType::PrintProgram:
+        case NodeType::BlockOperation:
             const auto& printNode = static_cast<const TreeNode&>(*node);
             j["children"] = nlohmann::json::array();
             for (const auto& child : printNode.children)
@@ -220,5 +240,58 @@ class CompilerOutputParser
         }
 
         return j;
+    }
+
+    std::string_view getInferredTypeDescription(const InferredType& t)
+    {
+        switch (t)
+        {
+        case InferredType::BOOL:
+            return "Boolean";
+        case InferredType::FLOAT:
+            return "Float";
+        case InferredType::INTEGER:
+            return "Integer";
+        case InferredType::STRING:
+            return "String";
+        default:
+            return "An unknown error occurred";
+        }
+    }
+
+    static void drawTable(const nlohmann::json& node, std::ofstream& outFile)
+    {
+        if (!node.is_array() || node.empty())
+        {
+            outFile << "No data to display\n";
+            return;
+        }
+
+        // Determine the maximum width for each column
+        size_t typeWidth = 4;  // Minimum width for "Type" header
+        size_t valueWidth = 5; // Minimum width for "Value" header
+        for (const auto& item : node)
+        {
+            typeWidth = std::max(typeWidth, item["type"].get<std::string>().length());
+            valueWidth = std::max(valueWidth, item["value"].get<std::string>().length());
+        }
+
+        // Draw the header
+        outFile << std::setfill('-') << std::setw(typeWidth + valueWidth + 7) << "-" << "\n";
+        outFile << std::setfill(' ');
+        outFile << "| " << std::left << std::setw(typeWidth) << "Type"
+                << " | " << std::setw(valueWidth) << "Value" << " |\n";
+        outFile << std::setfill('-') << std::setw(typeWidth + valueWidth + 7) << "-" << "\n";
+        outFile << std::setfill(' ');
+
+        // Draw the rows
+        for (const auto& item : node)
+        {
+            outFile << "| " << std::left << std::setw(typeWidth) << item["type"].get<std::string>()
+                    << " | " << std::setw(valueWidth) << item["value"].get<std::string>() << " |\n";
+        }
+
+        // Draw the bottom border
+        outFile << std::setfill('-') << std::setw(typeWidth + valueWidth + 7) << "-" << "\n";
     }
 };

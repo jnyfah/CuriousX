@@ -1,35 +1,34 @@
-#ifndef SEMANTIC_HPP
-#define SEMANTIC_HPP
+#pragma once
 
-#include "SymbolTable.hpp"
-#include "Node.hpp"
+#include "CompilerOutputParser.hpp"
 #include <vector>
-
-
 
 class Semantic
 {
 
   public:
-    explicit Semantic(){}
+    explicit Semantic() : m_symboltable(), flag(false) {}
 
-    void traverse(const std::vector<std::shared_ptr<Node>> &compound);
+    bool analyze(const ASTNode& node);
 
-    void checkAssignments(std::shared_ptr<Node> node, const InferredType &inferredType);
+    void analyzeAssignment(const BinaryNode& node);
+    void analyzeExpression(const BinaryNode& node);
+    void analyzeBinaryOperation(const BinaryNode& node);
+    void analyzeConditionalOperation(const ConditionalNode& node);
 
-    void checkExpr(std::shared_ptr<Node> node);
+    void checkDivisionByZero(const ASTNode& node);
 
-    void checkPrint(std::shared_ptr<Node> node);
+    InferredType inferType(const ASTNode& node);
+    InferredType inferTypeFromVariable(const ASTNode& node);
+    InferredType inferTypeFromOperation(const BinaryNode& node);
 
-    std::optional<InferredType> inferType(std::shared_ptr<Node> node);
+    bool isValidConditionType(const LexerToken& type);
+    void analyzeBlockOperation(const TreeNode& node);
+    bool isValidBinaryType(const LexerToken& token);
 
-    nlohmann::json printSymbolTree();
-
-    symbolTable::Table getSymbolTable() const;
-
+    const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable();
 
   private:
-    symbolTable::Table symboltable;
+    ScopedSymbolTable m_symboltable;
+    bool flag;
 };
-
-#endif
