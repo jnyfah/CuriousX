@@ -18,7 +18,6 @@ struct SymbolInfo
 {
     InferredType type;
     LexerToken token;
-    int scopeLevel;
 };
 
 class ScopedSymbolTable
@@ -54,7 +53,7 @@ class ScopedSymbolTable
         {
             throw Error("Unable to infer type", declarationToken.location, ErrorType::SEMANTIC);
         }
-        currentScope[name] = SymbolInfo{type, declarationToken, currentScopeLevel};
+        currentScope[name] = SymbolInfo{type, declarationToken};
     }
 
     bool contains(const std::string& name) const { return lookup(name).has_value(); }
