@@ -21,7 +21,6 @@ class Semantic
     InferredType inferType(const ASTNode& node);
     InferredType inferTypeFromVariable(const ASTNode& node);
     InferredType inferTypeFromOperation(const BinaryNode& node);
-    InferredType inferTypeFromCondition(const BinaryNode& node);
 
     bool isValidConditionType(const LexerToken& type);
     void analyzeBlockOperation(const TreeNode& node);

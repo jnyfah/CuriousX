@@ -89,7 +89,7 @@ InferredType Semantic::inferType(const ASTNode& node)
     case LexerTokenType::GreaterToken:
     case LexerTokenType::LessEqualToken:
     case LexerTokenType::LessToken:
-        return inferTypeFromCondition(static_cast<const BinaryNode&>(node));
+        return inferTypeFromOperation(static_cast<const BinaryNode&>(node));
     default:
         throw Error("Unable to infer type", node.token.location, ErrorType::SEMANTIC);
     }
@@ -124,29 +124,6 @@ InferredType Semantic::inferTypeFromOperation(const BinaryNode& node)
     {
         throw Error("Type mismatch in operation", node.token.location, ErrorType::SEMANTIC);
     }
-
-    if (leftType == InferredType::STRING || rightType == InferredType::STRING)
-    {
-        throw Error("Binary Operations not allowed on strings", node.token.location, ErrorType::SEMANTIC);
-    }
-
-    return leftType;
-}
-
-InferredType Semantic::inferTypeFromCondition(const BinaryNode& node)
-{
-    if (!node.left || !node.right)
-    {
-        throw Error("Unbalanced expression, missing operand", node.token.location,
-                    ErrorType::SEMANTIC);
-    }
-    InferredType leftType = inferType(*node.left);
-    InferredType rightType = inferType(*node.right);
-    if (leftType != rightType)
-    {
-        throw Error("Type mismatch in operation", node.token.location, ErrorType::SEMANTIC);
-    }
-
     return leftType;
 }
 
