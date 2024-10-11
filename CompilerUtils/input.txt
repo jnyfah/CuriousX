@@ -1,7 +1,7 @@
-a = 3 
-b = 8
-f = 0.8
-c = a + b
-x = 3.6
-y = 8.9
-z = x + y + f
+d = true
+a = 5.9
+if (d <= false) {
+    print(a)
+}else {
+    print(a)
+}

@@ -5,11 +5,10 @@
 #include <variant>
 #include <vector>
 
-// Enum representing WebAssembly instruction types
 enum class WasmInstruction
 {
-    I32Const, // Push an integer constant onto the stack
-    F32Const, // Push a float constant onto the stack
+    I32Const, 
+    F32Const, 
 
     // Integer arithmetic
     I32Add,
@@ -24,24 +23,24 @@ enum class WasmInstruction
     F32Div,
 
     // Comparisons (integers)
-    I32Eq,  // Integer equality
-    I32Ne,  // Integer inequality
-    I32LtS, // Integer less than (signed)
-    I32GtS, // Integer greater than (signed)
-    I32LeS, // Integer less than or equal (signed)
-    I32GeS, // Integer greater than or equal (signed)
+    I32Eq,  
+    I32Ne, 
+    I32LtS, 
+    I32GtS, 
+    I32LeS, 
+    I32GeS, 
 
     // Comparisons (floats)
-    F32Eq, // Float equality
-    F32Ne, // Float inequality
-    F32Lt, // Float less than
-    F32Gt, // Float greater than
-    F32Le, // Float less than or equal
-    F32Ge, // Float greater than or equal
+    F32Eq, 
+    F32Ne, 
+    F32Lt, 
+    F32Gt, 
+    F32Le, 
+    F32Ge, 
 
     // Boolean values
-    I32True,  // Represents 'true' (1)
-    I32False, // Represents 'false' (0)
+    I32True,  
+    I32False, 
 
     // Local variables
     LocalGet,
@@ -51,22 +50,17 @@ enum class WasmInstruction
     If,
     Else,
     End,
-
-    // Print function
     CallPrint
 };
 
-// Struct to represent an instruction along with any optional data
 struct WasmInstructionWithData
 {
     WasmInstruction instruction;
     std::string data;
-    bool has_data; // To indicate whether the instruction has associated data
+    bool has_data; 
 
-    // Constructor for instructions without data
     WasmInstructionWithData(WasmInstruction instr) : instruction(instr), has_data(false) {}
 
-    // Constructor for instructions with integer data
     WasmInstructionWithData(WasmInstruction instr, std::string value)
         : instruction(instr), data(value), has_data(true)
     {
@@ -132,9 +126,9 @@ inline std::string instructionToString(const WasmInstructionWithData& instr)
 
     // Boolean values
     case WasmInstruction::I32True:
-        return "i32.const 1"; // True is represented as 1
+        return "i32.const True"; 
     case WasmInstruction::I32False:
-        return "i32.const 0"; // False is represented as 0
+        return "i32.const False"; 
 
     // Local variables
     case WasmInstruction::LocalGet:

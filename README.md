@@ -46,7 +46,7 @@ This will configure the project to be compiled using Emscripten, allowing you to
 __Note:__ Emscripten might not compatible with the `Visual Studio generator` due to a lack of `MSBuild` integration. Use `Ninja` or `Makefiles` instead.
 
 ## Usage
-html file is located at the `web` folder, after building sucessfully, start the webserver
+html file is located at the `CompilerEditor` folder, after building sucessfully, start the webserver
 ```cmd
 emrun CompilerEditor/index.html
 ```
@@ -94,18 +94,14 @@ syntax-analysis output
 and assembly output
 
 ```sh
-	 mov r0, #2
-	 mov r1, #3
-	 mov r2, #4
-	 mul r1, r1, r2
-	 add r0, r0, r1
-	 str r0, [sp, #-4]!
-
-print: 
-	 ldr r0, [sp, #0]
-	 bl printf
-
-	 bx lr
+i32.const 2
+i32.const 3
+i32.const 4
+i32.mul
+i32.add
+local.set 0
+local.get 0
+call $print
 ```
 
 TODO:
