@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Semantic.hpp"
+#include "Codegen.hpp"
 #include <vector>
 
 class Parser
@@ -10,7 +11,7 @@ class Parser
         : m_lexer(std::make_unique<Lexer>(data)),
           m_root(ASTNodeFactory::createTreeNode({},
                                                 {"Program", {0, 0}, LexerTokenType::ProgramToken})),
-          m_prevToken({"Program", {0, 0}, LexerTokenType::ProgramToken}), m_semantic()
+          m_prevToken({"Program", {0, 0}, LexerTokenType::ProgramToken}), m_semantic(), m_wasmgen()
     {
     }
 
@@ -38,4 +39,5 @@ class Parser
     std::unique_ptr<TreeNode> m_root;
     LexerToken m_prevToken;
     Semantic m_semantic;
+    WasmGen m_wasmgen;
 };

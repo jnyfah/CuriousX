@@ -28,8 +28,7 @@ themeToggle.addEventListener("click", toggleTheme);
 
 let Modules = {};
 Modules["onRuntimeInitialized"] = function () {
-  // WASM is ready
-  document.getElementById("run-btn").disabled = false; // enable the Compile button
+  document.getElementById("run-btn").disabled = false; 
 };
 
 function handleCompile() {
@@ -56,6 +55,8 @@ function handleCompile() {
 function displayResults(result) {
   output.lexer = formatLexerOutput(result.Lexer);
   output.trees = generateAsciiTree(result.AST);
+  output.semantic = generateTable(result.SymbolTable);
+  output.codegen = formatCodegenOutput(result.Gen);
 
   updateOutput();
   showAllTabs();
@@ -143,27 +144,44 @@ function updateThemeIcon() {
 // Initial theme icon update
 updateThemeIcon();
 
-function generateAsciiTree(node, prefix = "", isLast = true, isRoot = true) {
+function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
   if (!node) return "";
+
   let result = "";
- 
-  if (!isRoot) {
-    result += prefix;
-    result += isLast ? "└── " : "├── ";
+  const indent = prefix + (isLast ? "└─ " : "├─ ");
+
+  // Add token value or indicate it's unknown
+  if (node.token && node.token.value) {
+    result += indent + node.token.value + "\n";
+  } else {
+    result += indent + "Unknown\n";
   }
-  // Get node value
-  const nodeValue = getNodeValue(node);
-  result += nodeValue + "\n";
-  // Get children
-  const children = getNodeChildren(node);
-  // Generate subtrees
-  children.forEach((child, index) => {
-    const isLastChild = index === children.length - 1;
-    const newPrefix = prefix + (isLast ? "    " : "│   ");
-    result += generateAsciiTree(child, newPrefix, isLastChild, false);
-  });
+
+  // Handle different node types
+  if (Array.isArray(node.children) && node.children.length > 0) {
+    node.children.forEach((child, index) => {
+      const isLastChild = index === node.children.length - 1;
+      result += generateAsciiTree(child, prefix + (isLast ? "    " : "│   "), isLastChild, depth + 1);
+    });
+  } else if (node.left && node.right) {
+    // Handle left-right child nodes
+    result += generateAsciiTree(node.left, prefix + (isLast ? "    " : "│   "), false, depth + 1);
+    result += generateAsciiTree(node.right, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+  } else if (node.condition && node.ifNode && node.elseNode) {
+    // Handle conditionals
+    result += generateAsciiTree(node.condition, prefix + (isLast ? "    " : "│   "), false, depth + 1);
+    result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), false, depth + 1);
+    result += generateAsciiTree(node.elseNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+  } else if (node.condition && node.ifNode) {
+    // Handle conditionals without an elseNode (optional else)
+    result += generateAsciiTree(node.condition, prefix + (isLast ? "    " : "│   "), false, depth + 1);
+    result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+  }
+
   return result;
 }
+
+
 
 function getNodeValue(node) {
   if (typeof node === "string") return node;
@@ -175,4 +193,23 @@ function getNodeChildren(node) {
   if (Array.isArray(node.children)) return node.children;
   if (node.left || node.right) return [node.left, node.right].filter(Boolean);
   return [];
+}
+
+function generateTable(symbolTable) {
+  let tableHeader =
+    "Type             Value\n" +
+    "--------------------------------\n";
+
+  // Format each entry in the symbol table
+  const formattedEntries = symbolTable.map((entry) => {
+    const typePadded = entry.type.padEnd(15); 
+    const valuePadded = entry.value.padEnd(10); 
+    return `${typePadded}${valuePadded}\n`;
+  });
+
+  return tableHeader + formattedEntries.join("");
+}
+
+function formatCodegenOutput(codegenData) {
+    return codegenData.join('\n');
 }

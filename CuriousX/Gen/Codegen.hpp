@@ -1,33 +1,30 @@
-#ifndef CODEGEN_HPP
-#define CODEGEN_HPP
+#pragma once
 
-#include "Node.hpp"
-#include "SymbolTable.hpp"
-#include "Register.hpp"
+#include <unordered_map>
+#include <vector>
 
+#include "CompilerOutputParser.hpp"
 
-class CodeGen 
+class WasmGen
 {
-    public:
-        explicit CodeGen(const symbolTable::Table& symboltable): _symboltable(symboltable) {
-            reg.free_all_registers();
-            last_reg = -1;
-        }
+  public:
+    WasmGen() : localVarIndex(0) {}
+    void traverse(const ASTNode& node);
+    bool isFloatType(const BinaryNode& node);
 
-        nlohmann::json convert(const std::vector<std::shared_ptr<Node>> &compound);
+    void generateBinaryOp(const BinaryNode& node);
+    void generateConditional(const ConditionalNode& node);
+    void generateBlock(const TreeNode& node);
+    void generateExpression(const BinaryNode& node);
 
-        nlohmann::json traverse(const std::shared_ptr<Node> node);
+    int getLocalIndex(std::string_view varName);
 
-        void generateAdd(const std::shared_ptr<Node>& left, const std::shared_ptr<Node>& right);
+    void addInstruction(const WasmInstructionWithData& instruction);
+    const std::vector<WasmInstructionWithData>& getInstructions() const;
+    const std::unordered_map<std::string, int>& getLocalMap() const;
 
-        void perform_operation(LexerTokenType op, int reg_idx1, int reg_idx2);
-
-    private:
-        RegisterAllocator reg;
-        int last_reg;
-        symbolTable::Table _symboltable;
-        std::unordered_map<std::string, int> _staked_var;
-        int sp = -4;
+  private:
+    std::unordered_map<std::string, int> locals;
+    int localVarIndex;
+    std::vector<WasmInstructionWithData> instructions;
 };
-
-#endif

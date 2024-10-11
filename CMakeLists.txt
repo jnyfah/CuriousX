@@ -50,22 +50,21 @@ add_library(Lexer STATIC ${SOURCES_LEXER})
 target_include_directories(Lexer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Lexer)
 target_link_libraries(Lexer PUBLIC CompilerUtils nlohmann_json::nlohmann_json)
 
+# -------------------- Include CodeGen Folder--------------------------------
+add_library(Gen STATIC ${SOURCES_GEN})
+target_include_directories(Gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Gen)
+target_link_libraries(Gen PUBLIC Lexer)
+
 # -------------------- Include Semantic Folder--------------------------------
 add_library(Semantic STATIC ${SOURCES_SEMANTIC})
 target_include_directories(Semantic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Semantic)
-target_link_libraries(Semantic PUBLIC Lexer)
+target_link_libraries(Semantic PUBLIC Gen)
 
 # -------------------- Include Parser Folder--------------------------------
 add_library(Parser STATIC ${SOURCES_PARSER})
 target_include_directories(Parser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Parser)
 target_link_libraries(Parser PUBLIC Semantic)
 
-
-
-# # -------------------- Include CodeGen Folder--------------------------------
-# add_library(Gen STATIC ${SOURCES_GEN})
-# target_include_directories(Gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Gen)
-# target_link_libraries(Gen PUBLIC Semantic)
 
 # -------------------- Create the main executable and link it to the libraries --------------------------------
 add_executable(CuriousX "CuriousX/main.cpp")
