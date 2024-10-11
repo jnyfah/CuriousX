@@ -50,9 +50,9 @@ void Semantic::analyzeAssignment(const BinaryNode& node)
     const std::string& varName = std::string(node.left->token.value);
     InferredType rightType = inferType(*node.right);
 
-    if (m_symboltable.contains(varName))
+    if (ScopedSymbolTable::getInstance().contains(varName))
     {
-        auto existingType = m_symboltable.lookup(varName);
+        auto existingType = ScopedSymbolTable::getInstance().lookup(varName);
         if (existingType != rightType)
         {
             throw Error("Type mismatch in assignment", node.left->token.location);
@@ -60,7 +60,7 @@ void Semantic::analyzeAssignment(const BinaryNode& node)
     }
     else
     {
-        m_symboltable.insert(varName, rightType, node.left->token);
+        ScopedSymbolTable::getInstance().insert(varName, rightType, node.left->token);
     }
 }
 
@@ -97,7 +97,7 @@ InferredType Semantic::inferType(const ASTNode& node)
 
 InferredType Semantic::inferTypeFromVariable(const ASTNode& node)
 {
-    auto type = m_symboltable.lookup(std::string(node.token.value));
+    auto type = ScopedSymbolTable::getInstance().lookup(std::string(node.token.value));
     if (!type)
     {
         throw Error("Variable not defined", node.token.location, ErrorType::SEMANTIC);
@@ -169,16 +169,16 @@ bool Semantic::isValidBinaryType(const LexerToken& token)
 
 void Semantic::analyzeBlockOperation(const TreeNode& node)
 {
-    m_symboltable.enterScope();
+    ScopedSymbolTable::getInstance().enterScope();
 
     for (const auto& statement : node.children)
     {
         analyze(*statement);
     }
-    m_symboltable.exitScope();
+    ScopedSymbolTable::getInstance().exitScope();
 }
 
 const std::vector<std::unordered_map<std::string, SymbolInfo>> Semantic::getSymbolTable()
 {
-    return m_symboltable.getSymbolTable();
+    return ScopedSymbolTable::getInstance().getSymbolTable();
 }

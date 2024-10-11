@@ -1,33 +1,52 @@
-#ifndef CODEGEN_HPP
-#define CODEGEN_HPP
+#pragma once
 
-#include "Node.hpp"
-#include "SymbolTable.hpp"
-#include "Register.hpp"
+#include <unordered_map>
+#include <vector>
 
 
-class CodeGen 
+#include "CompilerOutputParser.hpp"
+
+class WasmGen
 {
-    public:
-        explicit CodeGen(const symbolTable::Table& symboltable): _symboltable(symboltable) {
-            reg.free_all_registers();
-            last_reg = -1;
-        }
+  public:
+    // Constructor
+    WasmGen(): localVarIndex(0){}
 
-        nlohmann::json convert(const std::vector<std::shared_ptr<Node>> &compound);
+    // Main traversal function
+    void traverse(const ASTNode& node);
+    bool isFloatType(const BinaryNode& node);
 
-        nlohmann::json traverse(const std::shared_ptr<Node> node);
+    // Generation functions for different node types
+    void generateBinaryOp(const BinaryNode& node);
+    void generateConditional(const ConditionalNode& node);
+    void generateBlock(const TreeNode& node);
 
-        void generateAdd(const std::shared_ptr<Node>& left, const std::shared_ptr<Node>& right);
+    void generateExpression(const BinaryNode& node);
 
-        void perform_operation(LexerTokenType op, int reg_idx1, int reg_idx2);
+    // Variable management
+    int getLocalIndex(std::string_view varName);
 
-    private:
-        RegisterAllocator reg;
-        int last_reg;
-        symbolTable::Table _symboltable;
-        std::unordered_map<std::string, int> _staked_var;
-        int sp = -4;
+    // Instruction management
+    void addInstruction(const WasmInstructionWithData& instruction);
+    const std::vector<WasmInstructionWithData>& getInstructions() const;
+    const std::unordered_map<std::string, int>& getLocalMap() const;
+
+  private:
+    std::unordered_map<std::string, int> locals; 
+    int localVarIndex; 
+    std::vector<WasmInstructionWithData> instructions;
 };
 
-#endif
+// std::string generateWAT(const std::vector<WasmInstructionWithData>& instructions)
+// {
+//     std::string wat_output;
+//     for (const auto& instr : instructions)
+//     {
+//         wat_output += instructionToString(instr) + "\n";
+//     }
+//     return wat_output;
+// }
+
+// // Example usage
+// std::string wat_code = generateWAT(instructions);
+// std::cout << wat_code;

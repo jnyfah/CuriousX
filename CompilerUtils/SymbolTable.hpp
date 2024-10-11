@@ -25,11 +25,18 @@ class ScopedSymbolTable
   private:
     std::vector<std::unordered_map<std::string, SymbolInfo>> scopes;
     int currentScopeLevel;
-
-  public:
     ScopedSymbolTable() : currentScopeLevel(-1)
     {
         enterScope(); // Create global scope
+    }
+    ScopedSymbolTable(const ScopedSymbolTable&) = delete;
+    ScopedSymbolTable& operator=(const ScopedSymbolTable&) = delete;
+
+  public:
+    static ScopedSymbolTable& getInstance()
+    {
+        static ScopedSymbolTable instance;
+        return instance;
     }
     void enterScope()
     {
@@ -97,6 +104,11 @@ class ScopedSymbolTable
             }
         }
         return std::nullopt;
+    }
+
+    bool isFloatType(std::string_view varName) const
+    {
+        return lookup(std::string(varName)) == InferredType::FLOAT;
     }
 
     const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable()

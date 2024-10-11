@@ -1,11 +1,7 @@
-a = 1
-b = 2
+a = 3 
+b = 8
+f = 0.8
 c = a + b
-x = "hello"
-y = "world"
-z = x + y
-if ("hey" > "loop") {
-    d = 10
-} else {
-    d =8
-}
+x = 3.6
+y = 8.9
+z = x + y + f

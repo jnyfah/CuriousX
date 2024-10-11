@@ -10,6 +10,7 @@ bool Parser::parseTokens()
         if (auto node = parseStatement(token))
         {
             m_semantic.analyze(*node);
+            m_wasmgen.traverse(*node);
             m_root->children.emplace_back(std::move(node));
         }
         if (!expectNewlineOrEOF(token))
@@ -20,6 +21,7 @@ bool Parser::parseTokens()
         advancePastNewlines(token);
     }
     CompilerOutputParser::getInstance().setASTOutput(m_root, m_semantic.getSymbolTable());
+    CompilerOutputParser::getInstance().codeOutput(m_wasmgen.getInstructions());
     return !m_root->children.empty();
 }
 

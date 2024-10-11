@@ -8,6 +8,7 @@
 
 #include "Node.hpp"
 #include "SymbolTable.hpp"
+#include "WasmInstructions.hpp"
 
 using json = nlohmann::json;
 
@@ -84,6 +85,9 @@ class CompilerOutputParser
         outFile << "==== Symbol Output ====\n\n";
         drawTable(j["SymbolTable"], outFile);
 
+        outFile << "==== Code Output ====\n\n";
+        outFile << j["Gen"].dump(4);
+
         outFile.close();
         std::cout << "output written to: " << outputFile << std::endl;
     }
@@ -146,6 +150,17 @@ class CompilerOutputParser
     {
         jsonOutput["AST"] = nodeToJson(root);
         jsonOutput["SymbolTable"] = tableToJson(table);
+    }
+
+    void codeOutput(const std::vector<WasmInstructionWithData>& data)
+    {
+
+        json instructionArray = json::array();
+        for (const auto& instr : data)
+        {
+            instructionArray.push_back(instructionToString(instr));
+        }
+        jsonOutput["Gen"] = instructionArray;
     }
 
     nlohmann::json

@@ -7,7 +7,7 @@ class Semantic
 {
 
   public:
-    explicit Semantic() : m_symboltable(), flag(false) {}
+    explicit Semantic() : flag(false) {}
 
     bool analyze(const ASTNode& node);
 
@@ -29,6 +29,5 @@ class Semantic
     const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable();
 
   private:
-    ScopedSymbolTable m_symboltable;
     bool flag;
 };
