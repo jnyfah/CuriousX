@@ -22,33 +22,33 @@ __Test and check out the [Compiler Playground](https://jnyfah.github.io/CuriousX
 
 ## Dependencies
 1.  A C++ compiler that supports C++17. See [cppreference.com](https://en.cppreference.com/w/cpp/compiler_support) to see which features are supported by each compiler.
-2.  [CMake 3.15+](https://cmake.org/)
+2.  [CMake 3.25+](https://cmake.org/)
 3.  Compiler toolchain to WebAssembly [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
 
 ## Building
 
+### Building Without Emscripten (Standard Build)
 ```cmd
 mkdir build
 cd build
-emcmake cmake ..
-cmake --build .
-emrun ..\web\index.html
+cmake -B build -S .
+cmake --build build
 ```
+This will compile the project using your default system compiler (e.g., GCC, Clang, or MSVC).
 
-## Testing
-To compile and run the tests, you need to turn on the `-DCURIOUSX_BUILD_TESTS` option when building and execute
-
+### Building with Emscripten (WebAssembly Deployment)
 ```cmd
-cd build
-emcmake cmake -DCURIOUSX_BUILD_TESTS=ON ..
-cmake --build .
-ctest
+emcmake cmake -B build -S .
+cmake --build build
 ```
+This will configure the project to be compiled using Emscripten, allowing you to deploy it as WebAssembly
+
+__Note:__ Emscripten might not compatible with the `Visual Studio generator` due to a lack of `MSBuild` integration. Use `Ninja` or `Makefiles` instead.
 
 ## Usage
-html file is located at the `web` folder, after building sucessfuly, start the webserver
+html file is located at the `CompilerEditor` folder, after building sucessfully, start the webserver
 ```cmd
-emrun ..\web\index.html
+emrun CompilerEditor/index.html
 ```
 
 This generates a `Lexical-analysis` `Syntax-analysis` and an `assembly` files outputs on the webpage and you can also view the symbol table if you source code has any.
@@ -94,16 +94,24 @@ syntax-analysis output
 and assembly output
 
 ```sh
-	 mov r0, #2
-	 mov r1, #3
-	 mov r2, #4
-	 mul r1, r1, r2
-	 add r0, r0, r1
-	 str r0, [sp, #-4]!
-
-print: 
-	 ldr r0, [sp, #0]
-	 bl printf
-
-	 bx lr
+i32.const 2
+i32.const 3
+i32.const 4
+i32.mul
+i32.add
+local.set 0
+local.get 0
+call $print
 ```
+
+TODO:
+- [ ] the sun for the toggle theme
+- [ ] code line numbers
+- [ ] color code area
+- [ ] being able to scroll when input/output overflows
+- [ ] Clearing previous output when exception occurs ( clear output anytime compile is hit ?)
+- [ ] if output file is not provided create one
+- [ ] what if comment is too long
+- [ ] remove dark mode check prettier for good design
+- [ ] writing Unit tests
+- [ ] Translation validation
