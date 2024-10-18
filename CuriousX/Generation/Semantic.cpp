@@ -1,9 +1,7 @@
 #include "Semantic.hpp"
 #include <cmath>
 #include <limits>
-
-// if can start a program ?
-// division by zero
+#include <string>
 
 bool Semantic::analyze(const ASTNode& node)
 {
@@ -19,6 +17,7 @@ bool Semantic::analyze(const ASTNode& node)
         analyzeBlockOperation(static_cast<const TreeNode&>(node));
         break;
     default:
+        // Handle unexpected node types or throw an error
         break;
     }
     return true;
@@ -26,7 +25,6 @@ bool Semantic::analyze(const ASTNode& node)
 
 void Semantic::analyzeBinaryOperation(const BinaryNode& node)
 {
-    flag = false;
     if (node.token.type == LexerTokenType::AssignToken)
     {
         analyzeAssignment(node);
@@ -47,20 +45,20 @@ void Semantic::analyzeAssignment(const BinaryNode& node)
     {
         throw Error("Invalid assignment: left side must be a variable", node.left->token.location);
     }
-    const std::string& varName = std::string(node.left->token.value);
-    InferredType rightType = inferType(*node.right);
 
-    if (ScopedSymbolTable::getInstance().contains(varName))
+    const std::string& varName   = getVariableName(*node.left);
+    InferredType       rightType = inferType(*node.right);
+
+    auto& symbolTable = ScopedSymbolTable::getInstance();
+
+    if (symbolTable.contains(varName))
     {
-        auto existingType = ScopedSymbolTable::getInstance().lookup(varName);
-        if (existingType != rightType)
-        {
-            throw Error("Type mismatch in assignment", node.left->token.location);
-        }
+        auto existingType = symbolTable.lookup(varName);
+        ensureTypeMatch(existingType.value(), rightType, node.left->token);
     }
     else
     {
-        ScopedSymbolTable::getInstance().insert(varName, rightType, node.left->token);
+        symbolTable.insert(varName, rightType, node.left->token);
     }
 }
 
@@ -82,7 +80,6 @@ InferredType Semantic::inferType(const ASTNode& node)
     case LexerTokenType::MinusToken:
     case LexerTokenType::DivideToken:
     case LexerTokenType::MultiplyToken:
-        return inferTypeFromOperation(static_cast<const BinaryNode&>(node));
     case LexerTokenType::EqualToken:
     case LexerTokenType::NotEqualToken:
     case LexerTokenType::GreaterEqualToken:
@@ -102,8 +99,6 @@ InferredType Semantic::inferTypeFromVariable(const ASTNode& node)
     {
         throw Error("Variable not defined", node.token.location, ErrorType::SEMANTIC);
     }
-    flag = true;
-
     return *type;
 }
 
@@ -111,32 +106,23 @@ InferredType Semantic::inferTypeFromOperation(const BinaryNode& node)
 {
     if (!node.left || !node.right)
     {
-        throw Error("Unbalanced expression, missing operand", node.token.location,
-                    ErrorType::SEMANTIC);
+        throw Error("Unbalanced expression, missing operand", node.token.location, ErrorType::SEMANTIC);
     }
-    // // check division by zero
-    // if (node.token.type == LexerTokenType::DivideToken) checkDivisionByZero(*node.right);
 
-    InferredType leftType = inferType(*node.left);
-    InferredType rightType = inferType(*node.right);
-
-    if (leftType != rightType)
+    if (node.token.type == LexerTokenType::DivideToken)
     {
-        throw Error("Type mismatch in operation", node.token.location, ErrorType::SEMANTIC);
+        checkDivisionByZero(*node.right);
     }
+
+    InferredType leftType  = inferType(*node.left);
+    InferredType rightType = inferType(*node.right);
+    ensureTypeMatch(leftType, rightType, node.token);
     return leftType;
 }
 
 void Semantic::analyzeExpression(const BinaryNode& node)
 {
-    InferredType rightType = inferType(*node.right);
-    InferredType leftType = inferType(*node.left);
-    if (rightType != leftType)
-    {
-        throw Error("Type mismatch in operation", node.token.location, ErrorType::SEMANTIC);
-    }
-    if (!flag)
-        throw Error("literal Expressions not allowed", node.token.location, ErrorType::SEMANTIC);
+    ensureTypeMatch(inferType(*node.left), inferType(*node.right), node.token);
 }
 
 void Semantic::analyzeConditionalOperation(const ConditionalNode& node)
@@ -148,37 +134,64 @@ void Semantic::analyzeConditionalOperation(const ConditionalNode& node)
     inferType(*node.condition);
     analyzeBlockOperation(*node.ifNode);
     if (node.elseNode)
+    {
         analyzeBlockOperation(*node.elseNode);
-}
-
-bool Semantic::isValidConditionType(const LexerToken& token)
-{
-    return (token.type == LexerTokenType::EqualToken ||
-            token.type == LexerTokenType::GreaterEqualToken ||
-            token.type == LexerTokenType::GreaterToken ||
-            token.type == LexerTokenType::LessEqualToken ||
-            token.type == LexerTokenType::LessToken || token.type == LexerTokenType::NotEqualToken);
-}
-
-bool Semantic::isValidBinaryType(const LexerToken& token)
-{
-    return (token.type == LexerTokenType::PlusToken || token.type == LexerTokenType::MinusToken ||
-            token.type == LexerTokenType::MultiplyToken ||
-            token.type == LexerTokenType::DivideToken);
+    }
 }
 
 void Semantic::analyzeBlockOperation(const TreeNode& node)
 {
-    ScopedSymbolTable::getInstance().enterScope();
+    auto& symbolTable = ScopedSymbolTable::getInstance();
+    symbolTable.enterScope();
 
     for (const auto& statement : node.children)
     {
         analyze(*statement);
     }
-    ScopedSymbolTable::getInstance().exitScope();
+
+    symbolTable.exitScope();
 }
 
-const std::vector<std::unordered_map<std::string, SymbolInfo>> Semantic::getSymbolTable()
+void Semantic::checkDivisionByZero(const ASTNode& node)
+{
+    if (node.token.type == LexerTokenType::IntToken && std::stoi(std::string(node.token.value)) == 0)
+    {
+        throw Error("Division by zero", node.token.location, ErrorType::SEMANTIC);
+    }
+    else if (node.token.type == LexerTokenType::FloatToken &&
+             std::abs(std::stof(std::string(node.token.value))) < std::numeric_limits<float>::epsilon())
+    {
+        throw Error("Division by zero", node.token.location, ErrorType::SEMANTIC);
+    }
+}
+
+bool Semantic::isValidConditionType(const LexerToken& token) const
+{
+    return (token.type == LexerTokenType::EqualToken || token.type == LexerTokenType::GreaterEqualToken ||
+            token.type == LexerTokenType::GreaterToken || token.type == LexerTokenType::LessEqualToken ||
+            token.type == LexerTokenType::LessToken || token.type == LexerTokenType::NotEqualToken);
+}
+
+bool Semantic::isValidBinaryType(const LexerToken& token) const
+{
+    return (token.type == LexerTokenType::PlusToken || token.type == LexerTokenType::MinusToken ||
+            token.type == LexerTokenType::MultiplyToken || token.type == LexerTokenType::DivideToken);
+}
+
+void Semantic::ensureTypeMatch(InferredType left, InferredType right, const LexerToken& token) const
+{
+    if (left != right)
+    {
+        throw Error("Type mismatch in operation", token.location, ErrorType::SEMANTIC);
+    }
+}
+
+std::string Semantic::getVariableName(const ASTNode& node) const
+{
+    return std::string(node.token.value);
+}
+
+std::vector<symbol> Semantic::getSymbolTables() 
 {
     return ScopedSymbolTable::getInstance().getSymbolTable();
 }

@@ -17,19 +17,19 @@ enum class InferredType
 struct SymbolInfo
 {
     InferredType type;
-    LexerToken token;
+    LexerToken   token;
 };
 
 class ScopedSymbolTable
 {
   private:
     std::vector<std::unordered_map<std::string, SymbolInfo>> scopes;
-    int currentScopeLevel;
+    int                                                      currentScopeLevel;
     ScopedSymbolTable() : currentScopeLevel(-1)
     {
         enterScope(); // Create global scope
     }
-    ScopedSymbolTable(const ScopedSymbolTable&) = delete;
+    ScopedSymbolTable(const ScopedSymbolTable&)            = delete;
     ScopedSymbolTable& operator=(const ScopedSymbolTable&) = delete;
 
   public:
@@ -106,13 +106,7 @@ class ScopedSymbolTable
         return std::nullopt;
     }
 
-    bool isFloatType(std::string_view varName) const
-    {
-        return lookup(std::string(varName)) == InferredType::FLOAT;
-    }
+    bool isFloatType(std::string_view varName) const { return lookup(std::string(varName)) == InferredType::FLOAT; }
 
-    const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable()
-    {
-        return scopes;
-    }
+    const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable() { return scopes; }
 };

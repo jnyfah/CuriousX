@@ -1,7 +1,4 @@
 d = true
-a = 5.9
-if (d <= false) {
-    print(a)
-}else {
-    print(a)
-}
+a = 0
+c = 1.9
+e = a/c
