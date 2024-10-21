@@ -6,6 +6,8 @@
 
 #include "Node.hpp"
 
+
+
 enum class InferredType
 {
     INTEGER,
@@ -20,10 +22,12 @@ struct SymbolInfo
     LexerToken   token;
 };
 
+using symbolTable = std::vector<std::unordered_map<std::string, SymbolInfo>>;
+
 class ScopedSymbolTable
 {
   private:
-    std::vector<std::unordered_map<std::string, SymbolInfo>> scopes;
+    symbolTable scopes;
     int                                                      currentScopeLevel;
     ScopedSymbolTable() : currentScopeLevel(-1)
     {
@@ -108,5 +112,5 @@ class ScopedSymbolTable
 
     bool isFloatType(std::string_view varName) const { return lookup(std::string(varName)) == InferredType::FLOAT; }
 
-    const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable() { return scopes; }
+    const symbolTable getSymbolTable() { return scopes; }
 };

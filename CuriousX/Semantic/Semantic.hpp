@@ -1,24 +1,21 @@
 #pragma once
 
-#include "CompilerOutputParser.hpp"
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include "SymbolTable.hpp"
 
-using symbol = std::unordered_map<std::string, SymbolInfo>;
 class Semantic
 {
   public:
-    Semantic() = default;
+    Semantic() {}
 
-    bool                analyze(const ASTNode& node);
-    std::vector<symbol> getSymbolTables();
-    void                analyzeBinaryOperation(const BinaryNode& node);
-    void                analyzeConditionalOperation(const ConditionalNode& node);
-    void                analyzeBlockOperation(const TreeNode& node);
+    symbolTable getSymbolTables();
+    bool analyze(const ASTNode& node);
 
   private:
+    
     // Analysis methods
+    void analyzeBinaryOperation(const BinaryNode& node);
+    void analyzeConditionalOperation(const ConditionalNode& node);
+    void analyzeBlockOperation(const TreeNode& node);
     void analyzeAssignment(const BinaryNode& node);
     void analyzeExpression(const BinaryNode& node);
 
@@ -37,5 +34,5 @@ class Semantic
     std::string getVariableName(const ASTNode& node) const;
 
     // Member variables
-    bool m_hasAnalyzedExpression = false;
+    bool    m_hasAnalyzedExpression = false;
 };

@@ -3,6 +3,7 @@
 #include <limits>
 #include <string>
 
+
 bool Semantic::analyze(const ASTNode& node)
 {
     switch (node.getType())
@@ -191,7 +192,7 @@ std::string Semantic::getVariableName(const ASTNode& node) const
     return std::string(node.token.value);
 }
 
-std::vector<symbol> Semantic::getSymbolTables() 
+symbolTable Semantic::getSymbolTables() 
 {
     return ScopedSymbolTable::getInstance().getSymbolTable();
 }

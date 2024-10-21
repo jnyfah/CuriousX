@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "LexerToken.hpp"
+#include "Error.hpp"
 
 class Lexer
 {

@@ -1,25 +1,23 @@
 
-#include "Parser.hpp"
-#include <sstream>
+#include "Compiler.hpp"
+#include "CompilerOutputParser.hpp"
 #include <iostream>
-
-
+#include <sstream>
 
 std::string processFileContent(const std::string& content)
 {
     std::ostringstream output;
     try
     {
-        Parser parse(content);
-        parse.parseTokens();
-        
-        output << CompilerOutputParser::getInstance().getJson();
+        CompilerOutput m_output;
+        Compiler com(content, m_output);
+        com.compile();
+
+        m_output.writeToFile("C:/Repos/CuriousX/CompilerUtils/output.txt");
     }
     catch (const Error& ex)
     {
-        CompilerOutputParser::getInstance().setErrorOutput(ex);
-        output << CompilerOutputParser::getInstance().getJson();
-        std::cout<<ex.what();
+        std::cout << ex.what();
     }
     return output.str();
 }
@@ -39,8 +37,12 @@ int main(int argc, const char* argv[])
     }
     try
     {
-        std::string jsonString = processFileContent(CompilerOutputParser::getInstance().readInputFile(argv[1]));
-        CompilerOutputParser::getInstance().formatTokens(jsonString, argv[2]);
+        
+        std::ifstream inputFile(argv[1]);
+        std::ostringstream sstr;
+        sstr << inputFile.rdbuf();
+    
+        std::string jsonString = processFileContent(sstr.str());
         std::cout<<jsonString;
     }
     catch (const std::exception& e)

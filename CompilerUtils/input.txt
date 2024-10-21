@@ -1,4 +1,7 @@
 d = true
 a = 0
-c = 1.9
+c = 1
 e = a/c
+if (a==c) {
+    print(e)
+}

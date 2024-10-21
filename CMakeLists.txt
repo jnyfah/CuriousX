@@ -32,9 +32,13 @@ set(SOURCES_PARSER
     CuriousX/Parser/Parser.cpp
 )
 
+
+set(SOURCES_SEMANTIC
+    CuriousX/Semantic/Semantic.cpp
+)
+
 set(SOURCES_GEN
     CuriousX/Generation/Codegen.cpp
-    CuriousX/Generation/Semantic.cpp
 )
 
 
@@ -47,21 +51,32 @@ add_library(Lexer STATIC ${SOURCES_LEXER})
 target_include_directories(Lexer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Lexer)
 target_link_libraries(Lexer PUBLIC CompilerUtils nlohmann_json::nlohmann_json)
 
-# -------------------- Include CodeGen Folder--------------------------------
-add_library(Gen STATIC ${SOURCES_GEN})
-target_include_directories(Gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Generation)
-target_link_libraries(Gen PUBLIC Lexer)
-
 # -------------------- Include Parser Folder--------------------------------
 add_library(Parser STATIC ${SOURCES_PARSER})
 target_include_directories(Parser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Parser)
-target_link_libraries(Parser PUBLIC Gen)
+target_link_libraries(Parser PUBLIC Lexer)
+
+# -------------------- Include Semantic Folder--------------------------------
+add_library(Semantic STATIC ${SOURCES_SEMANTIC})
+target_include_directories(Semantic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Semantic)
+target_link_libraries(Semantic PUBLIC Parser)
+
+# -------------------- Include CodeGen Folder--------------------------------
+add_library(Gen STATIC ${SOURCES_GEN})
+target_include_directories(Gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX/Gen)
+target_link_libraries(Gen PUBLIC Semantic)
 
 
-# -------------------- Create the main executable and link it to the libraries --------------------------------
-add_executable(CuriousX "CuriousX/main.cpp")
-target_link_libraries(CuriousX PRIVATE Parser)
+# -------------------- Include Compiler Files --------------------------
+add_library(Compiler STATIC CuriousX/Compiler.cpp)
+target_include_directories(Compiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX)
+target_link_libraries(Compiler PUBLIC Parser Semantic Gen)
+
+# -------------------- Include the Main Executable ----------------------
+add_executable(CuriousX CuriousX/main.cpp)
 target_include_directories(CuriousX PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/CuriousX)
+target_link_libraries(CuriousX PRIVATE Compiler)
+
 
 
 if(EMSCRIPTEN)

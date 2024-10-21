@@ -1,47 +1,5 @@
 #include "Codegen.hpp"
 
-WasmGen::WasmGen(): m_semantic() {}
-
-void WasmGen::process(const ASTNode& node)
-{
-    // Perform semantic analysis and code generation in one pass.
-    switch (node.getType())
-    {
-    case NodeType::BinaryOperation:
-        processBinaryOperation(static_cast<const BinaryNode&>(node));
-        break;
-    case NodeType::ConditionalOperation:
-        processConditionalOperation(static_cast<const ConditionalNode&>(node));
-        break;
-    case NodeType::BlockOperation:
-        processBlockOperation(static_cast<const TreeNode&>(node));
-        break;
-    default:
-        throw std::runtime_error("Unexpected node type");
-    }
-}
-
-void WasmGen::processBinaryOperation(const BinaryNode& node)
-{
-    m_semantic.analyzeBinaryOperation(node); // Semantic validation
-    generateBinaryOp(node);        // Code generation
-}
-
-void WasmGen::processConditionalOperation(const ConditionalNode& node)
-{
-    m_semantic.analyzeConditionalOperation(node); // Semantic validation
-    generateConditional(node);          // Code generation
-}
-
-void WasmGen::processBlockOperation(const TreeNode& node)
-{
-    m_semantic.analyzeBlockOperation(node); // Semantic validation
-    generateBlock(node);          // Code generation
-}
-
-std::vector<symbol> WasmGen::getSymbolTables() {
-    return m_semantic.getSymbolTables();
-}
 
 void WasmGen::generate(const ASTNode& node)
 {
