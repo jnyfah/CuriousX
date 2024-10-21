@@ -11,11 +11,11 @@
 class WasmGen
 {
   public:
-    WasmGen(){}
+    WasmGen(CompilerOutput& output): m_output(output){}
 
     void                                        generate(const ASTNode& rootNode);
-    const std::vector<WasmInstructionWithData>& getInstructions() const;
     const std::unordered_map<std::string, int>& getLocalMap() const;
+    void addGeneratedCodeToOutput();
 
   private:
     // Node traversal methods
@@ -34,4 +34,5 @@ class WasmGen
     std::unordered_map<std::string, int> m_locals;
     std::vector<WasmInstructionWithData> m_instructions;
     int                                  m_nextLocalIndex = 0;
+    CompilerOutput&        m_output;
 };

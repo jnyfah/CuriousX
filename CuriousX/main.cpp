@@ -1,6 +1,6 @@
 
 #include "Compiler.hpp"
-#include "CompilerOutputParser.hpp"
+#include "CompilerOutput.hpp"
 #include <iostream>
 #include <sstream>
 

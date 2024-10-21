@@ -3,8 +3,7 @@
 #include <limits>
 #include <string>
 
-
-bool Semantic::analyze(const ASTNode& node)
+bool Semantic::analyzeTree(const ASTNode& node)
 {
     switch (node.getType())
     {
@@ -147,7 +146,7 @@ void Semantic::analyzeBlockOperation(const TreeNode& node)
 
     for (const auto& statement : node.children)
     {
-        analyze(*statement);
+        analyzeTree(*statement);
     }
 
     symbolTable.exitScope();
@@ -192,7 +191,42 @@ std::string Semantic::getVariableName(const ASTNode& node) const
     return std::string(node.token.value);
 }
 
-symbolTable Semantic::getSymbolTables() 
+nlohmann::json Semantic::tableToJson(const symbolTable& table)
 {
-    return ScopedSymbolTable::getInstance().getSymbolTable();
+    nlohmann::json jArray = nlohmann::json::array();
+    for (const auto& scope : table)
+    {
+        nlohmann::json scopeJson = nlohmann::json::object();
+        for (const auto& [name, info] : scope)
+        {
+            scopeJson[name] = {
+                {"type", getInferredTypeDescription(info.type)},
+                {"value", name},
+            };
+        }
+        jArray.push_back(scopeJson);
+    }
+    return jArray;
+}
+
+constexpr std::string_view Semantic::getInferredTypeDescription(const InferredType& t)
+{
+    switch (t)
+    {
+    case InferredType::BOOL:
+        return "Boolean";
+    case InferredType::FLOAT:
+        return "Float";
+    case InferredType::INTEGER:
+        return "Integer";
+    case InferredType::STRING:
+        return "String";
+    default:
+        return "An unknown error occurred";
+    }
+}
+
+void Semantic::addSymbolTableToOutput()
+{
+    m_output.getJson()["SymbolTable"] = tableToJson(ScopedSymbolTable::getInstance().getSymbolTable());
 }

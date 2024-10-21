@@ -1,15 +1,15 @@
 #pragma once
 
 #include "SymbolTable.hpp"
+#include  "CompilerOutput.hpp"
 
 class Semantic
 {
   public:
-    Semantic() {}
+    Semantic(CompilerOutput& output): m_output(output) {}
 
-    symbolTable getSymbolTables();
-    bool analyze(const ASTNode& node);
-
+    bool analyzeTree(const ASTNode& node);
+    void addSymbolTableToOutput();
   private:
     
     // Analysis methods
@@ -32,7 +32,10 @@ class Semantic
 
     // Helper methods
     std::string getVariableName(const ASTNode& node) const;
+    nlohmann::json tableToJson(const symbolTable& table);
+    constexpr std::string_view getInferredTypeDescription(const InferredType& t);
 
     // Member variables
     bool    m_hasAnalyzedExpression = false;
+    CompilerOutput&        m_output;
 };

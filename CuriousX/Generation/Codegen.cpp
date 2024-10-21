@@ -1,6 +1,5 @@
 #include "Codegen.hpp"
 
-
 void WasmGen::generate(const ASTNode& node)
 {
     switch (node.getType())
@@ -118,11 +117,6 @@ void WasmGen::addInstruction(WasmInstructionWithData instruction)
     m_instructions.push_back(instruction);
 }
 
-const std::vector<WasmInstructionWithData>& WasmGen::getInstructions() const
-{
-    return m_instructions;
-}
-
 const std::unordered_map<std::string, int>& WasmGen::getLocalMap() const
 {
     return m_locals;
@@ -170,4 +164,15 @@ void WasmGen::generateBlock(const TreeNode& node)
     {
         addInstruction(WasmInstructionWithData(WasmInstruction::CallPrint));
     }
+}
+
+void WasmGen::addGeneratedCodeToOutput()
+{
+
+    nlohmann::json instructionArray = nlohmann::json::array();
+    for (const auto& instr : m_instructions)
+    {
+        instructionArray.push_back(instructionToString(instr));
+    }
+    m_output.getJson()["Gen"].push_back(instructionArray);
 }
