@@ -55,7 +55,7 @@ function handleCompile() {
 function displayResults(result) {
   output.lexer = formatLexerOutput(result.Lexer);
   output.trees = generateAsciiTree(result.AST);
-  output.semantic = generateTable(result.SymbolTable);
+  //output.semantic = generateTable(result.SymbolTable);
   output.codegen = formatCodegenOutput(result.Gen);
 
   updateOutput();

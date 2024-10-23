@@ -19,5 +19,5 @@ class Compiler
     Semantic                  m_semantic;
     WasmGen                   m_codegen;
     std::unique_ptr<TreeNode> m_root;
-    CompilerOutput m_output;
+    CompilerOutput            m_output;
 };

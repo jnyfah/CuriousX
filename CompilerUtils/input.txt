@@ -1,7 +1,6 @@
-d = true
-a = 0
-c = 1
-e = a/c
-if (a==c) {
-    print(e)
+x = 60
+y = 9
+
+if (x == y) {
+print(x)
 }

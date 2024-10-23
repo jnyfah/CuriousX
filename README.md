@@ -115,8 +115,7 @@ TODO:
 - [ ] remove dark mode check prettier for good design
 - [ ] writing Unit tests
 - [ ] Translation validation
+- [ ] TError not showing on Js well
 
 
 turning into an interpreter, get all the errors first before throwing ??
-semantic and codegen can be done at once ?
-the jsonfile is slowing things down

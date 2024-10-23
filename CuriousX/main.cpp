@@ -6,20 +6,10 @@
 
 std::string processFileContent(const std::string& content)
 {
-    std::ostringstream output;
-    try
-    {
-        CompilerOutput m_output;
-        Compiler com(content, m_output);
-        com.compile();
-
-        m_output.writeToFile("C:/Repos/CuriousX/CompilerUtils/output.txt");
-    }
-    catch (const Error& ex)
-    {
-        std::cout << ex.what();
-    }
-    return output.str();
+    CompilerOutput output;
+    Compiler       compiler(content, output);
+    compiler.compile();
+    return output.getJson().dump();
 }
 
 #ifdef __EMSCRIPTEN__
@@ -31,24 +21,17 @@ EMSCRIPTEN_BINDINGS(my_module)
 #else
 int main(int argc, const char* argv[])
 {
+
     if (argc != 3)
     {
         std::cout << "Usage: " << argv[0] << " <input_file> <output_file>" << std::endl;
     }
-    try
-    {
-        
-        std::ifstream inputFile(argv[1]);
-        std::ostringstream sstr;
-        sstr << inputFile.rdbuf();
-    
-        std::string jsonString = processFileContent(sstr.str());
-        std::cout<<jsonString;
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << e.what() << std::endl;
-    }
+
+    CompilerOutput output(argv[1]);
+    auto           content = output.readFromFile();
+    Compiler       compiler(content, output);
+    compiler.compile();
+    output.writeToFile(argv[2]);
 
     return 0;
 }

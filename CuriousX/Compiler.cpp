@@ -5,8 +5,8 @@ Compiler::Compiler(std::string_view source, CompilerOutput& output)
     : m_parser(source, output)
     , m_semantic(output)
     , m_codegen(output)
-    , m_output(output)
     , m_root(ASTNodeFactory::createTreeNode({}, {"Program", {0, 0}, LexerTokenType::ProgramToken}))
+    , m_output(output)
 {
 }
 

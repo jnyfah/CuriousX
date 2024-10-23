@@ -36,6 +36,6 @@ class Semantic
     constexpr std::string_view getInferredTypeDescription(const InferredType& t);
 
     // Member variables
-    bool    m_hasAnalyzedExpression = false;
+    //bool    m_hasAnalyzedExpression = false;
     CompilerOutput&        m_output;
 };
