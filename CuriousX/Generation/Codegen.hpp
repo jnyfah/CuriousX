@@ -26,7 +26,7 @@ class WasmGen
     void generateExpression(const BinaryNode& node);
 
     // Helper methods
-    bool isFloatType(const BinaryNode& node) const;
+    bool isFloatType(const BinaryNode& node);
     int  getOrCreateLocalIndex(std::string_view varName);
     void addInstruction(WasmInstructionWithData instruction);
 
@@ -34,5 +34,6 @@ class WasmGen
     std::unordered_map<std::string, int> m_locals;
     std::vector<WasmInstructionWithData> m_instructions;
     int                                  m_nextLocalIndex = 0;
+    int                                  m_stringOffset = 0;
     CompilerOutput&        m_output;
 };

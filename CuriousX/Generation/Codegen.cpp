@@ -14,7 +14,7 @@ void WasmGen::generate(const ASTNode& node)
         generateBlock(static_cast<const TreeNode&>(node));
         break;
     default:
-        // Handle unexpected node types
+        throw Error("Unexpected type", node.token.location, ErrorType::SEMANTIC);
         break;
     }
 }
@@ -63,8 +63,10 @@ void WasmGen::generateExpression(const BinaryNode& node)
         addInstruction(WasmInstructionWithData(WasmInstruction::F32Const, std::string(node.token.value)));
         break;
     case LexerTokenType::StringToken:
-        // Handle string constants (this might need more complex handling)
-        addInstruction(WasmInstructionWithData(WasmInstruction::I32Const, "0")); // Placeholder
+        addInstruction(WasmInstructionWithData(WasmInstruction::I32Const,  "offset " + std::to_string(m_stringOffset)));
+        m_stringOffset += int(node.token.value.size() - 2);
+        addInstruction(WasmInstructionWithData(WasmInstruction::I32Const,
+                                               std::to_string(m_stringOffset))); // subtract 2 for quotes
         break;
     case LexerTokenType::BoolToken:
         addInstruction(
@@ -122,21 +124,37 @@ const std::unordered_map<std::string, int>& WasmGen::getLocalMap() const
     return m_locals;
 }
 
-bool WasmGen::isFloatType(const BinaryNode& node) const
+// Used lambda sike!!!! :)
+bool WasmGen::isFloatType(const BinaryNode& node)
 {
-    if (node.left)
-        return ScopedSymbolTable::getInstance().isFloatType(node.left->token.value);
-    if (node.right)
-        return ScopedSymbolTable::getInstance().isFloatType(node.right->token.value);
-    return false;
+    auto isFloatOperand = [](const std::unique_ptr<ASTNode>& operand) -> bool
+    {
+        if (!operand)
+            return false;
+
+        const auto& token = operand->token;
+
+        if (token.type == LexerTokenType::FloatToken)
+            return true;
+
+        if (token.type == LexerTokenType::VarToken)
+        {
+            if (auto type = ScopedSymbolTable::getInstance().lookup(std::string(token.value)))
+            {
+                return *type == InferredType::FLOAT;
+            }
+        }
+
+        return false;
+    };
+
+    return isFloatOperand(node.left) || isFloatOperand(node.right);
 }
 
 void WasmGen::generateConditional(const ConditionalNode& node)
 {
     // Generate code for the condition
     generateExpression(static_cast<const BinaryNode&>(*node.condition));
-
-    // Start of if block
     addInstruction(WasmInstructionWithData(WasmInstruction::If));
 
     // Generate code for the if block
@@ -148,19 +166,17 @@ void WasmGen::generateConditional(const ConditionalNode& node)
         addInstruction(WasmInstructionWithData(WasmInstruction::Else));
         generateBlock(*node.elseNode);
     }
-
-    // End of if-else block
     addInstruction(WasmInstructionWithData(WasmInstruction::End));
 }
 
 void WasmGen::generateBlock(const TreeNode& node)
 {
-    auto blah = node.token;
+    auto operand = node.token;
     for (const auto& block : node.children)
     {
         generate(*block);
     }
-    if (blah.type == LexerTokenType::PrintToken)
+    if (operand.type == LexerTokenType::PrintToken)
     {
         addInstruction(WasmInstructionWithData(WasmInstruction::CallPrint));
     }
@@ -168,7 +184,6 @@ void WasmGen::generateBlock(const TreeNode& node)
 
 void WasmGen::addGeneratedCodeToOutput()
 {
-
     nlohmann::json instructionArray = nlohmann::json::array();
     for (const auto& instr : m_instructions)
     {

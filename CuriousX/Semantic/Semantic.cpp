@@ -75,6 +75,7 @@ InferredType Semantic::inferType(const ASTNode& node)
     case LexerTokenType::BoolToken:
         return InferredType::BOOL;
     case LexerTokenType::VarToken:
+        m_hasNonLiteral = true;
         return inferTypeFromVariable(node);
     case LexerTokenType::PlusToken:
     case LexerTokenType::MinusToken:
@@ -92,6 +93,26 @@ InferredType Semantic::inferType(const ASTNode& node)
     }
 }
 
+void Semantic::analyzeExpression(const BinaryNode& node)
+{
+    m_hasNonLiteral = false;
+    if (node.left && node.right)
+    {
+        ensureTypeMatch(inferType(*node.left), inferType(*node.right), node.token);
+    }
+
+    if (!m_hasNonLiteral)
+    {
+        throw Error("Literal expressions without effect are not allowed", node.token.location, ErrorType::SEMANTIC);
+    }
+}
+void Semantic::ensureTypeMatch(InferredType left, InferredType right, const LexerToken& token) const
+{
+    if (left != right)
+    {
+        throw Error("Type mismatch in operation", token.location, ErrorType::SEMANTIC);
+    }
+}
 InferredType Semantic::inferTypeFromVariable(const ASTNode& node)
 {
     auto type = ScopedSymbolTable::getInstance().lookup(std::string(node.token.value));
@@ -100,6 +121,12 @@ InferredType Semantic::inferTypeFromVariable(const ASTNode& node)
         throw Error("Variable not defined", node.token.location, ErrorType::SEMANTIC);
     }
     return *type;
+}
+
+bool Semantic::isComparisonOp(const BinaryNode& node)
+{
+    return (node.token.type == LexerTokenType::LessEqualToken || node.token.type == LexerTokenType::LessToken ||
+            node.token.type == LexerTokenType::GreaterEqualToken || node.token.type == LexerTokenType::GreaterToken);
 }
 
 InferredType Semantic::inferTypeFromOperation(const BinaryNode& node)
@@ -117,12 +144,13 @@ InferredType Semantic::inferTypeFromOperation(const BinaryNode& node)
     InferredType leftType  = inferType(*node.left);
     InferredType rightType = inferType(*node.right);
     ensureTypeMatch(leftType, rightType, node.token);
+    if ((leftType == InferredType::BOOL && rightType == InferredType::BOOL) && isComparisonOp(node))
+    {
+        throw Error("Invalid operation: cannot compare boolean values using <, >, <=, or >=",
+                    node.token.location,
+                    ErrorType::SEMANTIC);
+    }
     return leftType;
-}
-
-void Semantic::analyzeExpression(const BinaryNode& node)
-{
-    ensureTypeMatch(inferType(*node.left), inferType(*node.right), node.token);
 }
 
 void Semantic::analyzeConditionalOperation(const ConditionalNode& node)
@@ -176,14 +204,6 @@ bool Semantic::isValidBinaryType(const LexerToken& token) const
 {
     return (token.type == LexerTokenType::PlusToken || token.type == LexerTokenType::MinusToken ||
             token.type == LexerTokenType::MultiplyToken || token.type == LexerTokenType::DivideToken);
-}
-
-void Semantic::ensureTypeMatch(InferredType left, InferredType right, const LexerToken& token) const
-{
-    if (left != right)
-    {
-        throw Error("Type mismatch in operation", token.location, ErrorType::SEMANTIC);
-    }
 }
 
 std::string Semantic::getVariableName(const ASTNode& node) const

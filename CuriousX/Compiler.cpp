@@ -35,7 +35,7 @@ bool Compiler::compile()
     }
     catch (const Error& e)
     {
-        m_output.getJson()["error"] = e.what();
+        m_output.setError(e.what());
         return false;
     }
 }

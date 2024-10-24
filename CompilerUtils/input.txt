@@ -1,6 +1,9 @@
-x = 60
-y = 9
-
-if (x == y) {
-print(x)
+a = 7
+b = 9
+x = "hello" #this is a comment 
+if (a == b) {
+    10 + a
+} else {
+    print(b + 10)
+    print(x)
 }

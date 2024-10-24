@@ -11,7 +11,7 @@ class CompilerOutput
   public:
     CompilerOutput() : m_json({{"success", true}}) {}
 
-    CompilerOutput(const std::string& filename) : m_json({{"success", true}}), m_filename(filename) {}
+    explicit CompilerOutput(const std::string& filename) : m_json({{"success", true}}), m_filename(filename) {}
 
     nlohmann::json&       getJson() { return m_json; }
     const nlohmann::json& getJson() const { return m_json; }
@@ -21,6 +21,8 @@ class CompilerOutput
         m_json["success"] = false;
         m_json["error"]   = error;
     }
+
+    nlohmann::json& getError() { return m_json["error"]; }
 
     void writeToFile(const std::string& filename) const
     {

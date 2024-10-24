@@ -1,17 +1,17 @@
 #pragma once
 
+#include "CompilerOutput.hpp"
 #include "SymbolTable.hpp"
-#include  "CompilerOutput.hpp"
 
 class Semantic
 {
   public:
-    Semantic(CompilerOutput& output): m_output(output) {}
+    Semantic(CompilerOutput& output) : m_output(output) {}
 
     bool analyzeTree(const ASTNode& node);
     void addSymbolTableToOutput();
+
   private:
-    
     // Analysis methods
     void analyzeBinaryOperation(const BinaryNode& node);
     void analyzeConditionalOperation(const ConditionalNode& node);
@@ -31,11 +31,12 @@ class Semantic
     void ensureTypeMatch(InferredType left, InferredType right, const LexerToken& token) const;
 
     // Helper methods
-    std::string getVariableName(const ASTNode& node) const;
-    nlohmann::json tableToJson(const symbolTable& table);
+    std::string                getVariableName(const ASTNode& node) const;
+    nlohmann::json             tableToJson(const symbolTable& table);
     constexpr std::string_view getInferredTypeDescription(const InferredType& t);
+    bool                       isComparisonOp(const BinaryNode& node);
 
     // Member variables
-    //bool    m_hasAnalyzedExpression = false;
-    CompilerOutput&        m_output;
+    bool            m_hasNonLiteral = false;
+    CompilerOutput& m_output;
 };
