@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.js"></script>
+    <script src="CuriousX.js"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-900 h-screen overflow-hidden">
@@ -36,11 +37,12 @@
                     </br>
                     </br>
                     <label class="text-sm font-semibold">Theme</label>
-                    <select class="w-full mt-1 p-2 border rounded-md">
+                    <select id="theme-select" class="w-full mt-1 p-2 border rounded-md">
                         <option>Light</option>
                         <option>Dark</option>
                     </select>
                 </div>
+
                 <!-- With Icon -->
                 </br>
                 <button id="run-btn" class="w-full flex items-center justify-center gap-2 
@@ -56,7 +58,7 @@
                 </br>
                 <div class="flex gap-8 p-1">
                     <!-- Changed gap-1 to gap-4 -->
-                    <button class="px-2 py-0.5 text-xs text-gray-700 border border-gray-400 rounded
+                    <button id="insert-code-btn" class="px-2 py-0.5 text-xs text-gray-700 border border-gray-400 rounded
                   bg-gradient-to-b from-gray-50 to-gray-200
                   shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_1px_rgba(0,0,0,0.05)]
                   hover:from-gray-100 hover:to-gray-300
@@ -64,7 +66,7 @@
                   active:shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
                         Insert dummy Code
                     </button>
-                    <button class="px-2 py-0.5 text-xs text-gray-700 border border-gray-400 rounded
+                    <button class="clear-btn px-2 py-0.5 text-xs text-gray-700 border border-gray-400 rounded
                   bg-gradient-to-b from-gray-50 to-gray-200
                   shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_1px_rgba(0,0,0,0.05)]
                   hover:from-gray-100 hover:to-gray-300

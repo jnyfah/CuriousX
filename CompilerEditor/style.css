@@ -1,3 +1,10 @@
+
+body.dark {background-color: #292c35;} /* #9b59b6 */
+body.dark #sidebar {
+    background-color: #292c35;
+    /* other dark mode styles */
+}
+
 .classic-beveled-btn {
     padding: 2px 8px;
     font-size: 12px;
