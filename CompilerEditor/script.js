@@ -1,10 +1,10 @@
 // Monaco Editor Initialization
 require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
-require(['vs/editor/editor.main'], function() {
-  monaco.editor.create(document.getElementById('editor-container'), {
-    value: '// Write your code here...\n',
-    language: 'python',
-    theme: 'vs-light',
+require(["vs/editor/editor.main"], function() {
+  monaco.editor.create(document.getElementById("editor-container"), {
+    value: "// Write your code here...\n",
+    language: "python",
+    theme: "vs-light",
     automaticLayout: true,
   });
 });

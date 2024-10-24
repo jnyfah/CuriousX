@@ -119,4 +119,3 @@ TODO:
 
 
 turning into an interpreter, get all the errors first before throwing ??
-handling string on wasm 
