@@ -14,7 +14,6 @@ class WasmGen
     WasmGen(CompilerOutput& output): m_output(output){}
 
     void                                        generate(const ASTNode& rootNode);
-    const std::unordered_map<std::string, int>& getLocalMap() const;
     void addGeneratedCodeToOutput();
 
   private:

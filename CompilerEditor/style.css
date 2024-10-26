@@ -1,5 +1,8 @@
+body.dark {
+    background-color: #292c35;
+}
 
-body.dark {background-color: #292c35;} /* #9b59b6 */
+/* #9b59b6 */
 body.dark #sidebar {
     background-color: #292c35;
     /* other dark mode styles */
@@ -12,10 +15,10 @@ body.dark #sidebar {
     border: 1px solid #999;
     border-radius: 2px;
     background: #f0f0f0;
-    box-shadow: 
+    box-shadow:
         inset 1px 1px 0 #fff,
         inset -1px -1px 0 #ccc,
-        0 1px 1px rgba(0,0,0,0.1);
+        0 1px 1px rgba(0, 0, 0, 0.1);
     text-shadow: 0 1px 0 #fff;
     cursor: pointer;
 }
@@ -26,7 +29,44 @@ body.dark #sidebar {
 
 .classic-beveled-btn:active {
     background: #e8e8e8;
-    box-shadow: 
-        inset 1px 1px 2px rgba(0,0,0,0.1),
+    box-shadow:
+        inset 1px 1px 2px rgba(0, 0, 0, 0.1),
         inset -1px -1px 0 #fff;
+}
+
+
+/* Add to style.css */
+.output-pane {
+    font-family: monospace;
+    white-space: pre;
+    height: 100%;
+}
+
+body.dark .output-pane {
+    color: #ffffff;
+}
+
+/* Add to your style.css */
+#error-container:not(.hidden) {
+    display: block;
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #FEE2E2; 
+    border-top: 2px solid #EF4444; /* Stronger red border */
+}
+
+#error-message {
+    white-space: pre-wrap;
+    margin: 0;
+    color: #991B1B; /* Darker red text */
+}
+
+/* Dark mode styles */
+.dark #error-container:not(.hidden) {
+    background-color: #7F1D1D; /* Dark mode deep red */
+    border-top: 2px solid #EF4444;
+}
+
+.dark #error-message {
+    color: #991B1B;
 }

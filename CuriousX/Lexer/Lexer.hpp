@@ -127,7 +127,7 @@ class Lexer
         {
             if (next_char() == '=')
                 return {data.substr(startPos, 2), location, LexerTokenType::NotEqualToken};
-            throw Error("Lexical Error- Unexpected character after '!' at line ", location, ErrorType::LEXICAL);
+            throw Error("Lexical Error- Unexpected character after '!' ", location, ErrorType::LEXICAL);
         }
 
         if (nchar == '>')
@@ -173,7 +173,7 @@ class Lexer
 
         if (!(std::isalpha(nchar) || std::isdigit(nchar)))
         {
-            throw Error(" Lexical Error- Unknown character at line ", location, ErrorType::LEXICAL);
+            throw Error(" Lexical Error- Unknown character", location, ErrorType::LEXICAL);
         }
 
         // Handle numeric and keyword tokens

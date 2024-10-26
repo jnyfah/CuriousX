@@ -63,7 +63,7 @@ void WasmGen::generateExpression(const BinaryNode& node)
         addInstruction(WasmInstructionWithData(WasmInstruction::F32Const, std::string(node.token.value)));
         break;
     case LexerTokenType::StringToken:
-        addInstruction(WasmInstructionWithData(WasmInstruction::I32Const,  "offset " + std::to_string(m_stringOffset)));
+        addInstruction(WasmInstructionWithData(WasmInstruction::I32Const, "offset " + std::to_string(m_stringOffset)));
         m_stringOffset += int(node.token.value.size() - 2);
         addInstruction(WasmInstructionWithData(WasmInstruction::I32Const,
                                                std::to_string(m_stringOffset))); // subtract 2 for quotes
@@ -117,11 +117,6 @@ int WasmGen::getOrCreateLocalIndex(std::string_view varName)
 void WasmGen::addInstruction(WasmInstructionWithData instruction)
 {
     m_instructions.push_back(instruction);
-}
-
-const std::unordered_map<std::string, int>& WasmGen::getLocalMap() const
-{
-    return m_locals;
 }
 
 // Used lambda sike!!!! :)
@@ -190,4 +185,8 @@ void WasmGen::addGeneratedCodeToOutput()
         instructionArray.push_back(instructionToString(instr));
     }
     m_output.getJson()["Gen"].push_back(instructionArray);
+    for (const auto& local : m_locals)
+    {
+        m_output.getJson()["Local"].push_back({{"name", local.first}, {"index", local.second}});
+    }
 }
