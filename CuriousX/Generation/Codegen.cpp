@@ -190,3 +190,8 @@ void WasmGen::addGeneratedCodeToOutput()
         m_output.getJson()["Local"].push_back({{"name", local.first}, {"index", local.second}});
     }
 }
+
+const std::vector<WasmInstructionWithData> WasmGen::getInstructions() const
+{
+    return m_instructions;
+}

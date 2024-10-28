@@ -9,7 +9,7 @@ require(["vs/editor/editor.main"], function () {
     inherit: true,
     rules: [],
     colors: {
-      "editor.background": "#292c35"
+      "editor.background": "#292c35",
     }
   });
 
@@ -24,7 +24,7 @@ require(["vs/editor/editor.main"], function () {
 const themeSelect = document.getElementById("theme-select");
 
 // Set initial select value based on body class
-themeSelect.value = document.body.classList.contains('dark') ? "Dark" : "Light";
+themeSelect.value = document.body.classList.contains("dark") ? "Dark" : "Light";
 themeSelect.addEventListener("change", () => {
   document.body.classList.toggle("dark", themeSelect.value === "Dark");
   monaco.editor.setTheme(themeSelect.value === "Dark" ? "custom-dark" : "vs-light");
@@ -35,7 +35,7 @@ themeSelect.addEventListener("change", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const insertCodeButton = document.getElementById("insert-code-btn");
   insertCodeButton.addEventListener("click", () => {
-    const dummyCode = `x = 5\ny = 10\nprint(x + y)`;
+    const dummyCode = `x = 5\ny = 10\n\nif (x == y) {\n   print(x + y)\n} else {\n    print("not equal")\n}`;
     editor.setValue(dummyCode);
   });
 });
@@ -77,31 +77,31 @@ function handleCompile() {
 
 // Display compilation results in the output panes
 function clearResults() {
-  document.getElementById('lexer-output').innerHTML =  "probably an error occurred ..";
-  document.getElementById('parse-tree-output').innerHTML = "probably an error occurred ..";
-  document.getElementById('symbol-table-output').innerHTML = "probably an error occurred ..";
-  document.getElementById('code-gen-output').innerHTML = "probably an error occurred ..";
+  document.getElementById("lexer-output").innerHTML =  "probably an error occurred ..";
+  document.getElementById("parse-tree-output").innerHTML = "probably an error occurred ..";
+  document.getElementById("symbol-table-output").innerHTML = "probably an error occurred ..";
+  document.getElementById("code-gen-output").innerHTML = "probably an error occurred ..";
 }
 
 // Display compilation results in the output panes
 function displayResults(parsedResult) {
-  document.getElementById('lexer-output').innerHTML = formatLexerOutput(parsedResult.Lexer);
-  document.getElementById('parse-tree-output').innerHTML = generateAsciiTree(parsedResult.AST);
-  document.getElementById('symbol-table-output').innerHTML = generateTable(parsedResult.SymbolTable);
-  document.getElementById('code-gen-output').innerHTML = generateGenOutput(parsedResult.Gen, parsedResult.Local);
+  document.getElementById("lexer-output").innerHTML = formatLexerOutput(parsedResult.Lexer);
+  document.getElementById("parse-tree-output").innerHTML = generateAsciiTree(parsedResult.AST);
+  document.getElementById("symbol-table-output").innerHTML = generateTable(parsedResult.SymbolTable);
+  document.getElementById("code-gen-output").innerHTML = generateGenOutput(parsedResult.Gen, parsedResult.Local);
 }
 
 function showError(error) {
   clearResults();
-  const errorContainer = document.getElementById('error-container');
-  const errorMessage = document.getElementById('error-message');
+  const errorContainer = document.getElementById("error-container");
+  const errorMessage = document.getElementById("error-message");
   errorMessage.textContent = error;
-  errorContainer.classList.remove('hidden');
+  errorContainer.classList.remove("hidden");
 }
 
 function hideError() {
-  const errorContainer = document.getElementById('error-container');
-  errorContainer.classList.add('hidden');
+  const errorContainer = document.getElementById("error-container");
+  errorContainer.classList.add("hidden");
 }
 
 
@@ -131,15 +131,15 @@ tabButtons.forEach((btn, index) => {
 
 function formatLexerOutput(lexerData) {
 
-  const formattedTokens = lexerData.map(token => {
-    const position = token.location.replace(/[<>]/g, '').padEnd(25);
+  const formattedTokens = lexerData.map((token) => {
+    const position = token.location.replace(/[<>]/g, "").padEnd(25);
     const tokenType = token.type.padEnd(20);
     const value = formatValue(token.value);
 
     return `${tokenType}${position}${[value]}`;
   });
 
-  return formattedTokens.join('\n');
+  return formattedTokens.join("\n");
 }
 
 // Helper function to format special characters in the value
@@ -194,12 +194,12 @@ function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
 }
 
 function generateTable(symbolTable) {
-  const formattedEntries = symbolTable.flatMap(entry =>
-    Object.values(entry).map(symbol => {
+  const formattedEntries = symbolTable.flatMap((entry) =>
+    Object.values(entry).map((symbol) => {
       const typePadded = symbol.type.padEnd(15);
       const valuePadded = symbol.value.padEnd(10);
       return `${typePadded}${valuePadded}\n`;
-    })
+    }),
   );
 
   return formattedEntries.join("");

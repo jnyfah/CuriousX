@@ -8,7 +8,7 @@ class Semantic
   public:
     Semantic(CompilerOutput& output) : m_output(output) {}
 
-    bool analyzeTree(const ASTNode& node);
+    void analyzeTree(const ASTNode& node);
     void addSymbolTableToOutput();
 
   private:
@@ -18,6 +18,9 @@ class Semantic
     void analyzeBlockOperation(const TreeNode& node);
     void analyzeAssignment(const BinaryNode& node);
     void analyzeExpression(const BinaryNode& node);
+    void analyzePrintOperation(const TreeNode& node);
+    void analyzePrintExpression(const ASTNode& node);
+    
 
     // Type inference methods
     InferredType inferType(const ASTNode& node);
@@ -28,6 +31,8 @@ class Semantic
     void checkDivisionByZero(const ASTNode& node);
     bool isValidConditionType(const LexerToken& token) const;
     bool isValidBinaryType(const LexerToken& token) const;
+    bool containsNonLiteral(const ASTNode& node) const;
+    bool isSimpleLiteralOrVariable(const ASTNode& node) const;
     void ensureTypeMatch(InferredType left, InferredType right, const LexerToken& token) const;
 
     // Helper methods
@@ -37,6 +42,5 @@ class Semantic
     bool                       isComparisonOp(const BinaryNode& node);
 
     // Member variables
-    bool            m_hasNonLiteral = false;
     CompilerOutput& m_output;
 };

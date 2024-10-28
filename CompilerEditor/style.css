@@ -2,10 +2,8 @@ body.dark {
     background-color: #292c35;
 }
 
-/* #9b59b6 */
 body.dark #sidebar {
     background-color: #292c35;
-    /* other dark mode styles */
 }
 
 .classic-beveled-btn {
@@ -34,8 +32,6 @@ body.dark #sidebar {
         inset -1px -1px 0 #fff;
 }
 
-
-/* Add to style.css */
 .output-pane {
     font-family: monospace;
     white-space: pre;
@@ -46,24 +42,22 @@ body.dark .output-pane {
     color: #ffffff;
 }
 
-/* Add to your style.css */
 #error-container:not(.hidden) {
     display: block;
     max-height: 150px;
     overflow-y: auto;
     background-color: #FEE2E2; 
-    border-top: 2px solid #EF4444; /* Stronger red border */
+    border-top: 2px solid #EF4444; 
 }
 
 #error-message {
     white-space: pre-wrap;
     margin: 0;
-    color: #991B1B; /* Darker red text */
+    color: #991B1B; 
 }
 
-/* Dark mode styles */
 .dark #error-container:not(.hidden) {
-    background-color: #7F1D1D; /* Dark mode deep red */
+    background-color: #7F1D1D; 
     border-top: 2px solid #EF4444;
 }
 

@@ -3,7 +3,7 @@
 #include <limits>
 #include <string>
 
-bool Semantic::analyzeTree(const ASTNode& node)
+void Semantic::analyzeTree(const ASTNode& node)
 {
     switch (node.getType())
     {
@@ -17,10 +17,9 @@ bool Semantic::analyzeTree(const ASTNode& node)
         analyzeBlockOperation(static_cast<const TreeNode&>(node));
         break;
     default:
-        // Handle unexpected node types or throw an error
+        throw Error("Unexpected node type", node.token.location, ErrorType::SEMANTIC);
         break;
     }
-    return true;
 }
 
 void Semantic::analyzeBinaryOperation(const BinaryNode& node)
@@ -75,7 +74,6 @@ InferredType Semantic::inferType(const ASTNode& node)
     case LexerTokenType::BoolToken:
         return InferredType::BOOL;
     case LexerTokenType::VarToken:
-        m_hasNonLiteral = true;
         return inferTypeFromVariable(node);
     case LexerTokenType::PlusToken:
     case LexerTokenType::MinusToken:
@@ -95,17 +93,35 @@ InferredType Semantic::inferType(const ASTNode& node)
 
 void Semantic::analyzeExpression(const BinaryNode& node)
 {
-    m_hasNonLiteral = false;
     if (node.left && node.right)
     {
         ensureTypeMatch(inferType(*node.left), inferType(*node.right), node.token);
     }
 
-    if (!m_hasNonLiteral)
+    if (!containsNonLiteral(node))
     {
         throw Error("Literal expressions without effect are not allowed", node.token.location, ErrorType::SEMANTIC);
     }
 }
+
+bool Semantic::containsNonLiteral(const ASTNode& node) const
+{
+    if (node.token.type == LexerTokenType::VarToken) {
+        return true;
+    }
+
+    if (node.getType() == NodeType::BinaryOperation) {
+        const auto* binaryNode = dynamic_cast<const BinaryNode*>(&node);
+        
+        if (binaryNode) {
+            bool leftHasNonLiteral = binaryNode->left && containsNonLiteral(*binaryNode->left);
+            bool rightHasNonLiteral = binaryNode->right && containsNonLiteral(*binaryNode->right);
+            return leftHasNonLiteral || rightHasNonLiteral;
+        }
+    }
+    return false;
+}
+
 void Semantic::ensureTypeMatch(InferredType left, InferredType right, const LexerToken& token) const
 {
     if (left != right)
@@ -172,12 +188,62 @@ void Semantic::analyzeBlockOperation(const TreeNode& node)
     auto& symbolTable = ScopedSymbolTable::getInstance();
     symbolTable.enterScope();
 
-    for (const auto& statement : node.children)
+    if (node.token.type == LexerTokenType::PrintToken)
     {
-        analyzeTree(*statement);
+        analyzePrintOperation(node);
+    }
+    else
+    {
+
+        for (const auto& statement : node.children)
+        {
+            analyzeTree(*statement);
+        }
     }
 
     symbolTable.exitScope();
+}
+
+void Semantic::analyzePrintOperation(const TreeNode& node)
+{
+    if (node.children.empty())
+    {
+        throw Error("Print statement requires at least one argument", node.token.location, ErrorType::SEMANTIC);
+    }
+
+    // Ensure each child of the print statement is a valid expression.
+    for (const auto& child : node.children)
+    {
+        analyzePrintExpression(*child); // Analyze the child expression.
+    }
+}
+
+void Semantic::analyzePrintExpression(const ASTNode& node)
+{
+
+    if (isSimpleLiteralOrVariable(node))
+    {
+        return;
+    }
+    else if (node.getType() == NodeType::BinaryOperation)
+    {
+        const auto& binaryNode = static_cast<const BinaryNode&>(node);
+        if (binaryNode.left && binaryNode.right)
+        {
+            ensureTypeMatch(inferType(*binaryNode.left), inferType(*binaryNode.right), binaryNode.token);
+        }
+    }
+    else
+    {
+        throw Error("Invalid expression in print statement", node.token.location, ErrorType::SEMANTIC);
+    }
+}
+
+bool Semantic::isSimpleLiteralOrVariable(const ASTNode& node) const
+{
+    return (node.token.type == LexerTokenType::IntToken || node.token.type == LexerTokenType::FloatToken ||
+            node.token.type == LexerTokenType::StringToken || node.token.type == LexerTokenType::BoolToken ||
+            node.token.type == LexerTokenType::VarToken);
 }
 
 void Semantic::checkDivisionByZero(const ASTNode& node)

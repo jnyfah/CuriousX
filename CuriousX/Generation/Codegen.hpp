@@ -15,6 +15,7 @@ class WasmGen
 
     void                                        generate(const ASTNode& rootNode);
     void addGeneratedCodeToOutput();
+    const std::vector<WasmInstructionWithData> getInstructions() const;
 
   private:
     // Node traversal methods
