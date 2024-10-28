@@ -27,8 +27,7 @@ const themeSelect = document.getElementById("theme-select");
 themeSelect.value = document.body.classList.contains("dark") ? "Dark" : "Light";
 themeSelect.addEventListener("change", () => {
   document.body.classList.toggle("dark", themeSelect.value === "Dark");
-  monaco.editor.setTheme(
-    themeSelect.value === "Dark" ? "custom-dark" : "vs-light");
+  monaco.editor.setTheme(themeSelect.value === "Dark" ? "custom-dark" : "vs-light");
 });
 
 
@@ -77,35 +76,18 @@ function handleCompile() {
 
 // Display compilation results in the output panes
 function clearResults() {
-  document.getElementById("lexer-output").innerHTML =
-    "probably an error occurred ..";
-  document.getElementById("parse-tree-output").innerHTML =
-    "probably an error occurred ..";
-  document.getElementById("symbol-table-output").innerHTML =
-    "probably an error occurred ..";
-  document.getElementById("code-gen-output").innerHTML =
-    "probably an error occurred ..";
+  document.getElementById("lexer-output").innerHTML = "probably an error occurred ..";
+  document.getElementById("parse-tree-output").innerHTML = "probably an error occurred ..";
+  document.getElementById("symbol-table-output").innerHTML = "probably an error occurred ..";
+  document.getElementById("code-gen-output").innerHTML = "probably an error occurred ..";
 }
 
 // Display compilation results in the output panes
 function displayResults(parsedResult) {
-  document.getElementById("lexer-output").innerHTML =
-    generateTable(
-      parsedResult.Lexer,
-    );
-
-  document.getElementById("parse-tree-output").innerHTML =
-    generateAsciiTree(
-      parsedResult.AST
-    );
-  document.getElementById("symbol-table-output").innerHTML =
-    generateTable(
-      parsedResult.SymbolTable,
-    );
-  document.getElementById("code-gen-output").innerHTML =
-    generateTable(
-      parsedResult.Gen, parsedResult.Local
-    );
+  document.getElementById("lexer-output").innerHTML = formatLexerOutput(parsedResult.Lexer);
+  document.getElementById("parse-tree-output").innerHTML = generateAsciiTree(parsedResult.AST);
+  document.getElementById("symbol-table-output").innerHTML = generateTable(parsedResult.SymbolTable);
+  document.getElementById("code-gen-output").innerHTML = generateGenOutput(parsedResult.Gen, parsedResult.Local);
 }
 
 function showError(error) {
@@ -120,6 +102,7 @@ function hideError() {
   const errorContainer = document.getElementById("error-container");
   errorContainer.classList.add("hidden");
 }
+
 
 // Tab Switching with Bold and Color
 const tabButtons = document.querySelectorAll(".tab-btn");
@@ -158,7 +141,6 @@ function formatLexerOutput(lexerData) {
   return formattedTokens.join("\n");
 }
 
-// Helper function to format special characters in the value
 function formatValue(value) {
   switch (value) {
     case "\\n":
@@ -168,7 +150,7 @@ function formatValue(value) {
     case "":
       return "[<empty>]";
     default:
-      return `[${value}]`; // Wrap regular values in brackets
+      return `[${value}]`;
   }
 }
 
@@ -178,7 +160,6 @@ function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
   let result = "";
   const indent = prefix + (isLast ? "└─ " : "├─ ");
 
-  // Add token value or indicate it's unknown
   if (node.token && node.token.value) {
     result += indent + node.token.value + "\n";
   } else {
@@ -201,7 +182,7 @@ function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
     result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), false, depth + 1);
     result += generateAsciiTree(node.elseNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
   } else if (node.condition && node.ifNode) {
-    // Handle conditionals without an elseNode
+    // Handle conditionals without an elseNode (optional else)
     result += generateAsciiTree(node.condition, prefix + (isLast ? "    " : "│   "), false, depth + 1);
     result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
   }
@@ -226,7 +207,6 @@ function generateGenOutput(genData, Local) {
   genData[0].forEach((instruction) => {
     output += `${instruction}\n`;
   });
-
   output += "\n\n\nLocal Variables:\n";
   output += "-----------------\n";
   output += "Index       Variable\n";
