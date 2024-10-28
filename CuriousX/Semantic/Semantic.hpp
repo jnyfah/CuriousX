@@ -6,7 +6,7 @@
 class Semantic
 {
   public:
-    Semantic(CompilerOutput& output) : m_output(output) {}
+    explicit Semantic(CompilerOutput& output) : m_output(output) {}
 
     void analyzeTree(const ASTNode& node);
     void addSymbolTableToOutput();

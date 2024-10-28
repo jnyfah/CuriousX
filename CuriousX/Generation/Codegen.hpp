@@ -11,7 +11,7 @@
 class WasmGen
 {
   public:
-    WasmGen(CompilerOutput& output): m_output(output){}
+    explicit WasmGen(CompilerOutput& output): m_output(output){}
 
     void                                        generate(const ASTNode& rootNode);
     void addGeneratedCodeToOutput();

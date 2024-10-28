@@ -39,7 +39,7 @@ body.dark #sidebar {
 }
 
 body.dark .output-pane {
-    color: #ffffff;
+    color: #fff;
 }
 
 #error-container:not(.hidden) {
