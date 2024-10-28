@@ -1,9 +1,5 @@
 #pragma once
-#include <functional>
 #include <string>
-#include <unordered_map>
-#include <variant>
-#include <vector>
 
 enum class WasmInstruction
 {
@@ -59,7 +55,7 @@ struct WasmInstructionWithData
     std::string data;
     bool has_data; 
 
-    WasmInstructionWithData(WasmInstruction instr) : instruction(instr), has_data(false) {}
+    explicit WasmInstructionWithData(WasmInstruction instr) : instruction(instr), has_data(false) {}
 
     WasmInstructionWithData(WasmInstruction instr, std::string value)
         : instruction(instr), data(value), has_data(true)

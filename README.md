@@ -103,15 +103,3 @@ local.set 0
 local.get 0
 call $print
 ```
-
-TODO:
-- [ ] the sun for the toggle theme
-- [ ] code line numbers
-- [ ] color code area
-- [ ] being able to scroll when input/output overflows
-- [ ] Clearing previous output when exception occurs ( clear output anytime compile is hit ?)
-- [ ] if output file is not provided create one
-- [ ] what if comment is too long
-- [ ] remove dark mode check prettier for good design
-- [ ] writing Unit tests
-- [ ] Translation validation

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SourceLocation.hpp"
-#include "Error.hpp"
 #include <string_view>
 
 enum class LexerTokenType

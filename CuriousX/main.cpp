@@ -1,27 +1,15 @@
 
-#include "Parser.hpp"
-#include <sstream>
+#include "Compiler.hpp"
+#include "CompilerOutput.hpp"
 #include <iostream>
-
-
+#include <sstream>
 
 std::string processFileContent(const std::string& content)
 {
-    std::ostringstream output;
-    try
-    {
-        Parser parse(content);
-        parse.parseTokens();
-        
-        output << CompilerOutputParser::getInstance().getJson();
-    }
-    catch (const Error& ex)
-    {
-        CompilerOutputParser::getInstance().setErrorOutput(ex);
-        output << CompilerOutputParser::getInstance().getJson();
-        std::cout<<ex.what();
-    }
-    return output.str();
+    CompilerOutput output;
+    Compiler       compiler(content, output);
+    compiler.compile();
+    return output.getJson().dump();
 }
 
 #ifdef __EMSCRIPTEN__
@@ -33,20 +21,17 @@ EMSCRIPTEN_BINDINGS(my_module)
 #else
 int main(int argc, const char* argv[])
 {
+
     if (argc != 3)
     {
         std::cout << "Usage: " << argv[0] << " <input_file> <output_file>" << std::endl;
     }
-    try
-    {
-        std::string jsonString = processFileContent(CompilerOutputParser::getInstance().readInputFile(argv[1]));
-        CompilerOutputParser::getInstance().formatTokens(jsonString, argv[2]);
-        std::cout<<jsonString;
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << e.what() << std::endl;
-    }
+
+    CompilerOutput output(argv[1]);
+    auto           content = output.readFromFile();
+    Compiler       compiler(content, output);
+    compiler.compile();
+    output.writeToFile(argv[2]);
 
     return 0;
 }

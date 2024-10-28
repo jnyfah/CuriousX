@@ -2,27 +2,23 @@
 Language: Cpp
 # Base style
 BasedOnStyle: LLVM
-
 # Indentation
 IndentWidth: 4
 TabWidth: 4
 UseTab: Never
 NamespaceIndentation: None
-
 # Line breaking
-ColumnLimit: 100
+ColumnLimit: 120
 AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBraces: Allman
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
-
 # Alignment
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
 AlignOperands: true
 AlignTrailingComments: true
-
 # Spacing
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: true
@@ -34,8 +30,14 @@ SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-
 # Other
 PointerAlignment: Left
 SortIncludes: true
 FixNamespaceComments: true
+# Added options
+BinPackArguments: false
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: true
+BreakConstructorInitializersBeforeComma: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+AllowAllConstructorInitializersOnNextLine: true

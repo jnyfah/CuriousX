@@ -1,7 +1,9 @@
-d = true
-a = 5.9
-if (d <= false) {
-    print(a)
-}else {
-    print(a)
+a = 7
+b = 9
+x = "hello" #this is a comment 
+if (a == b) {
+    10 + a
+} else {
+    print(b + 10)
+    print(x)
 }

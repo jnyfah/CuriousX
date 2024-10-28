@@ -1,33 +1,46 @@
 #pragma once
 
-#include "CompilerOutputParser.hpp"
-#include <vector>
+#include "CompilerOutput.hpp"
+#include "SymbolTable.hpp"
 
 class Semantic
 {
-
   public:
-    explicit Semantic() : flag(false) {}
+    explicit Semantic(CompilerOutput& output) : m_output(output) {}
 
-    bool analyze(const ASTNode& node);
+    void analyzeTree(const ASTNode& node);
+    void addSymbolTableToOutput();
 
-    void analyzeAssignment(const BinaryNode& node);
-    void analyzeExpression(const BinaryNode& node);
+  private:
+    // Analysis methods
     void analyzeBinaryOperation(const BinaryNode& node);
     void analyzeConditionalOperation(const ConditionalNode& node);
+    void analyzeBlockOperation(const TreeNode& node);
+    void analyzeAssignment(const BinaryNode& node);
+    void analyzeExpression(const BinaryNode& node);
+    void analyzePrintOperation(const TreeNode& node);
+    void analyzePrintExpression(const ASTNode& node);
+    
 
-    void checkDivisionByZero(const ASTNode& node);
-
+    // Type inference methods
     InferredType inferType(const ASTNode& node);
     InferredType inferTypeFromVariable(const ASTNode& node);
     InferredType inferTypeFromOperation(const BinaryNode& node);
 
-    bool isValidConditionType(const LexerToken& type);
-    void analyzeBlockOperation(const TreeNode& node);
-    bool isValidBinaryType(const LexerToken& token);
+    // Validation methods
+    void checkDivisionByZero(const ASTNode& node);
+    bool isValidConditionType(const LexerToken& token) const;
+    bool isValidBinaryType(const LexerToken& token) const;
+    bool containsNonLiteral(const ASTNode& node) const;
+    bool isSimpleLiteralOrVariable(const ASTNode& node) const;
+    void ensureTypeMatch(InferredType left, InferredType right, const LexerToken& token) const;
 
-    const std::vector<std::unordered_map<std::string, SymbolInfo>> getSymbolTable();
+    // Helper methods
+    std::string                getVariableName(const ASTNode& node) const;
+    nlohmann::json             tableToJson(const symbolTable& table);
+    constexpr std::string_view getInferredTypeDescription(const InferredType& t);
+    bool                       isComparisonOp(const BinaryNode& node);
 
-  private:
-    bool flag;
+    // Member variables
+    CompilerOutput& m_output;
 };

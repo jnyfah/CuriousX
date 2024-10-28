@@ -1,148 +1,180 @@
-// Get DOM elements
-const codeTextarea = document.getElementById("code-textarea");
-const compileButton = document.getElementById("compile-button");
-const outputDisplay = document.getElementById("output-display");
-const errorContainer = document.getElementById("error-container");
-const tabButtons = document.querySelectorAll(".tab-button");
-const fileInput = document.getElementById("file-input");
-const themeToggle = document.getElementById("theme-toggle");
-const moonIcon = themeToggle.querySelector(".moon");
-const sunIcon = themeToggle.querySelector(".sun");
+// Monaco Editor Initialization
+let editor;
 
-// Initialize state
-let currentTab = "lexer";
-let output = {
-  Lexer: "",
-  trees: "",
-  semantic: "",
-  codegen: "",
-};
-
-// Event listeners
-compileButton.addEventListener("click", handleCompile);
-tabButtons.forEach((button) => {
-  button.addEventListener("click", () => switchTab(button.dataset.tab));
+require.config({
+  paths: {
+    vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs",
+  },
 });
-fileInput.addEventListener("change", handleFileUpload);
-themeToggle.addEventListener("click", toggleTheme);
+require(["vs/editor/editor.main"], function () {
+  // custom dark theme
+  monaco.editor.defineTheme("custom-dark", {
+    base: "vs-dark",
+    inherit: true,
+    rules: [],
+    colors: {
+      "editor.background": "#292c35",
+    },
+  });
 
-let Modules = {};
-Modules["onRuntimeInitialized"] = function () {
-  document.getElementById("run-btn").disabled = false; 
-};
+  editor = monaco.editor.create(document.getElementById("editor-container"), {
+    value: "// Write your code here...\n",
+    language: "python",
+    theme: document.body.classList.contains("dark")
+      ? "custom-dark"
+      : "vs-light",
+    automaticLayout: true,
+  });
+});
+
+const themeSelect = document.getElementById("theme-select");
+
+// Set initial select value based on body class
+themeSelect.value = document.body.classList.contains("dark") ? "Dark" : "Light";
+themeSelect.addEventListener("change", () => {
+  document.body.classList.toggle("dark", themeSelect.value === "Dark");
+  monaco.editor.setTheme(
+    themeSelect.value === "Dark" ? "custom-dark" : "vs-light",
+  );
+});
+
+// dummy code for the editor
+document.addEventListener("DOMContentLoaded", () => {
+  const insertCodeButton = document.getElementById("insert-code-btn");
+  insertCodeButton.addEventListener("click", () => {
+    const dummyCode = `x = 5\ny = 10\n\nif (x == y) {\n   print(x + y)\n} else {\n    print("not equal")\n}`;
+    editor.setValue(dummyCode);
+  });
+});
+
+// Clear button functionality
+document.querySelector(".clear-btn").addEventListener("click", () => {
+  if (editor) editor.setValue(""); // Clear editor
+  document
+    .querySelectorAll(".output-pane")
+    .forEach((pane) => (pane.innerHTML = ""));
+});
+
+// compile button click
+document.getElementById("run-btn").addEventListener("click", handleCompile);
 
 function handleCompile() {
-  const code = codeTextarea.value;
-  errorContainer.innerHTML = "";
-  if (code.trim() !== "") {
-    try {
-      const result = Module.processFileContent(code);
-      const parsedResult = JSON.parse(result);
-      if (parsedResult.success === false) {
-        // If the operation wasn't successful, throw the error
-        throw new Error(parsedResult.error);
-      }
-      displayResults(parsedResult);
-    } catch (error) {
-      console.error("Error:", error);
-      showError(error.message || error.toString());
-    }
-  } else {
+  const code = editor.getValue();
+  hideError();
+
+  if (code.trim() === "") {
     showError("Please type some code or upload a file.");
+    return;
+  }
+
+  try {
+    const result = Module.processFileContent(code);
+    const parsedResult = JSON.parse(result);
+
+    if (!parsedResult.success) {
+      throw new Error(parsedResult.error);
+    }
+
+    displayResults(parsedResult);
+  } catch (error) {
+    console.error("Error:", error);
+    showError(error.message || error.toString());
   }
 }
 
-function displayResults(result) {
-  output.lexer = formatLexerOutput(result.Lexer);
-  output.trees = generateAsciiTree(result.AST);
-  output.semantic = generateTable(result.SymbolTable);
-  output.codegen = formatCodegenOutput(result.Gen);
-
-  updateOutput();
-  showAllTabs();
+// Display compilation results in the output panes
+function clearResults() {
+  document.getElementById("lexer-output").innerHTML =
+    "probably an error occurred ..";
+  document.getElementById("parse-tree-output").innerHTML =
+    "probably an error occurred ..";
+  document.getElementById("symbol-table-output").innerHTML =
+    "probably an error occurred ..";
+  document.getElementById("code-gen-output").innerHTML =
+    "probably an error occurred ..";
 }
 
+// Display compilation results in the output panes
+function displayResults(parsedResult) {
+  document.getElementById("lexer-output").innerHTML = formatLexerOutput(
+    parsedResult.Lexer,
+  );
+  document.getElementById("parse-tree-output").innerHTML = generateAsciiTree(
+    parsedResult.AST,
+  );
+  document.getElementById("symbol-table-output").innerHTML = generateTable(
+    parsedResult.SymbolTable,
+  );
+  document.getElementById("code-gen-output").innerHTML = generateGenOutput(
+    parsedResult.Gen,
+    parsedResult.Local,
+  );
+}
+
+function showError(error) {
+  clearResults();
+  const errorContainer = document.getElementById("error-container");
+  const errorMessage = document.getElementById("error-message");
+  errorMessage.textContent = error;
+  errorContainer.classList.remove("hidden");
+}
+
+function hideError() {
+  const errorContainer = document.getElementById("error-container");
+  errorContainer.classList.add("hidden");
+}
+
+// Tab Switching with Bold and Color
+const tabButtons = document.querySelectorAll(".tab-btn");
+const outputPanes = document.querySelectorAll(".output-pane");
+
+// Color classes for active tabs
+const colorClasses = [
+  "border-blue-600",
+  "border-green-600",
+  "border-red-600",
+  "border-yellow-600",
+];
+
+tabButtons.forEach((btn, index) => {
+  btn.addEventListener("click", () => {
+    // Reset all tabs and panes
+    tabButtons.forEach((b) => {
+      b.classList.remove(...colorClasses, "font-bold", "text-red-900");
+      b.classList.add("text-gray-600");
+    });
+    outputPanes.forEach((pane) => pane.classList.add("hidden"));
+
+    btn.classList.add(colorClasses[index], "font-bold", "text-red-900");
+    btn.classList.remove("text-gray-600");
+    document.getElementById(btn.dataset.target).classList.remove("hidden");
+  });
+});
+
 function formatLexerOutput(lexerData) {
-  const header =
-    "Token            Position            Value\n" +
-    "----------------------------------------------------------------------\n";
+  const formattedTokens = lexerData.map((token) => {
+    const position = token.location.replace(/[<>]/g, "").padEnd(25);
+    const tokenType = token.type.padEnd(20);
+    const value = formatValue(token.value);
 
-  const formattedTokens = lexerData.map((item) => {
-    const tokenPadded = item.type.padEnd(20);
-    const locationPadded = item.location.padEnd(20);
-    const value = formatValue(item.value);
-
-    return `${tokenPadded}${locationPadded}${value}\n`;
+    return `${tokenType}${position}${[value]}`;
   });
 
-  return header + formattedTokens.join("");
+  return formattedTokens.join("\n");
 }
 
 function formatValue(value) {
-  if (value === "") return "<empty>";
-  if (value === "\n") return "\\n";
-  if (value === "\t") return "\\t";
-  return `[${value}]`;
-}
-
-
-function switchTab(tab) {
-  currentTab = tab;
-  tabButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.tab === tab);
-  });
-  updateOutput();
-}
-
-function updateOutput() {
-  outputDisplay.textContent = output[currentTab] || "";
-}
-
-function showAllTabs() {
-  tabButtons.forEach((tab) => (tab.style.display = "block"));
-}
-
-function showError(message) {
-  errorContainer.innerHTML = `<div class="error-message"><strong>Error:</strong> ${escapeHtml(message)}</div>`;
-}
-
-// Helper function to escape HTML special characters
-function escapeHtml(unsafe) {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      codeTextarea.value = e.target.result;
-    };
-    reader.onerror = function () {
-      showError("Error reading file");
-    };
-    reader.readAsText(file);
+  switch (value) {
+    case "\\n":
+      return "[\\n]";
+    case "\\t":
+      return "[\\t]";
+    case "":
+      return "[<empty>]";
+    default:
+      return `[${value}]`;
   }
 }
-
-function toggleTheme() {
-  document.documentElement.classList.toggle("dark");
-  updateThemeIcon();
-}
-
-function updateThemeIcon() {
-  const isDark = document.documentElement.classList.contains("dark");
-  moonIcon.style.display = isDark ? "none" : "block";
-  sunIcon.style.display = isDark ? "block" : "none";
-}
-
-// Initial theme icon update
-updateThemeIcon();
 
 function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
   if (!node) return "";
@@ -150,7 +182,6 @@ function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
   let result = "";
   const indent = prefix + (isLast ? "└─ " : "├─ ");
 
-  // Add token value or indicate it's unknown
   if (node.token && node.token.value) {
     result += indent + node.token.value + "\n";
   } else {
@@ -161,55 +192,93 @@ function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
   if (Array.isArray(node.children) && node.children.length > 0) {
     node.children.forEach((child, index) => {
       const isLastChild = index === node.children.length - 1;
-      result += generateAsciiTree(child, prefix + (isLast ? "    " : "│   "), isLastChild, depth + 1);
+      result += generateAsciiTree(
+        child,
+        prefix + (isLast ? "    " : "│   "),
+        isLastChild,
+        depth + 1,
+      );
     });
   } else if (node.left && node.right) {
     // Handle left-right child nodes
-    result += generateAsciiTree(node.left, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.right, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+    result += generateAsciiTree(
+      node.left,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.right,
+      prefix + (isLast ? "    " : "│   "),
+      true,
+      depth + 1,
+    );
   } else if (node.condition && node.ifNode && node.elseNode) {
     // Handle conditionals
-    result += generateAsciiTree(node.condition, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.elseNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+    result += generateAsciiTree(
+      node.condition,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.ifNode,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.elseNode,
+      prefix + (isLast ? "    " : "│   "),
+      true,
+      depth + 1,
+    );
   } else if (node.condition && node.ifNode) {
     // Handle conditionals without an elseNode (optional else)
-    result += generateAsciiTree(node.condition, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+    result += generateAsciiTree(
+      node.condition,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.ifNode,
+      prefix + (isLast ? "    " : "│   "),
+      true,
+      depth + 1,
+    );
   }
 
   return result;
 }
 
-
-
-function getNodeValue(node) {
-  if (typeof node === "string") return node;
-  if (node.token && node.token.value) return `${node.token.value}`;
-  return "Unknown";
-}
-
-function getNodeChildren(node) {
-  if (Array.isArray(node.children)) return node.children;
-  if (node.left || node.right) return [node.left, node.right].filter(Boolean);
-  return [];
-}
-
 function generateTable(symbolTable) {
-  let tableHeader =
-    "Type             Value\n" +
-    "--------------------------------\n";
+  const formattedEntries = symbolTable.flatMap((entry) =>
+    Object.values(entry).map((symbol) => {
+      const typePadded = symbol.type.padEnd(15);
+      const valuePadded = symbol.value.padEnd(10);
+      return `${typePadded}${valuePadded}\n`;
+    }),
+  );
 
-  // Format each entry in the symbol table
-  const formattedEntries = symbolTable.map((entry) => {
-    const typePadded = entry.type.padEnd(15); 
-    const valuePadded = entry.value.padEnd(10); 
-    return `${typePadded}${valuePadded}\n`;
+  return formattedEntries.join("");
+}
+
+function generateGenOutput(genData, Local) {
+  let output = "\n";
+  genData[0].forEach((instruction) => {
+    output += `${instruction}\n`;
+  });
+  output += "\n\n\nLocal Variables:\n";
+  output += "-----------------\n";
+  output += "Index       Variable\n";
+
+  // Display the Local variables in a table-like format
+  Local.forEach((local) => {
+    const index = "local  " + local.index.toString().padEnd(8);
+    const name = local.name;
+    output += `${index}${name}\n`;
   });
 
-  return tableHeader + formattedEntries.join("");
-}
-
-function formatCodegenOutput(codegenData) {
-    return codegenData.join('\n');
+  return output;
 }
