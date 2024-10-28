@@ -1,7 +1,11 @@
 // Monaco Editor Initialization
 let editor;
 
-require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
+require.config({
+  paths: {
+    vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs",
+  },
+});
 require(["vs/editor/editor.main"], function () {
   // custom dark theme
   monaco.editor.defineTheme("custom-dark", {
@@ -10,13 +14,15 @@ require(["vs/editor/editor.main"], function () {
     rules: [],
     colors: {
       "editor.background": "#292c35",
-    }
+    },
   });
 
   editor = monaco.editor.create(document.getElementById("editor-container"), {
     value: "// Write your code here...\n",
     language: "python",
-    theme: document.body.classList.contains('dark') ? 'custom-dark' : 'vs-light',
+    theme: document.body.classList.contains("dark")
+      ? "custom-dark"
+      : "vs-light",
     automaticLayout: true,
   });
 });
@@ -27,9 +33,10 @@ const themeSelect = document.getElementById("theme-select");
 themeSelect.value = document.body.classList.contains("dark") ? "Dark" : "Light";
 themeSelect.addEventListener("change", () => {
   document.body.classList.toggle("dark", themeSelect.value === "Dark");
-  monaco.editor.setTheme(themeSelect.value === "Dark" ? "custom-dark" : "vs-light");
+  monaco.editor.setTheme(
+    themeSelect.value === "Dark" ? "custom-dark" : "vs-light",
+  );
 });
-
 
 // dummy code for the editor
 document.addEventListener("DOMContentLoaded", () => {
@@ -43,9 +50,10 @@ document.addEventListener("DOMContentLoaded", () => {
 // Clear button functionality
 document.querySelector(".clear-btn").addEventListener("click", () => {
   if (editor) editor.setValue(""); // Clear editor
-  document.querySelectorAll(".output-pane").forEach(pane => (pane.innerHTML = ""));
+  document
+    .querySelectorAll(".output-pane")
+    .forEach((pane) => (pane.innerHTML = ""));
 });
-
 
 // compile button click
 document.getElementById("run-btn").addEventListener("click", handleCompile);
@@ -76,18 +84,31 @@ function handleCompile() {
 
 // Display compilation results in the output panes
 function clearResults() {
-  document.getElementById("lexer-output").innerHTML = "probably an error occurred ..";
-  document.getElementById("parse-tree-output").innerHTML = "probably an error occurred ..";
-  document.getElementById("symbol-table-output").innerHTML = "probably an error occurred ..";
-  document.getElementById("code-gen-output").innerHTML = "probably an error occurred ..";
+  document.getElementById("lexer-output").innerHTML =
+    "probably an error occurred ..";
+  document.getElementById("parse-tree-output").innerHTML =
+    "probably an error occurred ..";
+  document.getElementById("symbol-table-output").innerHTML =
+    "probably an error occurred ..";
+  document.getElementById("code-gen-output").innerHTML =
+    "probably an error occurred ..";
 }
 
 // Display compilation results in the output panes
 function displayResults(parsedResult) {
-  document.getElementById("lexer-output").innerHTML = formatLexerOutput(parsedResult.Lexer);
-  document.getElementById("parse-tree-output").innerHTML = generateAsciiTree(parsedResult.AST);
-  document.getElementById("symbol-table-output").innerHTML = generateTable(parsedResult.SymbolTable);
-  document.getElementById("code-gen-output").innerHTML = generateGenOutput(parsedResult.Gen, parsedResult.Local);
+  document.getElementById("lexer-output").innerHTML = formatLexerOutput(
+    parsedResult.Lexer,
+  );
+  document.getElementById("parse-tree-output").innerHTML = generateAsciiTree(
+    parsedResult.AST,
+  );
+  document.getElementById("symbol-table-output").innerHTML = generateTable(
+    parsedResult.SymbolTable,
+  );
+  document.getElementById("code-gen-output").innerHTML = generateGenOutput(
+    parsedResult.Gen,
+    parsedResult.Local,
+  );
 }
 
 function showError(error) {
@@ -103,13 +124,17 @@ function hideError() {
   errorContainer.classList.add("hidden");
 }
 
-
 // Tab Switching with Bold and Color
 const tabButtons = document.querySelectorAll(".tab-btn");
 const outputPanes = document.querySelectorAll(".output-pane");
 
 // Color classes for active tabs
-const colorClasses = ["border-blue-600", "border-green-600", "border-red-600", "border-yellow-600"];
+const colorClasses = [
+  "border-blue-600",
+  "border-green-600",
+  "border-red-600",
+  "border-yellow-600",
+];
 
 tabButtons.forEach((btn, index) => {
   btn.addEventListener("click", () => {
@@ -126,10 +151,7 @@ tabButtons.forEach((btn, index) => {
   });
 });
 
-
-
 function formatLexerOutput(lexerData) {
-
   const formattedTokens = lexerData.map((token) => {
     const position = token.location.replace(/[<>]/g, "").padEnd(25);
     const tokenType = token.type.padEnd(20);
@@ -170,21 +192,61 @@ function generateAsciiTree(node, prefix = "", isLast = true, depth = 0) {
   if (Array.isArray(node.children) && node.children.length > 0) {
     node.children.forEach((child, index) => {
       const isLastChild = index === node.children.length - 1;
-      result += generateAsciiTree(child, prefix + (isLast ? "    " : "│   "), isLastChild, depth + 1);
+      result += generateAsciiTree(
+        child,
+        prefix + (isLast ? "    " : "│   "),
+        isLastChild,
+        depth + 1,
+      );
     });
   } else if (node.left && node.right) {
     // Handle left-right child nodes
-    result += generateAsciiTree(node.left, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.right, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+    result += generateAsciiTree(
+      node.left,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.right,
+      prefix + (isLast ? "    " : "│   "),
+      true,
+      depth + 1,
+    );
   } else if (node.condition && node.ifNode && node.elseNode) {
     // Handle conditionals
-    result += generateAsciiTree(node.condition, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.elseNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+    result += generateAsciiTree(
+      node.condition,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.ifNode,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.elseNode,
+      prefix + (isLast ? "    " : "│   "),
+      true,
+      depth + 1,
+    );
   } else if (node.condition && node.ifNode) {
     // Handle conditionals without an elseNode (optional else)
-    result += generateAsciiTree(node.condition, prefix + (isLast ? "    " : "│   "), false, depth + 1);
-    result += generateAsciiTree(node.ifNode, prefix + (isLast ? "    " : "│   "), true, depth + 1);
+    result += generateAsciiTree(
+      node.condition,
+      prefix + (isLast ? "    " : "│   "),
+      false,
+      depth + 1,
+    );
+    result += generateAsciiTree(
+      node.ifNode,
+      prefix + (isLast ? "    " : "│   "),
+      true,
+      depth + 1,
+    );
   }
 
   return result;
@@ -220,6 +282,3 @@ function generateGenOutput(genData, Local) {
 
   return output;
 }
-
-
-
