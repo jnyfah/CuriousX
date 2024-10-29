@@ -18,7 +18,7 @@ require(["vs/editor/editor.main"], function () {
   });
 
   editor = monaco.editor.create(document.getElementById("editor-container"), {
-    value: "// Write your code here...\n",
+    value: "# Write your code here...\n",
     language: "python",
     theme: document.body.classList.contains("dark")
       ? "custom-dark"
