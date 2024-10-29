@@ -1,105 +1,141 @@
 ![Github](https://github.com/jnyfah/CuriousX/actions/workflows/cmake.yml/badge.svg)
-![Github](https://github.com/jnyfah/CuriousX/actions/workflows/msvc.yml/badge.svg)
-![Github](https://github.com/jnyfah/CuriousX/actions/workflows/codeql.yml/badge.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/400c60bf7e00462d880d5d782adec10e)](https://www.codacy.com/gh/jnyfah/CuriousX/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jnyfah/CuriousX&amp;utm_campaign=Badge_Grade)
+
 
 # CuriousX: A Miniature Compiler
-CuriousX is a mini subset of C++ language created for fun and educational purposes, to help understand how compilers work and how to build a simple programming language.  
+CuriousX is a modern compiler that translates a C++-like language into WebAssembly. Built for educational purposes, it demonstrates fundamental compiler concepts through a practical implementation.
 
-compilers are just one part of the toolchain that help build programs from source code to an executable, to learn more visit [what is CuriousX](https://jenniferchukwu.com/posts/curiousx)
-
-CuriousX is designed to mimic the structure of a typical compiler and includes features such as lexical analysis, syntax analysis, and semantic analysis. Additionally, it includes a visualization of the output from each stage of the compiler.
-
-__Test and check out the [Compiler Playground](https://jnyfah.github.io/CuriousX/)__
+[Try the Online Compiler](https://jnyfah.github.io/CuriousX/) | [Learn More](https://jenniferchukwu.com/posts/curiousx)
 
 ## Features
--   Print
--   Variables (integer and float)
--   Expressions (add, subtract, divide, and multiply)
--   Operator precedence
--   Statements
--   __Target Architecture:__ ARMv8
 
-## Dependencies
-1.  A C++ compiler that supports C++17. See [cppreference.com](https://en.cppreference.com/w/cpp/compiler_support) to see which features are supported by each compiler.
-2.  [CMake 3.25+](https://cmake.org/)
-3.  Compiler toolchain to WebAssembly [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
+### Language Support
+- **Data Types**
+  - Integers and Floating-point numbers
+  - Strings (basic support)
+  - Booleans
+- **Operations**
+  - Arithmetic: `+`, `-`, `*`, `/`
+  - Comparison: `==`, `!=`, `<=`, `>=`, `>`,`<`
+- **Control Flow**
+  - If-else statements
+  - Basic blocks
+- **Functions**
+  - Built-in `print()` function
+  - Variable declarations and assignments
 
-## Building
+### Compiler Pipeline
+1. **Lexical Analysis**
+   - Token generation
+   - Source location tracking
+   - Comment handling
+2. **Syntax Analysis**
+   - AST generation
+   - Operator precedence
+   - Error recovery
+3. **Semantic Analysis**
+   - Type checking
+   - Scope analysis
+   - Symbol table management
+4. **Code Generation**
+   - WebAssembly text format output
+   - Optimization passes
+   - Runtime support
 
-### Building Without Emscripten (Standard Build)
-```cmd
+## Getting Started
+
+### Prerequisites
+- C++17 compatible compiler
+- CMake 3.25 or higher
+- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) (for WebAssembly compilation)
+- Git for version control
+
+### Building the Project
+
+#### Standard Build (Native)
+```bash
+# Clone the repository
+git clone https://github.com/jnyfah/CuriousX.git
+cd CuriousX
+
+# Create build directory and build
 mkdir build
-cd build
 cmake -B build -S .
 cmake --build build
 ```
-This will compile the project using your default system compiler (e.g., GCC, Clang, or MSVC).
 
-### Building with Emscripten (WebAssembly Deployment)
-```cmd
+#### WebAssembly Build
+```bash
+# Configure with Emscripten
 emcmake cmake -B build -S .
+
+# Build
 cmake --build build
-```
-This will configure the project to be compiled using Emscripten, allowing you to deploy it as WebAssembly
 
-__Note:__ Emscripten might not compatible with the `Visual Studio generator` due to a lack of `MSBuild` integration. Use `Ninja` or `Makefiles` instead.
-
-## Usage
-html file is located at the `CompilerEditor` folder, after building sucessfully, start the webserver
-```cmd
+# Start local server
 emrun CompilerEditor/index.html
 ```
 
-This generates a `Lexical-analysis` `Syntax-analysis` and an `assembly` files outputs on the webpage and you can also view the symbol table if you source code has any.
+### Usage Examples
 
-You can always validate your assembly code with this ARM emulator [miniarm](https://github.com/ebresafegaga/miniarm)
-
-or Just visit the __[Compiler Playground](https://jnyfah.github.io/CuriousX/)__ 🫠
-
-## Examples
-for the source code input:
-
-```py
-a = 2 + 3 * 4
-print(a)
+#### Basic Arithmetic
+```cpp
+x = 42
+y = x + 8
+if (y > 0) {
+    print("Positive")
+} else {
+    print("Non-positive")
+}
 ```
 
-the lexical-analysis output
-```sh
-[a]    ->   <line:1, col:1>;	 VarToken
-[=]    ->   <line:1, col:3>;	 AssignToken
-[2]    ->   <line:1, col:5>;	 IntToken
-[+]    ->   <line:1, col:7>;	 PlusToken
-[3]    ->   <line:1, col:9>;	 IntToken
-[*]    ->   <line:1, col:11>;	 MultiplyToken
-[4]    ->   <line:1, col:13>;	 IntToken
-[print] ->   <line:2, col:1>;	 PrintToken
-[(]    ->   <line:2, col:6>;	 ParenOpen
-[a]    ->   <line:2, col:7>;	 VarToken
-[)]    ->   <line:2, col:8>;	 ParenClose
+#### Output Examples
+
+##### Lexical Analysis
+```plaintext
+Newline             line:1, col:26           [\n]
+VarToken            line:2, col:1            [x]
+AssignToken         line:2, col:3            [=]
+IntToken            line:2, col:5            [42]
 ```
 
-syntax-analysis output
-```sh
-          =
-        /   \
-       a     +
-            / \
-           2   *
-              / \
-             3   4
+##### Abstract Syntax Tree
+```plaintext
+     =
+    / \
+   x   42
 ```
 
-and assembly output
-
-```sh
-i32.const 2
-i32.const 3
-i32.const 4
-i32.mul
-i32.add
-local.set 0
+##### Generated WebAssembly
+```wasm
+i32.const 42
+local.set 0    ;; x = 42
 local.get 0
-call $print
+call $print    ;; print(x)
 ```
+## Project Structure
+```
+CuriousX/
+├── CompilerUtils/    # Utility classes and helpers
+├── CuriousX/        # Core compiler implementation
+│   ├── Lexer/       # Lexical analysis
+│   ├── Parser/      # Syntax analysis
+│   ├── Semantic/    # Semantic analysis
+│   └── Generation/  # Code generation
+├── tests/          # Unit and integration tests
+└── CompilerEditor/ # Web interface
+```
+
+## Testing
+The project includes comprehensive tests for each compiler component:
+```bash
+# Build with tests enabled
+cmake -B build -DBUILD_TESTS=ON
+cmake --build build
+
+# Run tests
+cd build && ctest -C Debug -V
+```
+
+## Further Reading
+- [Lexer Design Documentation](CuriousX\Lexer\Readme.md)
+- [WebAssembly Output Format](CuriousX\Generation\README.md)
