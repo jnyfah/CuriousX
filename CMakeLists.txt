@@ -104,6 +104,7 @@ if(EMSCRIPTEN)
     set_target_properties(CuriousX PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/CompilerEditor"
     )
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -s ASSERTIONS=1")
     target_link_options(CuriousX PRIVATE --bind -s DISABLE_EXCEPTION_CATCHING=0)
     message(STATUS "Building with Emscripten support")
 endif()
