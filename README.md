@@ -140,7 +140,7 @@ cd build && ctest -C Debug -V
 ```
 
 ## Further Reading
-- [Lexer Design Documentation](CuriousX\Lexer\Readme.md)
-- [Grammar Design Documentation](CuriousX\Parser\README.md)
-- [SEmantic Design](CuriousX\Semantic\Readme.md)
-- [WebAssembly Output Format](CuriousX\Generation\README.md)
+- [Lexer Design Documentation](CuriousX/Lexer/Readme.md)
+- [Grammar Design Documentation](CuriousX/Parser/README.md)
+- [SEmantic Design](CuriousX/Semantic/Readme.md)
+- [WebAssembly Output Format](CuriousX/Generation/README.md)
