@@ -64,8 +64,11 @@ cmake --build build
 ```
 
 #### WebAssembly Build
+
+*NB: Make sure emscripten is active before building* 
 ```bash
 # Configure with Emscripten
+mkdir build
 emcmake cmake -B build -S .
 
 # Build
@@ -138,4 +141,6 @@ cd build && ctest -C Debug -V
 
 ## Further Reading
 - [Lexer Design Documentation](CuriousX\Lexer\Readme.md)
+- [Grammar Design Documentation](CuriousX\Parser\README.md)
+- [SEmantic Design](CuriousX\Semantic\Readme.md)
 - [WebAssembly Output Format](CuriousX\Generation\README.md)

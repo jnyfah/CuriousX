@@ -80,7 +80,3 @@ if (x) {  // Error: Condition must be boolean
 
 - Division by zero checking is planned but not yet implemented
 - if statement cannot start a program
-
-# Learn More
-For detailed information about the semantic analysis process, visit:
-[CuriousX Lexical Analyzer Blog](https://jenniferchukwu.com/posts/semanticAnalysis)
