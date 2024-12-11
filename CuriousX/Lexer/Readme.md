@@ -123,4 +123,3 @@ while ((token = lexer.nextToken()).type != LexerTokenType::Eof) {
     // Process token
 }
 ```
-

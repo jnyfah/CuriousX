@@ -89,7 +89,6 @@ function handleCompile() {
 
 document.getElementById("run-btn").addEventListener("click", handleCompile);
 
-
 // Display compilation results in the output panes
 function clearResults() {
   document.getElementById("lexer-output").innerHTML =

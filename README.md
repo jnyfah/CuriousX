@@ -64,6 +64,7 @@ cmake --build build
 ```
 
 #### WebAssembly Build
+
 *NB: Make sure emscripten is active before building* 
 ```bash
 # Configure with Emscripten
