@@ -102,7 +102,3 @@ if            // Start if block
     call $print  // Call print
 end           // End if block
 ```
-
-# Learn More
-For detailed information about the Code Generation process, visit:
-[CuriousX Lexical Analyzer Blog](https://jenniferchukwu.com/posts/codeGen)

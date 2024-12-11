@@ -145,6 +145,3 @@ Error at line 3: Expected ')' after expression
 if (x > 0 {
          ^
 ```
-# Learn More
-For detailed information about the syntax analysis process, visit:
-[CuriousX Lexical Analyzer Blog](https://jenniferchukwu.com/posts/syntaxAnalysis)

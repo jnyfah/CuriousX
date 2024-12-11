@@ -124,6 +124,3 @@ while ((token = lexer.nextToken()).type != LexerTokenType::Eof) {
 }
 ```
 
-## Learn More
-For detailed information about the lexical analysis process, visit:
-[CuriousX Lexical Analyzer Blog](https://jenniferchukwu.com/posts/lexicalAnalysis)

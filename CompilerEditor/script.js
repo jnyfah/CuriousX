@@ -55,8 +55,13 @@ document.querySelector(".clear-btn").addEventListener("click", () => {
     .forEach((pane) => (pane.innerHTML = ""));
 });
 
-// compile button click
-document.getElementById("run-btn").addEventListener("click", handleCompile);
+// Disable the compile button initially
+document.getElementById("run-btn").disabled = true;
+
+Module.onRuntimeInitialized = () => {
+  console.log("WebAssembly runtime initialized!");
+  document.getElementById("run-btn").disabled = false;
+};
 
 function handleCompile() {
   const code = editor.getValue();
@@ -81,6 +86,9 @@ function handleCompile() {
     showError(error.message || error.toString());
   }
 }
+
+document.getElementById("run-btn").addEventListener("click", handleCompile);
+
 
 // Display compilation results in the output panes
 function clearResults() {
