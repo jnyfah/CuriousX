@@ -87,6 +87,8 @@ namespace cx
 
             case TokenType::Comment:
                 return "Comment";
+            case TokenType::Semicolon:
+                return "Semicolon";
             case TokenType::Comma:
                 return "Comma";
             case TokenType::Space:

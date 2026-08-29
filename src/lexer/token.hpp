@@ -53,6 +53,7 @@ namespace cx
         Or,
 
         Comment,
+        Semicolon,
         Comma,
         Space,
         Tab,

@@ -200,6 +200,8 @@ namespace cx
                 return {"", loc, TokenType::Eof};
             case '(':
                 return {"(", loc, TokenType::ParenOpen};
+            case ';':
+                return {";", loc, TokenType::Semicolon};
             case ')':
                 return {")", loc, TokenType::ParenClose};
             case '%':
