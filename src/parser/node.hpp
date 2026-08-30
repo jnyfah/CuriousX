@@ -11,8 +11,6 @@ namespace cx
 
         BinaryExpr,
         UnaryExpr,
-        CondExpr,
-        CallExpr,
 
         IfStmt,
         WhileStmt,
@@ -25,13 +23,20 @@ namespace cx
         Bool,
 
         FuncDecl,
-        Comment,
+        FuncCall,
+
+        Print,
+
+        Error,
     };
 
     struct Node
     {
         cx::Token token;
         NodeType  type;
+
+        Node(Token token, NodeType type) : token(token), type(type) {}
+        virtual ~Node() = default;
     };
 
     struct BinaryNode : Node
@@ -52,11 +57,31 @@ namespace cx
     struct IfNode : Node
     {
         Node*              condition;
-        std::vector<Node*> thenBody;
-        std::vector<Node*> elseBody;
+        std::vector<Node*> then;
+        std::vector<Node*> nelse;
 
-        IfNode(Token token, NodeType type, Node* cond, std::vector<Node*> then, std::vector<Node*> els)
-            : Node(token, type), condition(cond), thenBody(then), elseBody(els)
+        IfNode(Token token, NodeType type, Node* cond, std::vector<Node*> then, std::vector<Node*> nelse)
+            : Node(token, type), condition(cond), then(then), nelse(nelse)
+        {
+        }
+    };
+
+    struct WhileNode : Node
+    {
+        Node*              condition;
+        std::vector<Node*> loop;
+        WhileNode(Token token, NodeType type, Node* cond, std::vector<Node*> loop) : Node(token, type), condition(cond), loop(loop) {}
+    };
+
+    // function definition
+    struct FuncNode : Node
+    {
+        Node*              name;
+        std::vector<Node*> parameters;
+        std::vector<Node*> body;
+
+        FuncNode(Token token, NodeType type, Node* name, std::vector<Node*> parameters, std::vector<Node*> body)
+            : Node(token, type), name(name), parameters(parameters), body(body)
         {
         }
     };
@@ -65,19 +90,28 @@ namespace cx
     {
         Node*              callee;
         std::vector<Node*> arguments;
-        size_t             argumentCount;
+        CallNode(Token token, NodeType type, Node* callee, std::vector<Node*> arguments) : Node(token, type), callee(callee), arguments(arguments) {}
     };
 
     struct ProgramNode : Node
     {
         std::vector<Node*> statements;
-        size_t             statementCount;
+        ProgramNode(Token token, NodeType type, std::vector<Node*> statements) : Node(token, type), statements(statements) {}
     };
 
-    // how do we represent the root node??
-    // what is the entry point of this parser ??
-    // does number literal include float and ints both of them
-} // namespace cx
+    struct PrintNode : Node
+    {
+        Node* expression;
 
+        PrintNode(Token token, NodeType type, Node* expression) : Node(token, type), expression(expression) {}
+    };
+
+    struct ReturnNode : Node
+    {
+        Node* expression;
+
+        ReturnNode(Token token, NodeType type, Node* expression) : Node(token, type), expression(expression) {}
+    };
+} // namespace cx
 
 // chane name to elseblock

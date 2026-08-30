@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <string_view>
 #include "tools/location.hpp"
 
@@ -21,7 +22,6 @@ namespace cx
         If,
         Else,
         Bool,
-        For,
         While,
 
         Plus,
@@ -52,15 +52,10 @@ namespace cx
         And,
         Or,
 
-        Comment,
         Semicolon,
         Comma,
-        Space,
-        Tab,
-        Newline,
         Eof,
 
-        Program,
         Unknown
     };
 
@@ -72,7 +67,7 @@ namespace cx
         TokenType        type;
     };
 
-    //! Converts LexerToken to String
-    const char* toString(const TokenType& t);
+    const char* describe(TokenType t);
+    std::string describe(const Token& t);
 
 } // namespace cx

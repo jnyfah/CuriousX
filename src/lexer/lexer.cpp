@@ -8,16 +8,6 @@ namespace cx
 
     Lexer::Lexer(std::string_view data, Diagnostics& diag) : m_data(data), m_diag(diag) {}
 
-    Token Lexer::nextNWToken()
-    {
-        Token t;
-        do
-        {
-            t = nextToken();
-        } while (t.type == TokenType::Space || t.type == TokenType::Tab);
-        return t;
-    }
-
     Token Lexer::nextToken()
     {
         return doGetNextToken();
@@ -124,7 +114,6 @@ namespace cx
             {    "if",     TokenType::If},
             {  "else",   TokenType::Else},
             { "while",  TokenType::While},
-            {   "for",    TokenType::For},
             {  "func",   TokenType::Func},
             {"return", TokenType::Return},
             { "print",  TokenType::Print},
@@ -160,18 +149,30 @@ namespace cx
         return {text, loc, TokenType::String};
     }
 
-    Token Lexer::lexComment(size_t startPos, const Location& location)
+    //! Consumes whitespace and comments
+    void Lexer::skipTrivia()
     {
-        while (true)
+        for (;;)
         {
-            char c = peek_next_char();
-            if (c == '\n' || c == '\0')
+            const char c = peek_next_char();
+
+            if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
             {
-                break;
+                next_char();
+                continue;
             }
-            next_char();
+
+            if (c == '#')
+            {
+                while (peek_next_char() != '\n' && peek_next_char() != '\0')
+                {
+                    next_char();
+                }
+                continue;
+            }
+
+            return;
         }
-        return {m_data.substr(startPos, m_pos - startPos), location, TokenType::Comment};
     }
 
     bool Lexer::match(char expected)
@@ -186,10 +187,8 @@ namespace cx
 
     Token Lexer::doGetNextToken()
     {
-        while (peek_next_char() == ' ' || peek_next_char() == '\t')
-        {
-            next_char();
-        }
+        skipTrivia();
+
         const Location loc   = currentLocation();
         const auto     start = m_pos;
         const char     nchar = next_char();
@@ -214,10 +213,6 @@ namespace cx
                 return {"}", loc, TokenType::BracesClose};
             case '|':
                 return {"|", loc, TokenType::Or};
-            case '\n':
-                return {"\n", loc, TokenType::Newline};
-            case '\t':
-                return {"\t", loc, TokenType::Tab};
             case '>':
                 return match('=') ? Token{m_data.substr(start, 2), loc, TokenType::GreaterEqual} : Token{">", loc, TokenType::Greater};
             case '<':
@@ -236,8 +231,6 @@ namespace cx
                 return match('=') ? Token{m_data.substr(start, 2), loc, TokenType::DivideEq} : Token{"/", loc, TokenType::Divide};
             case '"':
                 return lexString(loc);
-            case '#':
-                return lexComment(start, loc);
             case ',':
                 return {",", loc, TokenType::Comma};
             default:

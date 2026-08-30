@@ -37,7 +37,7 @@ namespace
         for (size_t i = 0; i < tokens.size(); ++i)
         {
             EXPECT_EQ(tokens[i].type, expected[i].type)
-                << "type mismatch at " << i << " (got " << toString(tokens[i].type) << ")";
+                << "type mismatch at " << i << " (got " << describe(tokens[i].type) << ")";
             EXPECT_EQ(tokens[i].value, expected[i].value) << "value mismatch at " << i;
         }
         EXPECT_EQ(diag.all().size(), expectedErrors) << "diagnostic count mismatch for input: " << input;
@@ -97,11 +97,10 @@ TEST(Lexer, Identifiers)
 
 TEST(Lexer, Keywords)
 {
-    expectTokens("if else while for func return print true false",
+    expectTokens("if else while func return print true false",
                  {{TokenType::If, "if"},
                   {TokenType::Else, "else"},
                   {TokenType::While, "while"},
-                  {TokenType::For, "for"},
                   {TokenType::Func, "func"},
                   {TokenType::Return, "return"},
                   {TokenType::Print, "print"},
@@ -198,34 +197,38 @@ TEST(Lexer, UnterminatedStringAtEof)
 
 TEST(Lexer, UnterminatedStringStopsAtNewline)
 {
-    // the newline must survive: it is the statement terminator
-    expectTokens("\"abc\nx",
-                 {{TokenType::Unknown, "abc"}, {TokenType::Newline, "\n"}, {TokenType::Var, "x"}},
-                 1);
+    // the string must not swallow the rest of the file
+    expectTokens("\"abc\nx", {{TokenType::Unknown, "abc"}, {TokenType::Var, "x"}}, 1);
 }
 
 // ---------------------------------------------------------------- comments
 
-TEST(Lexer, CommentRunsToEndOfLine)
+TEST(Lexer, CommentsAreSkippedEntirely)
 {
-    expectTokens("# a comment", {{TokenType::Comment, "# a comment"}});
+    expectTokens("# a comment", {});
 }
 
-TEST(Lexer, CommentStopsAtNewline)
+TEST(Lexer, CommentStopsAtEndOfLine)
 {
-    expectTokens("x # note\ny",
+    expectTokens("x # note\ny", {{TokenType::Var, "x"}, {TokenType::Var, "y"}});
+}
+
+TEST(Lexer, CommentBetweenTokensOnOneLine)
+{
+    expectTokens("x = 1 # trailing\ny = 2",
                  {{TokenType::Var, "x"},
-                  {TokenType::Comment, "# note"},
-                  {TokenType::Newline, "\n"},
-                  {TokenType::Var, "y"}});
+                  {TokenType::Assign, "="},
+                  {TokenType::Int, "1"},
+                  {TokenType::Var, "y"},
+                  {TokenType::Assign, "="},
+                  {TokenType::Int, "2"}});
 }
 
 // -------------------------------------------------------------- whitespace
 
-TEST(Lexer, SpacesAndTabsAreSkippedButNewlinesAreNot)
+TEST(Lexer, AllWhitespaceIsSkipped)
 {
-    expectTokens("a \t b\nc",
-                 {{TokenType::Var, "a"}, {TokenType::Var, "b"}, {TokenType::Newline, "\n"}, {TokenType::Var, "c"}});
+    expectTokens("a \t b\nc", {{TokenType::Var, "a"}, {TokenType::Var, "b"}, {TokenType::Var, "c"}});
 }
 
 TEST(Lexer, EmptyInputProducesNoTokens)
@@ -264,11 +267,11 @@ TEST(Lexer, TracksLines)
     Diagnostics diag;
     const auto  tokens = tokenize("a\nb\nc", diag);
 
-    ASSERT_EQ(tokens.size(), 5u);
+    ASSERT_EQ(tokens.size(), 3u);
     EXPECT_EQ(tokens[0].location.getLine(), 1);   // a
-    EXPECT_EQ(tokens[2].location.getLine(), 2);   // b
-    EXPECT_EQ(tokens[4].location.getLine(), 3);   // c
-    EXPECT_EQ(tokens[4].location.getCol(), 1);
+    EXPECT_EQ(tokens[1].location.getLine(), 2);   // b
+    EXPECT_EQ(tokens[2].location.getLine(), 3);   // c
+    EXPECT_EQ(tokens[2].location.getCol(), 1);
 }
 
 // ------------------------------------------------------------- diagnostics

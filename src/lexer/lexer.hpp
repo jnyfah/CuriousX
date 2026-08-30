@@ -13,9 +13,6 @@ namespace cx
         explicit Lexer(std::string_view data, Diagnostics& diag);
         Token nextToken();
 
-        // skips spaces/tabs
-        Token nextNWToken();
-
     private:
         Token            doGetNextToken();
         char             next_char();
@@ -30,7 +27,7 @@ namespace cx
 
         Token            lexIdentifier(size_t start, Location loc);
         Token            lexString(Location loc);
-        Token            lexComment(size_t startPos, const Location& location);
+        void             skipTrivia();
 
         std::string_view m_data;
         size_t           m_pos = 0;

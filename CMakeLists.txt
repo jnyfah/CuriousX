@@ -28,7 +28,7 @@ target_link_libraries(CuriousX
 enable_testing()
 add_subdirectory(tests)
 
-option(BUILD_TESTS "Build unit tests" OFF)
-if(BUILD_TESTS)
-    add_subdirectory(tests)
-endif()
+# option(BUILD_TESTS "Build unit tests" OFF)
+# if(BUILD_TESTS)
+#     add_subdirectory(tests)
+# endif()
