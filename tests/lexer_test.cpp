@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "lexer/lexer.hpp"
-#include "tools/diagnostics.hpp"
+#include "helpers/diagnostics.hpp"
 
 using namespace cx;
 

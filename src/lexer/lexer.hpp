@@ -2,7 +2,7 @@
 #include <optional>
 #include <string_view>
 #include "token.hpp"
-#include "tools/diagnostics.hpp"
+#include "helpers/diagnostics.hpp"
 
 namespace cx
 {

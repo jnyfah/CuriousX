@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arena.hpp"
 #include "lexer/lexer.hpp"
 #include "node.hpp"
 
@@ -29,7 +30,7 @@ namespace cx
     class Parser
     {
     public:
-        Parser(Lexer& lexer, Diagnostics& diag);
+        Parser(Lexer& lexer, Diagnostics& diag, size_t arenasize);
 
         ProgramNode* Parse();
 
@@ -73,6 +74,7 @@ namespace cx
         Token                m_current;
         int                  m_depth    = 0;
         int                  m_consumed = 0;
+        Arena m_arena;
     };
 
 } // namespace cx
