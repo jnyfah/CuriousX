@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <utility>
+#include <vector>
 
 namespace cx
 {
@@ -12,13 +13,27 @@ namespace cx
         Arena(std::size_t initSize);
         ~Arena();
 
+        Arena(const Arena&)            = delete;
+        Arena& operator=(const Arena&) = delete;
+
+        Arena(Arena&& other) noexcept;
+        Arena&     operator=(Arena&& other) noexcept;
+        void       release() noexcept;
+
         std::byte* allocate(std::size_t size, std::size_t alignment);
 
         template <typename T, typename... Args>
         T* create(Args&&... args)
         {
             std::byte* mem = allocate(sizeof(T), alignof(T));
-            return std::construct_at(reinterpret_cast<T*>(mem), std::forward<Args>(args)...);
+            T*         obj = std::construct_at(reinterpret_cast<T*>(mem), std::forward<Args>(args)...);
+
+            // for types that are not trivially destructible, keep track so it can be destroyed later 
+            if constexpr (!std::is_trivially_destructible_v<T>)
+            {
+                m_destructors.push_back({obj, [](void* p) { static_cast<T*>(p)->~T(); }});
+            }
+            return obj;
         }
 
     private:
@@ -37,11 +52,18 @@ namespace cx
             }
         };
 
-        Chunk*      m_current;
-        Chunk*      m_chunks; // head pointer
-        std::size_t m_chunkSize;
+        struct Finalizer
+        {
+            void* obj;
+            void (*destroy)(void*);
+        };
 
-        void        allocateChunk(std::size_t minSize, std::size_t alignment);
+        Chunk*                 m_chunks; // head pointer
+        Chunk*                 m_current;
+        std::size_t            m_chunkSize;
+        std::vector<Finalizer> m_destructors;
+
+        void                   allocateChunk(std::size_t minSize, std::size_t alignment);
     };
 
 } // namespace cx

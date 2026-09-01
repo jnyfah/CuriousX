@@ -2,11 +2,12 @@
 #include "lexer/lexer.hpp"
 #include "lexer/token.hpp"
 #include "node.hpp"
+#include "parser/arena.hpp"
 
 namespace cx
 {
 
-    Parser::Parser(Lexer& lexer, Diagnostics& diag, size_t arenasize) : m_lex(lexer), m_diag(diag), m_arena(arenasize)
+    Parser::Parser(Lexer& lexer, Diagnostics& diag, Arena& arena) : m_lex(lexer), m_diag(diag), m_arena(arena)
     {
         consume();
     }
@@ -527,7 +528,7 @@ namespace cx
 
         // Unexpected token: a primary expression was expected.
         m_diag.error(m_current.location, "expected expression, found '{}'", describe(m_current));
-        return new Node{m_current, NodeType::Error};
+        return m_arena.create<Node>(m_current, NodeType::Error);
     }
 
 } // namespace cx

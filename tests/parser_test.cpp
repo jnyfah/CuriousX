@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 
+#include "parser/arena.hpp"
 #include "parser/parser.hpp"
 
 using namespace cx;
@@ -128,8 +129,9 @@ namespace
     //! the Parser, so the tree must be rendered before this returns.
     std::string parseToString(std::string_view src, Diagnostics& diag)
     {
+        Arena arena(4096);
         Lexer  lexer(src, diag);
-        Parser parser(lexer, diag, 4096);
+        Parser parser(lexer, diag, arena);
 
         ProgramNode* root = parser.Parse();
 
@@ -393,8 +395,9 @@ TEST(Parser, ParsingContinuesAfterAnError)
 {
     // the broken statement must not swallow the ones after it
     Diagnostics diag;
+     Arena arena(4096);
     Lexer       lexer("x = ;\ny = 2;\nz = 3;", diag);
-    Parser      parser(lexer, diag, 4096);
+    Parser      parser(lexer, diag, arena);
     auto*       root = parser.Parse();
 
     EXPECT_TRUE(diag.hasErrors());

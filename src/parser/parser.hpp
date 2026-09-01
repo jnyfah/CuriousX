@@ -30,7 +30,7 @@ namespace cx
     class Parser
     {
     public:
-        Parser(Lexer& lexer, Diagnostics& diag, size_t arenasize);
+        Parser(Lexer& lexer, Diagnostics& diag, Arena& arena);
 
         ProgramNode* Parse();
 
@@ -74,7 +74,7 @@ namespace cx
         Token                m_current;
         int                  m_depth    = 0;
         int                  m_consumed = 0;
-        Arena m_arena;
+        Arena& m_arena;
     };
 
 } // namespace cx
