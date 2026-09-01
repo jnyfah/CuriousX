@@ -25,7 +25,7 @@ namespace cx
     }
 
     Arena::Arena(Arena&& other) noexcept
-        : m_chunks(other.m_chunks), m_current(other.m_current), m_chunkSize(other.m_chunkSize), m_destructors(std::move(other.m_destructors))
+        : m_chunks(other.m_chunks), m_current(other.m_current), m_chunkSize(other.m_chunkSize)
     {
         other.m_chunks  = nullptr;
         other.m_current = nullptr;
@@ -39,7 +39,6 @@ namespace cx
             m_chunks        = other.m_chunks;
             m_current       = other.m_current;
             m_chunkSize     = other.m_chunkSize;
-            m_destructors   = other.m_destructors;
             other.m_chunks  = nullptr;
             other.m_current = nullptr;
         }
@@ -48,12 +47,6 @@ namespace cx
 
     void Arena::release() noexcept
     {
-        // Destroy non-trivially destructible objects before releasing their arena storage.
-        for (auto it = m_destructors.rbegin(); it != m_destructors.rend(); ++it)
-        {
-            it->destroy(it->obj);
-        }
-        m_destructors.clear();
         auto* current = m_chunks;
         while (current)
         {
@@ -90,6 +83,17 @@ namespace cx
         m_current->next      = std::construct_at(reinterpret_cast<Chunk*>(raw), chunkSize, alignment, nullptr);
 
         m_current            = m_current->next;
+    }
+
+    std::span<Node*> Arena::copyOf(const std::vector<Node*>& src)
+    {
+        if (src.empty())
+        {
+            return {};
+        }
+        auto* mem = reinterpret_cast<Node**>(allocate(sizeof(Node*) * src.size(), alignof(Node*)));
+        std::copy(src.begin(), src.end(), mem);
+        return {mem, src.size()};
     }
 
 } // namespace cx

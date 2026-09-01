@@ -4,6 +4,8 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <span>
+#include "node.hpp"
 
 namespace cx
 {
@@ -28,13 +30,11 @@ namespace cx
             std::byte* mem = allocate(sizeof(T), alignof(T));
             T*         obj = std::construct_at(reinterpret_cast<T*>(mem), std::forward<Args>(args)...);
 
-            // for types that are not trivially destructible, keep track so it can be destroyed later 
-            if constexpr (!std::is_trivially_destructible_v<T>)
-            {
-                m_destructors.push_back({obj, [](void* p) { static_cast<T*>(p)->~T(); }});
-            }
+
             return obj;
         }
+
+        std::span<Node*> copyOf(const std::vector<Node*>& src);
 
     private:
         struct Chunk
@@ -52,16 +52,10 @@ namespace cx
             }
         };
 
-        struct Finalizer
-        {
-            void* obj;
-            void (*destroy)(void*);
-        };
 
         Chunk*                 m_chunks; // head pointer
         Chunk*                 m_current;
         std::size_t            m_chunkSize;
-        std::vector<Finalizer> m_destructors;
 
         void                   allocateChunk(std::size_t minSize, std::size_t alignment);
     };

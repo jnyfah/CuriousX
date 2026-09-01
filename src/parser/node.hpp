@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lexer/lexer.hpp"
+#include <span>
 
 namespace cx
 {
@@ -36,7 +37,6 @@ namespace cx
         NodeType  type;
 
         Node(Token token, NodeType type) : token(token), type(type) {}
-        virtual ~Node() = default;
     };
 
     struct BinaryNode : Node
@@ -57,10 +57,10 @@ namespace cx
     struct IfNode : Node
     {
         Node*              condition;
-        std::vector<Node*> then;
-        std::vector<Node*> nelse;
+        std::span<Node*> then;
+        std::span<Node*> nelse;
 
-        IfNode(Token token, NodeType type, Node* cond, std::vector<Node*> then, std::vector<Node*> nelse)
+        IfNode(Token token, NodeType type, Node* cond, std::span<Node*> then, std::span<Node*> nelse)
             : Node(token, type), condition(cond), then(then), nelse(nelse)
         {
         }
@@ -69,18 +69,18 @@ namespace cx
     struct WhileNode : Node
     {
         Node*              condition;
-        std::vector<Node*> loop;
-        WhileNode(Token token, NodeType type, Node* cond, std::vector<Node*> loop) : Node(token, type), condition(cond), loop(loop) {}
+        std::span<Node*> loop;
+        WhileNode(Token token, NodeType type, Node* cond, std::span<Node*> loop) : Node(token, type), condition(cond), loop(loop) {}
     };
 
     // function definition
     struct FuncNode : Node
     {
         Node*              name;
-        std::vector<Node*> parameters;
-        std::vector<Node*> body;
+        std::span<Node*> parameters;
+        std::span<Node*> body;
 
-        FuncNode(Token token, NodeType type, Node* name, std::vector<Node*> parameters, std::vector<Node*> body)
+        FuncNode(Token token, NodeType type, Node* name, std::span<Node*> parameters, std::span<Node*> body)
             : Node(token, type), name(name), parameters(parameters), body(body)
         {
         }
@@ -90,14 +90,14 @@ namespace cx
     struct CallNode : Node
     {
         Node*              callee;
-        std::vector<Node*> arguments;
-        CallNode(Token token, NodeType type, Node* callee, std::vector<Node*> arguments) : Node(token, type), callee(callee), arguments(arguments) {}
+        std::span<Node*> arguments;
+        CallNode(Token token, NodeType type, Node* callee, std::span<Node*> arguments) : Node(token, type), callee(callee), arguments(arguments) {}
     };
 
     struct ProgramNode : Node
     {
-        std::vector<Node*> statements;
-        ProgramNode(Token token, NodeType type, std::vector<Node*> statements) : Node(token, type), statements(statements) {}
+        std::span<Node*> statements;
+        ProgramNode(Token token, NodeType type, std::span<Node*> statements) : Node(token, type), statements(statements) {}
     };
 
     struct PrintNode : Node
