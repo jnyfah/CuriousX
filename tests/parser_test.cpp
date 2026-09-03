@@ -21,42 +21,42 @@ namespace
 
         const std::string value(n->token.value);
 
-        switch (n->type)
+        switch (n->kind)
         {
-            case NodeType::Number:
-            case NodeType::String:
-            case NodeType::Bool:
-            case NodeType::Identifier:
+            case NodeKind::Number:
+            case NodeKind::String:
+            case NodeKind::Bool:
+            case NodeKind::Identifier:
                 return value;
 
-            case NodeType::Error:
+            case NodeKind::Error:
                 return "<error>";
 
-            case NodeType::BinaryExpr:
+            case NodeKind::BinaryExpr:
             {
                 const auto* b = static_cast<const BinaryNode*>(n);
                 return "(" + value + " " + dump(b->left) + " " + dump(b->right) + ")";
             }
 
-            case NodeType::UnaryExpr:
+            case NodeKind::UnaryExpr:
             {
                 const auto* u = static_cast<const UnaryNode*>(n);
                 return "(" + value + " " + dump(u->operand) + ")";
             }
 
-            case NodeType::Print:
+            case NodeKind::Print:
             {
                 const auto* p = static_cast<const PrintNode*>(n);
                 return "(print " + dump(p->expression) + ")";
             }
 
-            case NodeType::ReturnStmt:
+            case NodeKind::ReturnStmt:
             {
                 const auto* r = static_cast<const ReturnNode*>(n);
                 return r->expression ? "(return " + dump(r->expression) + ")" : "(return)";
             }
 
-            case NodeType::IfStmt:
+            case NodeKind::IfStmt:
             {
                 const auto* i   = static_cast<const IfNode*>(n);
                 std::string out = "(if " + dump(i->condition) + " [";
@@ -71,7 +71,7 @@ namespace
                 return out + ")";
             }
 
-            case NodeType::WhileStmt:
+            case NodeKind::WhileStmt:
             {
                 const auto* w   = static_cast<const WhileNode*>(n);
                 std::string out = "(while " + dump(w->condition) + " [";
@@ -79,7 +79,7 @@ namespace
                 return out + "])";
             }
 
-            case NodeType::FuncDecl:
+            case NodeKind::FuncDecl:
             {
                 const auto* f   = static_cast<const FuncNode*>(n);
                 std::string out = "(func " + dump(f->name) + " (";
@@ -92,7 +92,7 @@ namespace
                 return out + "])";
             }
 
-            case NodeType::FuncCall:
+            case NodeKind::FuncCall:
             {
                 const auto* c   = static_cast<const CallNode*>(n);
                 std::string out = "(call " + dump(c->callee);

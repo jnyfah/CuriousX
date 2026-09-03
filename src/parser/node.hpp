@@ -1,12 +1,14 @@
 #pragma once
 
-#include "lexer/lexer.hpp"
+#include <cstddef>
 #include <span>
+#include "helpers/type.hpp"
+#include "lexer/lexer.hpp"
 
 namespace cx
 {
 
-    enum class NodeType
+    enum class NodeKind
     {
         Program,
 
@@ -16,7 +18,6 @@ namespace cx
         IfStmt,
         WhileStmt,
         ReturnStmt,
-        ForStmt,
 
         Identifier,
         String,
@@ -34,9 +35,13 @@ namespace cx
     struct Node
     {
         cx::Token token;
-        NodeType  type;
+        NodeKind  kind;
+        ValueType valuetype = ValueType::Unknown;
 
-        Node(Token token, NodeType type) : token(token), type(type) {}
+        //! Identifiers only
+        std::size_t slot = static_cast<std::size_t>(-1);
+
+        Node(Token token, NodeKind kind, ValueType valuetype) : token(token), kind(kind), valuetype(valuetype) {}
     };
 
     struct BinaryNode : Node
@@ -44,44 +49,45 @@ namespace cx
         Node* left;
         Node* right;
 
-        BinaryNode(Token token, NodeType type, Node* left, Node* right) : Node(token, type), left(left), right(right) {}
+        BinaryNode(Token token, NodeKind kind,  ValueType valuetype,  Node* left, Node* right) : Node(token, kind, valuetype), left(left), right(right) {}
     };
 
     struct UnaryNode : Node
     {
         Node* operand;
 
-        UnaryNode(Token token, NodeType type, Node* operand) : Node(token, type), operand(operand) {}
+        UnaryNode(Token token, NodeKind kind, ValueType valuetype, Node* operand) : Node(token, kind, valuetype), operand(operand) {}
     };
 
     struct IfNode : Node
     {
-        Node*              condition;
+        Node*            condition;
         std::span<Node*> then;
         std::span<Node*> nelse;
 
-        IfNode(Token token, NodeType type, Node* cond, std::span<Node*> then, std::span<Node*> nelse)
-            : Node(token, type), condition(cond), then(then), nelse(nelse)
+        IfNode(Token token, NodeKind kind, ValueType valuetype, Node* cond, std::span<Node*> then, std::span<Node*> nelse)
+            : Node(token, kind, valuetype), condition(cond), then(then), nelse(nelse)
         {
         }
     };
 
     struct WhileNode : Node
     {
-        Node*              condition;
+        Node*            condition;
         std::span<Node*> loop;
-        WhileNode(Token token, NodeType type, Node* cond, std::span<Node*> loop) : Node(token, type), condition(cond), loop(loop) {}
+
+        WhileNode(Token token, NodeKind kind, ValueType valuetype, Node* cond, std::span<Node*> loop) : Node(token, kind, valuetype), condition(cond), loop(loop) {}
     };
 
     // function definition
     struct FuncNode : Node
     {
-        Node*              name;
+        Node*            name;
         std::span<Node*> parameters;
         std::span<Node*> body;
 
-        FuncNode(Token token, NodeType type, Node* name, std::span<Node*> parameters, std::span<Node*> body)
-            : Node(token, type), name(name), parameters(parameters), body(body)
+        FuncNode(Token token, NodeKind kind, ValueType valuetype, Node* name, std::span<Node*> parameters, std::span<Node*> body)
+            : Node(token, kind, valuetype), name(name), parameters(parameters), body(body)
         {
         }
     };
@@ -89,29 +95,29 @@ namespace cx
     // functioncall
     struct CallNode : Node
     {
-        Node*              callee;
+        Node*            callee;
         std::span<Node*> arguments;
-        CallNode(Token token, NodeType type, Node* callee, std::span<Node*> arguments) : Node(token, type), callee(callee), arguments(arguments) {}
+        CallNode(Token token, NodeKind kind, ValueType valuetype, Node* callee, std::span<Node*> arguments) : Node(token, kind, valuetype), callee(callee), arguments(arguments) {}
     };
 
     struct ProgramNode : Node
     {
         std::span<Node*> statements;
-        ProgramNode(Token token, NodeType type, std::span<Node*> statements) : Node(token, type), statements(statements) {}
+        ProgramNode(Token token, NodeKind kind, ValueType valuetype, std::span<Node*> statements) : Node(token, kind, valuetype), statements(statements) {}
     };
 
     struct PrintNode : Node
     {
         Node* expression;
 
-        PrintNode(Token token, NodeType type, Node* expression) : Node(token, type), expression(expression) {}
+        PrintNode(Token token, NodeKind kind, ValueType valuetype, Node* expression) : Node(token, kind, valuetype), expression(expression) {}
     };
 
     struct ReturnNode : Node
     {
         Node* expression;
 
-        ReturnNode(Token token, NodeType type, Node* expression) : Node(token, type), expression(expression) {}
+        ReturnNode(Token token, NodeKind kind, ValueType valuetype, Node* expression) : Node(token, kind, valuetype), expression(expression) {}
     };
 } // namespace cx
 

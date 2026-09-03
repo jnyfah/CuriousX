@@ -4,3 +4,5 @@ todo
 - fix the ci/cd pipeline eventually 
 - add tests 
 - arena allocation??
+- implicit cast btw int and float 
+

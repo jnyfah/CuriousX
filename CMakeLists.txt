@@ -14,6 +14,7 @@ target_sources(curiousx_core
     src/lexer/token.cpp
     src/parser/parser.cpp
     src/parser/arena.cpp
+    src/sema/sema.cpp
 )
 
 target_include_directories(curiousx_core PUBLIC src)
