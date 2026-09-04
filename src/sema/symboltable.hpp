@@ -1,5 +1,4 @@
 #pragma once
-=
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -10,24 +9,40 @@
 #include "helpers/diagnostics.hpp"
 #include "helpers/type.hpp"
 #include "lexer/token.hpp"
+#include "parser/node.hpp"
 
 namespace cx
 {
-
     struct SymbolInfo
     {
-        ValueType       valuetype;
+        ValueType   valuetype;
         Token       token;
         std::size_t slot; //!< index into the owning function's local list which will becomes a frame offset
+    };
+
+    //! Where a function is in the lazy "analyse the body at the first call" flow.
+    enum class Analysis
+    {
+        NotStarted, //!< never called, body not walked
+        InProgress, //!< being walked right now -- a recursive call lands here
+        Done,       //!< body walked; later calls only type-check their arguments
     };
 
     struct FunctionInfo
     {
         std::string_view        name;
         Token                   token;
-        std::vector<ValueType>       paramTypes;
-        ValueType                    returnType = ValueType::Unknown;
-        std::vector<SymbolInfo> locals; // keeps track of functions local var
+        std::vector<ValueType>  paramTypes;
+        ValueType               returnType = ValueType::Unknown;
+        std::vector<SymbolInfo> locals;
+        Analysis                state = Analysis::NotStarted; // keeps track of functions local var
+        FuncNode*               decl = nullptr;
+    };
+
+    struct ActiveFunction
+    {
+        std::size_t index;
+        std::size_t scopeFloor;
     };
 
     using Table = std::vector<std::unordered_map<std::string_view, SymbolInfo>>;
@@ -46,14 +61,14 @@ namespace cx
         SymbolTable(const SymbolTable&)            = delete;
         SymbolTable& operator=(const SymbolTable&) = delete;
 
-        void enterScope()
+        void         enterScope()
         {
             m_table.emplace_back();
         }
 
         void exitScope()
         {
-            if (m_table.size() > 1)
+            if (m_table.size() > currentFloor() + 1)
             {
                 m_table.pop_back();
             }
@@ -67,7 +82,8 @@ namespace cx
             {
                 if (existing->valuetype != valuetype)
                 {
-                    m_diag.error(token.location, "cannot assign {} to '{}' of valuetype {}", describe(valuetype), name, describe(existing->valuetype));
+                    m_diag.error(
+                        token.location, "cannot assign {} to '{}' of valuetype {}", describe(valuetype), name, describe(existing->valuetype));
                 }
                 return;
             }
@@ -79,9 +95,12 @@ namespace cx
         //! lookup var names in the table if they exist
         std::optional<SymbolInfo> lookup(std::string_view name) const
         {
-            for (auto scope = m_table.rbegin(); scope != m_table.rend(); ++scope)
+            const std::size_t floor = m_active.empty() ? 0 : m_active.back().scopeFloor;
+
+            // look up within active function range
+            for (std::size_t i = m_table.size(); i-- > floor;)
             {
-                if (auto it = scope->find(name); it != scope->end())
+                if (auto it = m_table[i].find(name); it != m_table[i].end())
                 {
                     return it->second;
                 }
@@ -89,20 +108,17 @@ namespace cx
             return std::nullopt;
         }
 
-        //! Functions are global and never nested, so they need no scope stack.
+        //! Functions are global and never nested (i.e declared inside another functions body), so they need no scope stack.
         //! Returns false if `name` is already declared.
-        bool declareFunction(std::string_view name, Token token, std::vector<ValueType> paramTypes, ValueType returnType)
+        bool declareFunction(std::string_view name, Token token, std::vector<ValueType> paramTypes, ValueType returnType, FuncNode* decl)
         {
             if (const std::size_t existing = findFunction(name); existing != kNoFunction)
             {
-                m_diag.error(token.location,
-                             "function '{}' is already declared on line {}",
-                             name,
-                             m_functions[existing].token.location.getLine());
+                m_diag.error(token.location, "function '{}' is already declared on line {}", name, m_functions[existing].token.location.getLine());
                 return false;
             }
 
-            m_functions.push_back(FunctionInfo{name, token, std::move(paramTypes), returnType, {}});
+            m_functions.push_back(FunctionInfo{name, token, std::move(paramTypes), returnType, {}, Analysis::NotStarted, decl});
             return true;
         }
 
@@ -118,49 +134,79 @@ namespace cx
             return m_functions;
         }
 
-        //! Opens `name`'s body: locals recorded from here on belong to it, and its
-        //! parameters take the first slots. Returns false if `name` is unknown.
-        bool beginFunction(std::string_view name, const std::vector<Token>& paramTokens)
+        FunctionInfo& function(std::size_t index)
         {
-            const std::size_t index = findFunction(name);
-            m_currentFunction = index;
+            return m_functions[index];
+        }
+
+        //! Opens a function's frame: a fresh scope stack floor, and its parameters
+        //! inserted as the first locals. `decl` may be null for a synthetic function
+        //! (the implicit @main), in which case there are no parameters to insert.
+        void beginFunction(std::size_t index)
+        {
+            m_active.push_back({index, m_table.size()});
             enterScope();
 
-            // insert all the parameters as part of the locals in this scope
-            const auto& types = m_functions[index].paramTypes;
-            for (std::size_t i = 0; i < paramTokens.size() && i < types.size(); ++i)
+            auto& function = m_functions[index];
+            if (function.decl == nullptr)
             {
-                insert(paramTokens[i].value, types[i], paramTokens[i]);
+                return;
             }
-            return true;
+
+            const auto  params = function.decl->parameters;
+            const auto& types  = function.paramTypes;
+
+            for (std::size_t i = 0; i < params.size() && i < types.size(); ++i)
+            {
+                insert(params[i]->token.value, types[i], params[i]->token);
+
+                // codegen reads the parameter's storage off these nodes
+                if (const auto info = lookup(params[i]->token.value))
+                {
+                    params[i]->valuetype = info->valuetype;
+                    params[i]->slot      = info->slot;
+                }
+            }
         }
 
         void endFunction()
         {
-            exitScope();
-            m_currentFunction = kNoFunction;
+            m_table.resize(m_active.back().scopeFloor); // drop every scope this function opened
+            m_active.pop_back();
+        }
+
+        size_t currentFunction() const
+        {
+            return m_active.empty() ? kNoFunction : m_active.back().index;
         }
 
     private:
         //! Appends to the current function's local list and hands back its slot.
         std::size_t recordLocal(ValueType valuetype, Token token)
         {
-            if (m_currentFunction == kNoFunction)
+            const std::size_t index = currentFunction();
+            assert(index != kNoFunction && "declaration outside any function");
+            if (index == kNoFunction)
             {
                 return 0;
             }
 
-            auto& current = m_functions[m_currentFunction];
+            auto& current = m_functions[index];
             current.locals.push_back(SymbolInfo{valuetype, token, current.locals.size()});
 
             return current.locals.size() - 1;
         }
 
-        Table                     m_table;
-        Diagnostics&              m_diag;
+        std::size_t currentFloor() const
+        {
+            return m_active.empty() ? 0 : m_active.back().scopeFloor;
+        }
 
-        std::vector<FunctionInfo> m_functions;
-        std::size_t               m_currentFunction = kNoFunction;
+        Table                       m_table;
+        Diagnostics&                m_diag;
+
+        std::vector<FunctionInfo>   m_functions;
+        std::vector<ActiveFunction> m_active;
     };
 
 } // namespace cx

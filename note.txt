@@ -5,4 +5,46 @@ todo
 - add tests 
 - arena allocation??
 - implicit cast btw int and float 
+- pass by refrence 
+- fix bug in function
 
+
+The sharp edge: recursion
+
+func fact(n) {
+    if (n < 2) { return 1; }
+    return n * fact(n - 1);
+}
+Call fact(5): bind n = Int, start analysing the body. Partway through you hit fact(n - 1) — but fact is currently being analysed and its returnType is still Unknown. So you can't type n * fact(n - 1), which is the very expression you need in order to determine the return type.
+
+That circularity is what real inference solves with unification and fixpoint iteration. The cheap version that handles most real code: mark the function "in progress", and when a recursive call needs the return type, take it from whatever return statements you've already seen — here return 1; gives Int before the recursive call is reached. If none has been seen yet, defer and re-run the body once the first non-recursive return resolves.
+
+Mutual recursion needs the same machinery, one level more tangled.
+
+Save and restore m_currentFunction. You'll be inside @main's body when you start analysing foo's. A single field gets clobbered; endFunction must put back what was there, not kNoFunction.
+
+Fresh scope stack for the body. Otherwise foo's body sees @main's locals through the normal outward lookup.
+
+Recursion needs an in-progress marker. fact calling itself re-enters analyzeFunctionBody while the first invocation hasn't finished — infinite recursion in your compiler. 
+A flag on FunctionInfo ("being analysed") lets the recursive call skip re-entering and use
+ whatever returnType has been bound so far.
+
+And the loose end
+Functions that are never called never get analysed — no types, no body checking, nothing to emit. 
+After pass two, walking m_functions for any still holding Unknown gives you a clean place to warn about it.
+
+
+
+our other things in that function:
+
+paramTokens[i]->value doesn't exist. parameters[i] is a Node*, and Node has a token, not a value. You want paramTokens[i]->token.value for the name, and paramTokens[i]->token for the third argument to insert — which takes a Token, not a Node*.
+
+auto function = m_functions[index]; copies the whole record — both vectors, every call. auto&.
+
+That one's also subtly confusing: types is a reference into the copy, while insert → recordLocal pushes into the real m_functions[index].locals. It happens to work, but two views of the same record is exactly the setup where someone later writes to the wrong one.
+
+The null-decl branch does nothing and falls straight through to dereference it. Report and return false — you already have the bool for that, and it currently always returns true.
+
+Stamp the parameter nodes while you're in the loop. After insert, look the symbol back up (or have insert hand back the slot) and write valuetype and slot onto paramTokens[i]. Codegen needs both to emit the prologue storing a0, a1 into the frame — and these nodes are the only place it'll be able to read them.
+
+Rename paramTokens to params while you're there; they're nodes now, not tokens.

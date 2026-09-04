@@ -204,7 +204,7 @@ namespace cx
         {
             do
             {
-                arguments.push_back(parseExpression());
+                arguments.push_back(parseLogicalOr());
 
             } while (match(TokenType::Comma));
         }
