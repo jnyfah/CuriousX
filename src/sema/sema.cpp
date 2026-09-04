@@ -110,8 +110,11 @@ namespace cx
                 analyzePrint(static_cast<PrintNode*>(node));
                 break;
             case NodeKind::FuncDecl:
-                // declared in pass 1: analyze :)
+                // top-level declarations are handled in pass 1 and skipped there,
+                // so anything reaching here is nested inside a body or a block
+                m_diag.error(node->token.location, "functions may only be declared at the top level");
                 break;
+
             default:
                 analyzeExpr(node);
         }

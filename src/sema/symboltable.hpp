@@ -19,12 +19,12 @@ namespace cx
         std::size_t slot; //!< index into the owning function's local list
     };
 
-    //! Where a function is in the lazy "analyze the body at the first call" flow.
+    //! what is function current condition
     enum class Analysis
     {
-        NotStarted, //!< never called, body not walked
-        InProgress, //!< being walked right now -- a recursive call lands here
-        Done,       //!< body walked; later calls only type-check their arguments
+        NotStarted,
+        InProgress,
+        Done,
     };
 
     struct FunctionInfo
