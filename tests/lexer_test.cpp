@@ -1,102 +1,298 @@
-#include "Lexer/Lexer.hpp"
-#include "Parser/Parser.hpp"
 #include <gtest/gtest.h>
+#include <string_view>
+#include <vector>
 
-std::vector<LexerToken> tokenize(std::string_view input)
+#include "lexer/lexer.hpp"
+#include "helpers/diagnostics.hpp"
+
+using namespace cx;
+
+namespace
 {
-    Lexer                   lexer(input);
-    std::vector<LexerToken> tokens;
-    for (auto token = lexer.nextNWToken(); token.type != LexerTokenType::Eof; token = lexer.nextNWToken())
+
+    struct Expected
     {
-        tokens.push_back(token);
+        TokenType        type;
+        std::string_view value;
+    };
+
+    //! Lexes `input` to Eof (the Eof token itself is not returned).
+    std::vector<Token> tokenize(std::string_view input, Diagnostics& diag)
+    {
+        Lexer              lexer(input, diag);
+        std::vector<Token> tokens;
+        for (auto t = lexer.nextToken(); t.type != TokenType::Eof; t = lexer.nextToken())
+        {
+            tokens.push_back(t);
+        }
+        return tokens;
     }
-    return tokens;
-}
 
-void expectToken(const LexerToken& token, LexerTokenType expectedType, std::string_view expectedValue)
-{
-    EXPECT_EQ(token.type, expectedType);
-    EXPECT_EQ(token.value, expectedValue);
-}
-
-class LexerTest : public ::testing::Test
-{
-  protected:
-    void verifyTokenSequence(const std::vector<LexerToken>&                             tokens,
-                             const std::vector<std::pair<LexerTokenType, std::string>>& expected)
+    void expectTokens(std::string_view input, const std::vector<Expected>& expected, size_t expectedErrors = 0)
     {
-        ASSERT_EQ(tokens.size(), expected.size());
+        Diagnostics diag;
+        const auto  tokens = tokenize(input, diag);
+
+        ASSERT_EQ(tokens.size(), expected.size()) << "token count mismatch for input: " << input;
         for (size_t i = 0; i < tokens.size(); ++i)
         {
-            expectToken(tokens[i], expected[i].first, expected[i].second);
+            EXPECT_EQ(tokens[i].type, expected[i].type)
+                << "type mismatch at " << i << " (got " << describe(tokens[i].type) << ")";
+            EXPECT_EQ(tokens[i].value, expected[i].value) << "value mismatch at " << i;
         }
+        EXPECT_EQ(diag.all().size(), expectedErrors) << "diagnostic count mismatch for input: " << input;
     }
-};
 
-TEST_F(LexerTest, Numbers)
+} // namespace
+
+// ---------------------------------------------------------------- numbers
+
+TEST(Lexer, Integers)
 {
-    auto tokens = tokenize(R"(42 3.14 -17 -2.5 "hello" true #comment)");
-
-    std::vector<std::pair<LexerTokenType, std::string>> expected = {
-        {LexerTokenType::IntToken, "42"},
-        {LexerTokenType::FloatToken, "3.14"},
-        {LexerTokenType::MinusToken, "-"},
-        {LexerTokenType::IntToken, "17"},
-        {LexerTokenType::MinusToken, "-"},
-        {LexerTokenType::FloatToken, "2.5"},
-        {LexerTokenType::StringToken, "\"hello\""},
-        {LexerTokenType::BoolToken, "true"},
-        {LexerTokenType::CommentToken, "#comment"},
-    };
-
-    verifyTokenSequence(tokens, expected);
+    expectTokens("42 0 1000", {{TokenType::Int, "42"}, {TokenType::Int, "0"}, {TokenType::Int, "1000"}});
 }
 
-TEST_F(LexerTest, Operators)
+TEST(Lexer, Floats)
 {
-    auto tokens = tokenize("+-*/ == != < <= > >=");
-
-    std::vector<std::pair<LexerTokenType, std::string>> expected = {
-        {LexerTokenType::PlusToken, "+"},
-        {LexerTokenType::MinusToken, "-"},
-        {LexerTokenType::MultiplyToken, "*"},
-        {LexerTokenType::DivideToken, "/"},
-        {LexerTokenType::EqualToken, "=="},
-        {LexerTokenType::NotEqualToken, "!="},
-        {LexerTokenType::LessToken, "<"},
-        {LexerTokenType::LessEqualToken, "<="},
-        {LexerTokenType::GreaterToken, ">"},
-        {LexerTokenType::GreaterEqualToken, ">="},
-    };
-
-    verifyTokenSequence(tokens, expected);
+    expectTokens("3.14 0.5", {{TokenType::Float, "3.14"}, {TokenType::Float, "0.5"}});
 }
 
-TEST_F(LexerTest, Keywords)
+TEST(Lexer, NegativeNumbersLexAsMinusThenNumber)
 {
+    // the lexer does not fold sign into the literal; that is the parser's job
+    expectTokens("-17", {{TokenType::Minus, "-"}, {TokenType::Int, "17"}});
+}
 
-    auto tokens = tokenize(R"(
-x = 42
-if (x >= 0){
-y = x + 10
-    print(y)
-})");
+TEST(Lexer, TrailingDotIsAnError)
+{
+    expectTokens("1.", {{TokenType::Unknown, "1."}}, 1);
+}
 
-    std::vector<std::pair<LexerTokenType, std::string>> expected = {
-        {LexerTokenType::Newline, "\\n"},          {LexerTokenType::VarToken, "x"},
-        {LexerTokenType::AssignToken, "="},        {LexerTokenType::IntToken, "42"},
-        {LexerTokenType::Newline, "\\n"},          {LexerTokenType::IfToken, "if"},
-        {LexerTokenType::ParenOpen, "("},          {LexerTokenType::VarToken, "x"},
-        {LexerTokenType::GreaterEqualToken, ">="}, {LexerTokenType::IntToken, "0"},
-        {LexerTokenType::ParenClose, ")"},         {LexerTokenType::BracesOpen, "{"},
-        {LexerTokenType::Newline, "\\n"},          {LexerTokenType::VarToken, "y"},
-        {LexerTokenType::AssignToken, "="},        {LexerTokenType::VarToken, "x"},
-        {LexerTokenType::PlusToken, "+"},          {LexerTokenType::IntToken, "10"},
-        {LexerTokenType::Newline, "\\n"},          {LexerTokenType::PrintToken, "print"},
-        {LexerTokenType::ParenOpen, "("},          {LexerTokenType::VarToken, "y"},
-        {LexerTokenType::ParenClose, ")"},         {LexerTokenType::Newline, "\\n"},
-        {LexerTokenType::BracesClose, "}"},
-    };
+TEST(Lexer, DigitsFollowedByLettersIsAnError)
+{
+    expectTokens("123abc", {{TokenType::Unknown, "123abc"}}, 1);
+}
 
-    verifyTokenSequence(tokens, expected);
+TEST(Lexer, TwoDotsIsAnError)
+{
+    expectTokens("1.2.3", {{TokenType::Unknown, "1.2.3"}}, 1);
+}
+
+TEST(Lexer, BadNumberConsumesWholeRunAndReportsOnce)
+{
+    // one bad lexeme must produce exactly one diagnostic, not a cascade
+    expectTokens("123abc + 1", {{TokenType::Unknown, "123abc"}, {TokenType::Plus, "+"}, {TokenType::Int, "1"}}, 1);
+}
+
+// ------------------------------------------------------------ identifiers
+
+TEST(Lexer, Identifiers)
+{
+    expectTokens("x count2 _foo my_var3",
+                 {{TokenType::Var, "x"},
+                  {TokenType::Var, "count2"},
+                  {TokenType::Var, "_foo"},
+                  {TokenType::Var, "my_var3"}});
+}
+
+TEST(Lexer, Keywords)
+{
+    expectTokens("if else while func return print true false",
+                 {{TokenType::If, "if"},
+                  {TokenType::Else, "else"},
+                  {TokenType::While, "while"},
+                  {TokenType::Func, "func"},
+                  {TokenType::Return, "return"},
+                  {TokenType::Print, "print"},
+                  {TokenType::Bool, "true"},
+                  {TokenType::Bool, "false"}});
+}
+
+TEST(Lexer, MaximalMunchBeatsKeywords)
+{
+    // "iffy" must not lex as `if` + `fy`
+    expectTokens("iffy elsewhere", {{TokenType::Var, "iffy"}, {TokenType::Var, "elsewhere"}});
+}
+
+TEST(Lexer, KeywordsAreCaseSensitive)
+{
+    expectTokens("If PRINT", {{TokenType::Var, "If"}, {TokenType::Var, "PRINT"}});
+}
+
+// --------------------------------------------------------------- operators
+
+TEST(Lexer, SingleCharOperators)
+{
+    expectTokens("+ - * / % = < > !",
+                 {{TokenType::Plus, "+"},
+                  {TokenType::Minus, "-"},
+                  {TokenType::Multiply, "*"},
+                  {TokenType::Divide, "/"},
+                  {TokenType::Percent, "%"},
+                  {TokenType::Assign, "="},
+                  {TokenType::Less, "<"},
+                  {TokenType::Greater, ">"},
+                  {TokenType::Not, "!"}});
+}
+
+TEST(Lexer, ComparisonOperators)
+{
+    expectTokens("== != <= >=",
+                 {{TokenType::Equal, "=="},
+                  {TokenType::NotEqual, "!="},
+                  {TokenType::LessEqual, "<="},
+                  {TokenType::GreaterEqual, ">="}});
+}
+
+TEST(Lexer, CompoundAssignment)
+{
+    expectTokens("+= -= *= /=",
+                 {{TokenType::PlusEq, "+="},
+                  {TokenType::MinusEq, "-="},
+                  {TokenType::MultiplyEq, "*="},
+                  {TokenType::DivideEq, "/="}});
+}
+
+TEST(Lexer, OperatorsWithoutSurroundingSpace)
+{
+    expectTokens("a+b<=c",
+                 {{TokenType::Var, "a"},
+                  {TokenType::Plus, "+"},
+                  {TokenType::Var, "b"},
+                  {TokenType::LessEqual, "<="},
+                  {TokenType::Var, "c"}});
+}
+
+TEST(Lexer, Punctuation)
+{
+    expectTokens("( ) { } ,",
+                 {{TokenType::ParenOpen, "("},
+                  {TokenType::ParenClose, ")"},
+                  {TokenType::BracesOpen, "{"},
+                  {TokenType::BracesClose, "}"},
+                  {TokenType::Comma, ","}});
+}
+
+// ----------------------------------------------------------------- strings
+
+TEST(Lexer, StringLiteralExcludesQuotes)
+{
+    expectTokens(R"("hello")", {{TokenType::String, "hello"}});
+}
+
+TEST(Lexer, StringLiteralKeepsInnerSpacesAndPunctuation)
+{
+    expectTokens(R"("hello, world 42!")", {{TokenType::String, "hello, world 42!"}});
+}
+
+TEST(Lexer, EmptyStringLiteral)
+{
+    expectTokens(R"("")", {{TokenType::String, ""}});
+}
+
+TEST(Lexer, UnterminatedStringAtEof)
+{
+    expectTokens("\"abc", {{TokenType::Unknown, "abc"}}, 1);
+}
+
+TEST(Lexer, UnterminatedStringStopsAtNewline)
+{
+    // the string must not swallow the rest of the file
+    expectTokens("\"abc\nx", {{TokenType::Unknown, "abc"}, {TokenType::Var, "x"}}, 1);
+}
+
+// ---------------------------------------------------------------- comments
+
+TEST(Lexer, CommentsAreSkippedEntirely)
+{
+    expectTokens("# a comment", {});
+}
+
+TEST(Lexer, CommentStopsAtEndOfLine)
+{
+    expectTokens("x # note\ny", {{TokenType::Var, "x"}, {TokenType::Var, "y"}});
+}
+
+TEST(Lexer, CommentBetweenTokensOnOneLine)
+{
+    expectTokens("x = 1 # trailing\ny = 2",
+                 {{TokenType::Var, "x"},
+                  {TokenType::Assign, "="},
+                  {TokenType::Int, "1"},
+                  {TokenType::Var, "y"},
+                  {TokenType::Assign, "="},
+                  {TokenType::Int, "2"}});
+}
+
+// -------------------------------------------------------------- whitespace
+
+TEST(Lexer, AllWhitespaceIsSkipped)
+{
+    expectTokens("a \t b\nc", {{TokenType::Var, "a"}, {TokenType::Var, "b"}, {TokenType::Var, "c"}});
+}
+
+TEST(Lexer, EmptyInputProducesNoTokens)
+{
+    expectTokens("", {});
+}
+
+TEST(Lexer, EofRepeatsForever)
+{
+    Diagnostics diag;
+    Lexer       lexer("x", diag);
+
+    EXPECT_EQ(lexer.nextToken().type, TokenType::Var);
+    for (int i = 0; i < 5; ++i)
+    {
+        EXPECT_EQ(lexer.nextToken().type, TokenType::Eof);
+    }
+}
+
+// --------------------------------------------------------------- locations
+
+TEST(Lexer, TracksColumns)
+{
+    Diagnostics diag;
+    const auto  tokens = tokenize("x = 42", diag);
+
+    ASSERT_EQ(tokens.size(), 3u);
+    EXPECT_EQ(tokens[0].location.getLine(), 1);
+    EXPECT_EQ(tokens[0].location.getCol(), 1);
+    EXPECT_EQ(tokens[1].location.getCol(), 3);
+    EXPECT_EQ(tokens[2].location.getCol(), 5);
+}
+
+TEST(Lexer, TracksLines)
+{
+    Diagnostics diag;
+    const auto  tokens = tokenize("a\nb\nc", diag);
+
+    ASSERT_EQ(tokens.size(), 3u);
+    EXPECT_EQ(tokens[0].location.getLine(), 1);   // a
+    EXPECT_EQ(tokens[1].location.getLine(), 2);   // b
+    EXPECT_EQ(tokens[2].location.getLine(), 3);   // c
+    EXPECT_EQ(tokens[2].location.getCol(), 1);
+}
+
+// ------------------------------------------------------------- diagnostics
+
+TEST(Lexer, UnknownCharacterIsReportedOnce)
+{
+    expectTokens("a $ b", {{TokenType::Var, "a"}, {TokenType::Unknown, "$"}, {TokenType::Var, "b"}}, 1);
+}
+
+TEST(Lexer, ValidProgramProducesNoDiagnostics)
+{
+    Diagnostics diag;
+    tokenize("x = 42\nif (x >= 0) {\n  print(\"hi\")\n}\n", diag);
+    EXPECT_FALSE(diag.hasErrors());
+}
+
+TEST(Lexer, DiagnosticsAreReportedToTheCallersEngine)
+{
+    // guards against Diagnostics being stored by value in the Lexer
+    Diagnostics diag;
+    tokenize("1.", diag);
+    ASSERT_TRUE(diag.hasErrors());
+    EXPECT_EQ(diag.all().front().loc.getLine(), 1);
 }
