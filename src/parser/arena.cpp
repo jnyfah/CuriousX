@@ -4,8 +4,6 @@
 #include <cstdint>
 #include <memory>
 
-// Todo use bit manipulation for alignment??
-
 namespace cx
 {
 

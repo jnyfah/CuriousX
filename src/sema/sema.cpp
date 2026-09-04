@@ -48,9 +48,7 @@ namespace cx
         }
     } // namespace
 
-
     Sema::Sema(Diagnostics& d) : m_diag(d), m_table(m_diag) {}
-
 
     void Sema::analyze(ProgramNode* root)
     {
@@ -66,7 +64,10 @@ namespace cx
 
         // top-level statements are the body of an implicit function, so that every
         // variable in the program belongs to a frame and gets a real slot
-        const Token mainToken{"@main", Location{0, 0}, TokenType::Var};
+        const Token mainToken{
+            "@main", Location{0, 0},
+             TokenType::Var
+        };
         m_table.declareFunction("@main", mainToken, {}, ValueType::Void, nullptr);
 
         const std::size_t mainIndex = m_table.findFunction("@main");
@@ -109,7 +110,7 @@ namespace cx
                 analyzePrint(static_cast<PrintNode*>(node));
                 break;
             case NodeKind::FuncDecl:
-                // declared in pass 1; the body waits for the first call
+                // declared in pass 1: analyze :)
                 break;
             default:
                 analyzeExpr(node);
@@ -185,7 +186,7 @@ namespace cx
         const ValueType right = analyzeExpr(node->right);
         const TokenType op    = node->token.type;
 
-        // already reported further down the tree
+        // error already reported further down the tree
         if (left == ValueType::Error || right == ValueType::Error)
         {
             node->valuetype = ValueType::Error;
@@ -281,11 +282,13 @@ namespace cx
     {
         const auto cond = analyzeExpr(node->condition);
 
+        // condition expr must be of type boolean
         if (cond != ValueType::Bool && cond != ValueType::Error)
         {
             m_diag.error(node->condition->token.location, "if condition must be a boolean, found {}", describe(cond));
         }
 
+        // enter block scope
         m_table.enterScope();
         for (auto n : node->then)
         {
@@ -321,7 +324,6 @@ namespace cx
         m_table.exitScope();
     }
 
-    // todo fix
     void Sema::analyzeReturn(ReturnNode* node)
     {
         // a bare `return;` yields nothing
@@ -343,14 +345,13 @@ namespace cx
 
         FunctionInfo& funcInfo = m_table.function(index);
 
-        // has a return function been set already, do they match ?
+        // has a return type been set already, do they match ?
         if (funcInfo.returnType == ValueType::Unknown)
         {
             funcInfo.returnType = returned;
             return;
         }
-
-        if (returned != funcInfo.returnType)
+        else if (returned != funcInfo.returnType)
         {
             m_diag.error(
                 node->token.location,
@@ -384,7 +385,7 @@ namespace cx
         {
             m_diag.error(node->callee->token.location, "undefined function '{}'", node->callee->token.value);
 
-            // still analyze the arguments so their subexpressions get types and slots
+            // walk the arguments anyway: they may contain errors of their own,
             for (Node* arg : node->arguments)
             {
                 analyzeExpr(arg);
@@ -406,6 +407,7 @@ namespace cx
                 node->arguments.size(),
                 funcInfo.token.location.getLine());
 
+            // walk the arguments anyway: they may contain errors of their own,
             for (Node* arg : node->arguments)
             {
                 analyzeExpr(arg);
