@@ -3,20 +3,19 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <utility>
 
-// Todo use bit manipulation for alignment
+// Todo use bit manipulation for alignment??
 
 namespace cx
 {
 
-    Arena::Arena(std::size_t initSize)
+    Arena::Arena(std::size_t size)
     {
-        std::byte* raw = static_cast<std::byte*>(::operator new(sizeof(Chunk) + initSize, std::align_val_t(alignof(std::max_align_t))));
-        m_chunks       = std::construct_at(reinterpret_cast<Chunk*>(raw), initSize, alignof(std::max_align_t), nullptr);
+        std::byte* raw = static_cast<std::byte*>(::operator new(sizeof(Chunk) + size, std::align_val_t(alignof(std::max_align_t))));
+        m_chunks       = std::construct_at(reinterpret_cast<Chunk*>(raw), size, alignof(std::max_align_t), nullptr);
 
         m_current      = m_chunks;
-        m_chunkSize    = initSize;
+        m_chunkSize    = size;
     }
 
     Arena::~Arena()
@@ -24,8 +23,7 @@ namespace cx
         release();
     }
 
-    Arena::Arena(Arena&& other) noexcept
-        : m_chunks(other.m_chunks), m_current(other.m_current), m_chunkSize(other.m_chunkSize)
+    Arena::Arena(Arena&& other) noexcept : m_chunks(other.m_chunks), m_current(other.m_current), m_chunkSize(other.m_chunkSize)
     {
         other.m_chunks  = nullptr;
         other.m_current = nullptr;
@@ -61,30 +59,34 @@ namespace cx
 
     std::byte* Arena::allocate(std::size_t size, std::size_t alignment)
     {
-
-        auto addr    = m_current->data() + m_current->used;
-        auto padding = (alignment - (std::uintptr_t(addr) % alignment)) % alignment;
+        // calculate padding
+        const auto addr    = reinterpret_cast<std::uintptr_t>(m_current->data() + m_current->used);
+        const auto aligned = (addr + alignment - 1) & ~(alignment - 1);
+        const auto padding = aligned - addr;
 
         if (m_current->used + size + padding <= m_current->capacity)
         {
             m_current->used += (size + padding);
-            return addr + padding;
+            return reinterpret_cast<std::byte*>(addr + padding);
         }
 
+        // allocate more chunk
         allocateChunk(size, alignment);
         return allocate(size, alignment);
     }
 
     void Arena::allocateChunk(std::size_t minSize, std::size_t alignment)
     {
-        alignment            = std::max(alignof(Chunk), alignment);
-        const auto chunkSize = std::max(minSize + alignment, m_chunkSize);
-        std::byte* raw       = static_cast<std::byte*>(::operator new(sizeof(Chunk) + chunkSize, std::align_val_t(alignment)));
-        m_current->next      = std::construct_at(reinterpret_cast<Chunk*>(raw), chunkSize, alignment, nullptr);
+        alignment             = std::max(alignof(Chunk), alignment);
+        m_chunkSize          *= 2;
+        const auto chunkSize  = std::max(minSize + alignment, m_chunkSize);
+        std::byte* raw        = static_cast<std::byte*>(::operator new(sizeof(Chunk) + chunkSize, std::align_val_t(alignment)));
+        m_current->next       = std::construct_at(reinterpret_cast<Chunk*>(raw), chunkSize, alignment, nullptr);
 
-        m_current            = m_current->next;
+        m_current             = m_current->next;
     }
 
+    //! Allocate vector in the Arena and return a view to it 
     std::span<Node*> Arena::copyOf(const std::vector<Node*>& src)
     {
         if (src.empty())

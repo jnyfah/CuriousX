@@ -12,25 +12,28 @@ namespace cx
     class Sema
     {
     public:
-        Sema(Diagnostics& d);
-        void      analyze(ProgramNode* root);
+        explicit Sema(Diagnostics& d);
+        void               analyze(ProgramNode* root);
 
-        ValueType analyzeExpr(Node* node); // produces a type
-        void      analyzeStmt(Node* node); // produces nothing
-        ValueType analyzeBinary(BinaryNode* node);
-        ValueType inferIdentifier(Node* node);
-        ValueType analyzeUnary(UnaryNode* node);
-        ValueType analyzeFunCall(CallNode* node);
-        void      analyzeIf(IfNode* node);
-        void      analyzeWhile(WhileNode* node);
-        void      analyzeReturn(ReturnNode* node);
-        void      analyzePrint(PrintNode* node);
-        void      analyzeFunDclr(FuncNode* node);
-
-        //! The analysed program: function signatures, locals, frame layout inputs.
-        const SymbolTable& table() const { return m_table; }
+        const SymbolTable& table() const
+        {
+            return m_table;
+        }
 
     private:
+        ValueType    analyzeExpr(Node* node);
+        ValueType    analyzeBinary(BinaryNode* node);
+        ValueType    inferIdentifier(Node* node);
+        ValueType    analyzeUnary(UnaryNode* node);
+        ValueType    analyzeFunCall(CallNode* node);
+
+        void         analyzeStmt(Node* node);
+        void         analyzeIf(IfNode* node);
+        void         analyzeWhile(WhileNode* node);
+        void         analyzeReturn(ReturnNode* node);
+        void         analyzePrint(PrintNode* node);
+        void         analyzeFunDclr(FuncNode* node);
+
         void         analyzeFunctionBody(size_t index);
         Diagnostics& m_diag;
         SymbolTable  m_table;

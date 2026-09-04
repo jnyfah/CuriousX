@@ -5,6 +5,7 @@
 namespace cx
 {
 
+    //! Represents the line and column locations for a token, symbol, or expression
     class Location
     {
     public:

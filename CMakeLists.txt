@@ -40,3 +40,5 @@ add_subdirectory(tests)
 #     add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -g)
 #     add_link_options(-fsanitize=address,undefined)
 # endif()
+
+# change all warnings to errors

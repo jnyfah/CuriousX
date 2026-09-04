@@ -17,10 +17,10 @@ namespace cx
     {
         ValueType   valuetype;
         Token       token;
-        std::size_t slot; //!< index into the owning function's local list which will becomes a frame offset
+        std::size_t slot; //!< index into the owning function's local list
     };
 
-    //! Where a function is in the lazy "analyse the body at the first call" flow.
+    //! Where a function is in the lazy "analyze the body at the first call" flow.
     enum class Analysis
     {
         NotStarted, //!< never called, body not walked
@@ -74,9 +74,9 @@ namespace cx
             }
         }
 
-        //! Declares `name` if it is not visible, otherwise treats this as an
-        //! assignment and checks the type matches.
-        void insert(std::string_view name, ValueType valuetype, Token token)
+        //! Declares `name` if it is not visible, otherwise treats this as an assignment and checks the type matches.
+        //! Returns the slot the variable lives in, either way
+        std::size_t insert(std::string_view name, ValueType valuetype, Token token)
         {
             if (auto existing = lookup(name))
             {
@@ -85,17 +85,18 @@ namespace cx
                     m_diag.error(
                         token.location, "cannot assign {} to '{}' of valuetype {}", describe(valuetype), name, describe(existing->valuetype));
                 }
-                return;
+                return existing->slot;
             }
 
             const std::size_t slot = recordLocal(valuetype, token);
             m_table.back().emplace(name, SymbolInfo{valuetype, token, slot});
+            return slot;
         }
 
         //! lookup var names in the table if they exist
         std::optional<SymbolInfo> lookup(std::string_view name) const
         {
-            const std::size_t floor = m_active.empty() ? 0 : m_active.back().scopeFloor;
+            const std::size_t floor = currentFloor();
 
             // look up within active function range
             for (std::size_t i = m_table.size(); i-- > floor;)
@@ -158,20 +159,15 @@ namespace cx
 
             for (std::size_t i = 0; i < params.size() && i < types.size(); ++i)
             {
-                insert(params[i]->token.value, types[i], params[i]->token);
-
-                // codegen reads the parameter's storage off these nodes
-                if (const auto info = lookup(params[i]->token.value))
-                {
-                    params[i]->valuetype = info->valuetype;
-                    params[i]->slot      = info->slot;
-                }
+                params[i]->valuetype = types[i];
+                params[i]->slot = insert(params[i]->token.value, types[i], params[i]->token);
             }
         }
 
         void endFunction()
         {
-            m_table.resize(m_active.back().scopeFloor); // drop every scope this function opened
+            // drop every scope this function opened
+            m_table.resize(m_active.back().scopeFloor); 
             m_active.pop_back();
         }
 
@@ -185,7 +181,6 @@ namespace cx
         std::size_t recordLocal(ValueType valuetype, Token token)
         {
             const std::size_t index = currentFunction();
-            assert(index != kNoFunction && "declaration outside any function");
             if (index == kNoFunction)
             {
                 return 0;

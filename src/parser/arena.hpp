@@ -12,7 +12,7 @@ namespace cx
     class Arena
     {
     public:
-        Arena(std::size_t initSize);
+        explicit Arena(std::size_t size);
         ~Arena();
 
         Arena(const Arena&)            = delete;
@@ -29,8 +29,6 @@ namespace cx
         {
             std::byte* mem = allocate(sizeof(T), alignof(T));
             T*         obj = std::construct_at(reinterpret_cast<T*>(mem), std::forward<Args>(args)...);
-
-
             return obj;
         }
 
@@ -45,7 +43,7 @@ namespace cx
             std::size_t alignment;
             Chunk*      next;
 
-            // chunk data is allocated after the struct, and addr is calculate when needed
+            //! chunk data is allocated after the struct, and addr is calculate when needed
             std::byte*  data()
             {
                 return reinterpret_cast<std::byte*>(this + 1);

@@ -48,10 +48,13 @@ namespace cx
         }
     } // namespace
 
+
     Sema::Sema(Diagnostics& d) : m_diag(d), m_table(m_diag) {}
+
+
     void Sema::analyze(ProgramNode* root)
     {
-        // pass 1 -- every top-level function is declared before any body is walked,
+        // pass 1: every top-level function is declared before any body is walked,
         // so a call may name a function declared further down the file
         for (Node* statement : root->statements)
         {
@@ -69,8 +72,7 @@ namespace cx
         const std::size_t mainIndex = m_table.findFunction("@main");
         m_table.beginFunction(mainIndex);
 
-        // pass 2 -- function bodies are not walked here; they are walked at the
-        // first call, once the argument types have bound the parameters
+        // pass 2: function bodies are walked here, once the argument types have bound the parameters
         for (Node* statement : root->statements)
         {
             if (statement->kind != NodeKind::FuncDecl)
@@ -85,7 +87,7 @@ namespace cx
         {
             if (f.state == Analysis::NotStarted && f.name != "@main")
             {
-                m_diag.warning(f.token.location, "function '{}' is never called, so it cannot be type-checked", f.name);
+                m_diag.warning(f.token.location, "function '{}' is never called", f.name);
             }
         }
     }
@@ -173,8 +175,7 @@ namespace cx
             }
 
             // insert() reports the mismatch when the variable already exists with another type.
-            m_table.insert(node->left->token.value, right, node->left->token);
-
+            node->left->slot      = m_table.insert(node->left->token.value, right, node->left->token);
             node->left->valuetype = right;
             node->valuetype       = right;
             return right;

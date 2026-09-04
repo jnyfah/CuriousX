@@ -14,22 +14,20 @@ namespace cx
 
     ProgramNode* Parser::Parse()
     {
-        // Todo no token for program node ?? why
-
         std::vector<Node*> statements;
         while (m_current.type != TokenType::Eof)
         {
             const auto before = m_consumed;
             statements.push_back(parseStatement());
 
-            // no movement ??
+            // returned without advancing the token stream, maybe due to error
             if (m_consumed == before)
             {
                 consume();
             }
         }
 
-        return m_arena.create<ProgramNode>(Token{}, NodeKind::Program,  ValueType::Unknown, m_arena.copyOf(statements));
+        return m_arena.create<ProgramNode>(Token{}, NodeKind::Program, ValueType::Unknown, m_arena.copyOf(statements));
     }
 
     void Parser::consume()
@@ -38,6 +36,7 @@ namespace cx
         ++m_consumed;
     }
 
+    //! match tokentype with current and consumes if true
     bool Parser::match(TokenType type)
     {
         if (m_current.type != type)
@@ -48,7 +47,7 @@ namespace cx
         return true;
     }
 
-    // match but with error recorded
+    //! match tokentype with current and consumes if true and record error if false
     bool Parser::expect(TokenType type)
     {
         if (m_current.type == type)
@@ -79,7 +78,7 @@ namespace cx
         return false;
     }
 
-    // For this parser we dont predict when there is an error we skip till we get the nearest token that can start a meaningful statement
+    //! For this parser we dont predict when there is an error we skip till we get the nearest token that can start a meaningful statement
     void Parser::synchronize()
     {
         while (m_current.type != TokenType::Eof)
@@ -122,12 +121,12 @@ namespace cx
                 return parseWhileLoop();
             case TokenType::BracesClose:
             {
+                // to catch stray braces in blocks
                 const Token stray = m_current;
                 m_diag.error(stray.location, "unmatched '}}'");
                 consume();
-                return m_arena.create<Node>(stray, NodeKind::Error,  ValueType::Unknown);
+                return m_arena.create<Node>(stray, NodeKind::Error, ValueType::Unknown);
             }
-
             default:
                 return parseExprStatement();
         }
@@ -135,7 +134,7 @@ namespace cx
 
     Node* Parser::parseReturnStatement()
     {
-        auto* node = m_arena.create<ReturnNode>(m_current, NodeKind::ReturnStmt,  ValueType::Unknown, nullptr);
+        auto* node = m_arena.create<ReturnNode>(m_current, NodeKind::ReturnStmt, ValueType::Unknown, nullptr);
         consume();
 
         // return;
@@ -168,6 +167,7 @@ namespace cx
 
     bool Parser::parseBlock(std::vector<Node*>& out)
     {
+        // get the "{" token
         const Token brace = m_current;
         if (!expect(TokenType::BracesOpen))
         {
@@ -180,7 +180,7 @@ namespace cx
             const auto before = m_consumed;
             out.push_back(parseStatement());
 
-            // same backstop as Parse(): never loop without consuming
+            // returned without advancing the token stream, maybe due to error
             if (m_consumed == before)
             {
                 consume();
@@ -204,6 +204,7 @@ namespace cx
         {
             do
             {
+                // start parsing fro logicalor since we dont want to allow assignments as an arg
                 arguments.push_back(parseLogicalOr());
 
             } while (match(TokenType::Comma));
@@ -211,14 +212,13 @@ namespace cx
 
         expectClosing(TokenType::ParenClose, parenTok);
 
-        auto callee = m_arena.create<Node>(prevtoken, NodeKind::Identifier,  ValueType::Unknown);
-        return m_arena.create<CallNode>(prevtoken, NodeKind::FuncCall,  ValueType::Unknown, callee, m_arena.copyOf(arguments));
+        auto callee = m_arena.create<Node>(prevtoken, NodeKind::Identifier, ValueType::Unknown);
+        return m_arena.create<CallNode>(prevtoken, NodeKind::FuncCall, ValueType::Unknown, callee, m_arena.copyOf(arguments));
     }
 
     Node* Parser::parseFuncDecl()
     {
-
-        // consume "func"
+        // consume "func" keyword
         const Token funcTok = m_current;
         consume();
 
@@ -227,9 +227,9 @@ namespace cx
         if (!expect(TokenType::Var))
         {
             synchronize();
-            return m_arena.create<Node>(funcTok, NodeKind::Error,  ValueType::Unknown);
+            return m_arena.create<Node>(funcTok, NodeKind::Error, ValueType::Unknown);
         }
-        auto               name = m_arena.create<Node>(nameTok, NodeKind::Identifier,  ValueType::Unknown);
+        auto               name = m_arena.create<Node>(nameTok, NodeKind::Identifier, ValueType::Unknown);
 
         std::vector<Node*> parameters;
         std::vector<Node*> body;
@@ -244,7 +244,7 @@ namespace cx
                 {
                     if (m_current.type == TokenType::Var)
                     {
-                        parameters.push_back(m_arena.create<Node>(m_current, NodeKind::Identifier,  ValueType::Unknown));
+                        parameters.push_back(m_arena.create<Node>(m_current, NodeKind::Identifier, ValueType::Unknown));
                         consume();
                     }
                     else
@@ -254,7 +254,7 @@ namespace cx
                             break;
                         }
                         m_diag.error(m_current.location, "expected parameter name, found '{}'", describe(m_current));
-                        parameters.push_back(m_arena.create<Node>(m_current, NodeKind::Error,  ValueType::Unknown));
+                        parameters.push_back(m_arena.create<Node>(m_current, NodeKind::Error, ValueType::Unknown));
                         consume();
                     }
                 } while (match(TokenType::Comma));
@@ -262,41 +262,42 @@ namespace cx
             expectClosing(TokenType::ParenClose, parenTok);
         }
 
-        // function body
+        // function body {...}
         if (!parseBlock(body))
         {
-            return m_arena.create<Node>(funcTok, NodeKind::Error,  ValueType::Unknown);
+            return m_arena.create<Node>(funcTok, NodeKind::Error, ValueType::Unknown);
         }
 
-        return m_arena.create<FuncNode>(m_current, NodeKind::FuncDecl,  ValueType::Unknown, name, m_arena.copyOf(parameters), m_arena.copyOf(body));
+        return m_arena.create<FuncNode>(m_current, NodeKind::FuncDecl, ValueType::Unknown, name, m_arena.copyOf(parameters), m_arena.copyOf(body));
     }
 
     Node* Parser::parseWhileLoop()
     {
         std::vector<Node*> loop;
 
-        // consume "while"
+        // consume "while" keyword
         const Token        whileTok = m_current;
         consume();
 
-        // parse condition
+        // parse condition "()"
         auto condition = parseExpression();
 
+        // parse body {...}
         if (!parseBlock(loop))
         {
             return m_arena.create<Node>(whileTok, NodeKind::Error, ValueType::Unknown);
         }
 
-        return m_arena.create<WhileNode>(m_current, NodeKind::WhileStmt,  ValueType::Unknown, condition, m_arena.copyOf(loop));
-        ;
+        return m_arena.create<WhileNode>(m_current, NodeKind::WhileStmt, ValueType::Unknown, condition, m_arena.copyOf(loop));
     }
 
     Node* Parser::parseIfStatement()
     {
-        // consume "if"
+        // consume "if" keyword
         const Token ifTok = m_current;
         consume();
-        // parse condition
+
+        // parse condition "()"
         auto               condition = parseExpression();
 
         std::vector<Node*> then;
@@ -304,13 +305,13 @@ namespace cx
 
         if (!parseBlock(then))
         {
-            return m_arena.create<Node>(ifTok, NodeKind::Error,  ValueType::Unknown);
+            return m_arena.create<Node>(ifTok, NodeKind::Error, ValueType::Unknown);
         }
 
         // check for else
         if (m_current.type == TokenType::Else)
         {
-            // consume "else"
+            // consume "else" keyword
             consume();
 
             // `else if (...) {...}`
@@ -324,12 +325,7 @@ namespace cx
             }
         }
 
-        return m_arena.create<IfNode>(ifTok, NodeKind::IfStmt,  ValueType::Unknown, condition, m_arena.copyOf(then), m_arena.copyOf(nelse));
-    }
-
-    Node* Parser::parseExpression()
-    {
-        return parseAssignment();
+        return m_arena.create<IfNode>(ifTok, NodeKind::IfStmt, ValueType::Unknown, condition, m_arena.copyOf(then), m_arena.copyOf(nelse));
     }
 
     Node* Parser::parseExprStatement()
@@ -344,26 +340,34 @@ namespace cx
         return expr;
     }
 
+    Node* Parser::parseExpression()
+    {
+        return parseAssignment();
+    }
+
     Node* Parser::parseAssignment()
     {
         auto* left = parseLogicalOr();
 
         if (m_current.type == TokenType::Assign)
         {
+            // Get assignment "="
             const Token op = m_current;
             consume();
+
             Node* right = parseAssignment();
 
+            // left node has to be a variable 
             if (left->kind != NodeKind::Identifier)
             {
                 if (left->kind != NodeKind::Error)
                 {
                     m_diag.error(op.location, "left side of an assignment must be a variable");
                 }
-                return m_arena.create<Node>(op, NodeKind::Error,  ValueType::Unknown);
+                return m_arena.create<Node>(op, NodeKind::Error, ValueType::Unknown);
             }
 
-            return m_arena.create<BinaryNode>(op, NodeKind::BinaryExpr,   ValueType::Unknown, left, right);
+            return m_arena.create<BinaryNode>(op, NodeKind::BinaryExpr, ValueType::Unknown, left, right);
         }
 
         return left;
@@ -374,7 +378,7 @@ namespace cx
         auto left = parseLogicalAnd();
         while (m_current.type == TokenType::Or)
         {
-            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr,  ValueType::Unknown, left, nullptr);
+            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr, ValueType::Unknown, left, nullptr);
             consume();
             node->right = parseLogicalAnd();
             left        = node;
@@ -388,7 +392,7 @@ namespace cx
         auto left = parseEquality();
         while (m_current.type == TokenType::And)
         {
-            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr,  ValueType::Unknown, left, nullptr);
+            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr, ValueType::Unknown, left, nullptr);
             consume();
             node->right = parseEquality();
             left        = node;
@@ -402,7 +406,7 @@ namespace cx
         auto left = parseComparison();
         while (m_current.type == TokenType::Equal || m_current.type == TokenType::NotEqual)
         {
-            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr,  ValueType::Unknown, left, nullptr);
+            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr, ValueType::Unknown, left, nullptr);
             consume();
             node->right = parseComparison();
             left        = node;
@@ -417,7 +421,7 @@ namespace cx
         while (m_current.type == TokenType::Less || m_current.type == TokenType::LessEqual || m_current.type == TokenType::Greater ||
                m_current.type == TokenType::GreaterEqual)
         {
-            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr,  ValueType::Unknown, left, nullptr);
+            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr, ValueType::Unknown, left, nullptr);
             consume();
             node->right = parseTerm();
             left        = node;
@@ -431,7 +435,7 @@ namespace cx
         auto left = parseFactor();
         while (m_current.type == TokenType::Plus || m_current.type == TokenType::Minus)
         {
-            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr,  ValueType::Unknown, left, nullptr);
+            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr, ValueType::Unknown, left, nullptr);
             consume();
 
             node->right = parseFactor();
@@ -447,7 +451,7 @@ namespace cx
 
         while (m_current.type == TokenType::Divide || m_current.type == TokenType::Multiply || m_current.type == TokenType::Percent)
         {
-            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr,  ValueType::Unknown, left, nullptr);
+            auto* node = m_arena.create<BinaryNode>(m_current, NodeKind::BinaryExpr, ValueType::Unknown, left, nullptr);
             consume();
             node->right = parseUnary();
             left        = node;
@@ -463,13 +467,13 @@ namespace cx
         {
             m_diag.error(m_current.location, "expression nests too deeply (limit {})", kMaxDepth);
             synchronize();
-            return m_arena.create<Node>(m_current, NodeKind::Error,  ValueType::Unknown);
+            return m_arena.create<Node>(m_current, NodeKind::Error, ValueType::Unknown);
         }
         const DepthGuard guard(m_depth);
 
         if (m_current.type == TokenType::Minus || m_current.type == TokenType::Not)
         {
-            auto* node = m_arena.create<UnaryNode>(m_current, NodeKind::UnaryExpr,  ValueType::Unknown, nullptr);
+            auto* node = m_arena.create<UnaryNode>(m_current, NodeKind::UnaryExpr, ValueType::Unknown, nullptr);
             consume();
             node->operand = parseUnary();
             return node;
@@ -485,18 +489,18 @@ namespace cx
             const Token temp = m_current;
             consume();
 
-            // function call ??
+            // check is this is a function call: by checking if it has "(" immediately after 
             if (m_current.type == TokenType::ParenOpen)
             {
                 return parseCall(temp);
             }
 
-            return m_arena.create<Node>(temp, NodeKind::Identifier,  ValueType::Unknown);
+            return m_arena.create<Node>(temp, NodeKind::Identifier, ValueType::Unknown);
         }
 
         if (m_current.type == TokenType::Bool)
         {
-            auto* node = m_arena.create<Node>(m_current, NodeKind::Bool,  ValueType::Unknown);
+            auto* node = m_arena.create<Node>(m_current, NodeKind::Bool, ValueType::Unknown);
 
             consume();
             return node;
@@ -504,7 +508,7 @@ namespace cx
 
         if (m_current.type == TokenType::String)
         {
-            auto* node = m_arena.create<Node>(m_current, NodeKind::String,  ValueType::Unknown);
+            auto* node = m_arena.create<Node>(m_current, NodeKind::String, ValueType::Unknown);
 
             consume();
             return node;
@@ -512,7 +516,7 @@ namespace cx
 
         if (m_current.type == TokenType::Float || m_current.type == TokenType::Int)
         {
-            auto* node = m_arena.create<Node>(m_current, NodeKind::Number,  ValueType::Unknown);
+            auto* node = m_arena.create<Node>(m_current, NodeKind::Number, ValueType::Unknown);
 
             consume();
             return node;
@@ -520,7 +524,7 @@ namespace cx
 
         if (m_current.type == TokenType::ParenOpen)
         {
-            auto opener = m_current;
+            const auto opener = m_current;
             consume();
 
             auto* expr = parseExpression();
@@ -532,7 +536,7 @@ namespace cx
 
         // Unexpected token: a primary expression was expected.
         m_diag.error(m_current.location, "expected expression, found '{}'", describe(m_current));
-        return m_arena.create<Node>(m_current, NodeKind::Error,  ValueType::Unknown);
+        return m_arena.create<Node>(m_current, NodeKind::Error, ValueType::Unknown);
     }
 
 } // namespace cx

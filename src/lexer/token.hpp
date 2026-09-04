@@ -67,7 +67,10 @@ namespace cx
         TokenType        type;
     };
 
+    //! Given the tokentype return the char equivalent 
     const char* describe(TokenType t);
+
+    //! Given the Token return the char equivalent of the tokentype
     std::string describe(const Token& t);
 
 } // namespace cx

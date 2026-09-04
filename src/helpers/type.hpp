@@ -13,6 +13,7 @@ namespace cx
         Unknown,
     };
 
+    //! for diagnostics: returns char equivalent of the valuetype
     constexpr const char* describe(ValueType t)
     {
         switch (t)
