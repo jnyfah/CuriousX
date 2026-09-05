@@ -57,15 +57,17 @@ namespace cx
 
     std::byte* Arena::allocate(std::size_t size, std::size_t alignment)
     {
-        // calculate padding
-        const auto addr    = reinterpret_cast<std::uintptr_t>(m_current->data() + m_current->used);
-        const auto aligned = (addr + alignment - 1) & ~(alignment - 1);
-        const auto padding = aligned - addr;
+        // How far past `base` the next correctly aligned address sits. `alignment` is
+        // always a power of two, so rounding up is an add and a mask.
+        std::byte* const base    = m_current->data() + m_current->used;
+        const auto       addr    = reinterpret_cast<std::uintptr_t>(base);
+        const auto       aligned = (addr + alignment - 1) & ~(alignment - 1);
+        const auto       padding = static_cast<std::size_t>(aligned - addr);
 
         if (m_current->used + size + padding <= m_current->capacity)
         {
             m_current->used += (size + padding);
-            return reinterpret_cast<std::byte*>(addr + padding);
+            return base + padding;
         }
 
         // allocate more chunk
@@ -84,7 +86,7 @@ namespace cx
         m_current             = m_current->next;
     }
 
-    //! Allocate vector in the Arena and return a view to it 
+    //! Allocate vector in the Arena and return a view to it
     std::span<Node*> Arena::copyOf(const std::vector<Node*>& src)
     {
         if (src.empty())

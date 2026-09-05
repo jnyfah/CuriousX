@@ -47,8 +47,8 @@ namespace cx
         }
 
     private:
-        const Location start = Location();
-        const Location stop  = Location();
+        const Location start;
+        const Location stop;
     };
 
 } // namespace cx

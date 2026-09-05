@@ -357,7 +357,7 @@ namespace cx
 
             Node* right = parseAssignment();
 
-            // left node has to be a variable 
+            // left node has to be a variable
             if (left->kind != NodeKind::Identifier)
             {
                 if (left->kind != NodeKind::Error)
@@ -489,7 +489,7 @@ namespace cx
             const Token temp = m_current;
             consume();
 
-            // check is this is a function call: by checking if it has "(" immediately after 
+            // check is this is a function call: by checking if it has "(" immediately after
             if (m_current.type == TokenType::ParenOpen)
             {
                 return parseCall(temp);

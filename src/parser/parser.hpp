@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include "arena.hpp"
 #include "lexer/lexer.hpp"
 #include "node.hpp"
@@ -73,7 +74,7 @@ namespace cx
         Diagnostics&         m_diag;
         Token                m_current;
         int                  m_depth    = 0;
-        int                  m_consumed = 0;
+        size_t               m_consumed = 0;
         Arena&               m_arena;
     };
 

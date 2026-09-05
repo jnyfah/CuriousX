@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <string_view>
-
 #include "parser/arena.hpp"
 #include "parser/parser.hpp"
 
@@ -60,12 +59,14 @@ namespace
             {
                 const auto* i   = static_cast<const IfNode*>(n);
                 std::string out = "(if " + dump(i->condition) + " [";
-                for (const auto* s : i->then) out += dump(s) + " ";
+                for (const auto* s : i->then)
+                    out += dump(s) + " ";
                 out += "]";
                 if (!i->nelse.empty())
                 {
                     out += " [";
-                    for (const auto* s : i->nelse) out += dump(s) + " ";
+                    for (const auto* s : i->nelse)
+                        out += dump(s) + " ";
                     out += "]";
                 }
                 return out + ")";
@@ -75,7 +76,8 @@ namespace
             {
                 const auto* w   = static_cast<const WhileNode*>(n);
                 std::string out = "(while " + dump(w->condition) + " [";
-                for (const auto* s : w->loop) out += dump(s) + " ";
+                for (const auto* s : w->loop)
+                    out += dump(s) + " ";
                 return out + "])";
             }
 
@@ -88,7 +90,8 @@ namespace
                     out += (i ? " " : "") + dump(f->parameters[i]);
                 }
                 out += ") [";
-                for (const auto* s : f->body) out += dump(s) + " ";
+                for (const auto* s : f->body)
+                    out += dump(s) + " ";
                 return out + "])";
             }
 
@@ -96,7 +99,8 @@ namespace
             {
                 const auto* c   = static_cast<const CallNode*>(n);
                 std::string out = "(call " + dump(c->callee);
-                for (const auto* a : c->arguments) out += " " + dump(a);
+                for (const auto* a : c->arguments)
+                    out += " " + dump(a);
                 return out + ")";
             }
 
@@ -121,21 +125,27 @@ namespace
             return out;
         }
 
-        size_t errors() const { return diag.all().size(); }
-        size_t statements() const { return root->statements.size(); }
+        size_t errors() const
+        {
+            return diag.all().size();
+        }
+        size_t statements() const
+        {
+            return root->statements.size();
+        }
     };
 
     //! Parses `src`. The Parsed object owns the diagnostics; the arena lives inside
     //! the Parser, so the tree must be rendered before this returns.
     std::string parseToString(std::string_view src, Diagnostics& diag)
     {
-        Arena arena(4096);
-        Lexer  lexer(src, diag);
-        Parser parser(lexer, diag, arena);
+        Arena        arena(4096);
+        Lexer        lexer(src, diag);
+        Parser       parser(lexer, diag, arena);
 
         ProgramNode* root = parser.Parse();
 
-        std::string out;
+        std::string  out;
         for (size_t i = 0; i < root->statements.size(); ++i)
         {
             out += (i ? " " : "") + dump(root->statements[i]);
@@ -281,8 +291,7 @@ TEST(Parser, IfElse)
 
 TEST(Parser, ElseIfChain)
 {
-    expectAst("if (a) { x = 1; } else if (b) { x = 2; } else { x = 3; }",
-              "(if a [(= x 1) ] [(if b [(= x 2) ] [(= x 3) ]) ])");
+    expectAst("if (a) { x = 1; } else if (b) { x = 2; } else { x = 3; }", "(if a [(= x 1) ] [(if b [(= x 2) ] [(= x 3) ]) ])");
 }
 
 TEST(Parser, EmptyBlock)
@@ -316,8 +325,7 @@ TEST(Parser, FuncOneParameter)
 
 TEST(Parser, FuncManyParameters)
 {
-    expectAst("func add(a, b, c) { return a + b + c; }",
-              "(func add (a b c) [(return (+ (+ a b) c)) ])");
+    expectAst("func add(a, b, c) { return a + b + c; }", "(func add (a b c) [(return (+ (+ a b) c)) ])");
 }
 
 TEST(Parser, FuncNameIsNotTheKeyword)
@@ -395,7 +403,7 @@ TEST(Parser, ParsingContinuesAfterAnError)
 {
     // the broken statement must not swallow the ones after it
     Diagnostics diag;
-     Arena arena(4096);
+    Arena       arena(4096);
     Lexer       lexer("x = ;\ny = 2;\nz = 3;", diag);
     Parser      parser(lexer, diag, arena);
     auto*       root = parser.Parse();
@@ -428,18 +436,19 @@ TEST(Parser, DeepNestingIsRejectedNotCrashed)
 TEST(Parser, ValidProgramProducesNoDiagnostics)
 {
     Diagnostics diag;
-    parseToString("func add(a, b) {\n"
-                  "  return a + b;\n"
-                  "}\n"
-                  "x = add(1, 2);\n"
-                  "if (x > 2) {\n"
-                  "  print x;\n"
-                  "} else {\n"
-                  "  print 0;\n"
-                  "}\n"
-                  "while (x < 10) {\n"
-                  "  x = x + 1;\n"
-                  "}\n",
-                  diag);
+    parseToString(
+        "func add(a, b) {\n"
+        "  return a + b;\n"
+        "}\n"
+        "x = add(1, 2);\n"
+        "if (x > 2) {\n"
+        "  print x;\n"
+        "} else {\n"
+        "  print 0;\n"
+        "}\n"
+        "while (x < 10) {\n"
+        "  x = x + 1;\n"
+        "}\n",
+        diag);
     EXPECT_FALSE(diag.hasErrors());
 }

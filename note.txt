@@ -1,10 +1,9 @@
 todo 
 
-- fix clang tidy 
-- fix the ci/cd pipeline eventually 
-- add tests 
-- arena allocation??
+- fix clang tidy  - done 
+- fix the ci/cd pipeline eventually - done for now 
+- add tests  - done
+- arena allocation?? - done for now 
 - implicit cast btw int and float 
 - pass by refrence 
-- fix cmake 
 - what are we doing with the LR ??

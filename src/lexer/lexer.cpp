@@ -19,7 +19,7 @@ namespace cx
         {
             return '\0';
         }
-        char c = m_data[m_pos++];
+        const char c = m_data[m_pos++];
         if (c == '\n')
         {
             y_pos++;
