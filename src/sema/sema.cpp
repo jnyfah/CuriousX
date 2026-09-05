@@ -42,10 +42,6 @@ namespace cx
             return t == ValueType::Bool;
         }
 
-        bool isExpression(ValueType t)
-        {
-            return t != ValueType::Void;
-        }
     } // namespace
 
     Sema::Sema(Diagnostics& d) : m_diag(d), m_table(m_diag) {}

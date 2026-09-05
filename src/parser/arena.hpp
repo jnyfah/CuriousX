@@ -2,9 +2,9 @@
 
 #include <cstddef>
 #include <memory>
+#include <span>
 #include <utility>
 #include <vector>
-#include <span>
 #include "node.hpp"
 
 namespace cx
@@ -50,12 +50,11 @@ namespace cx
             }
         };
 
+        Chunk*      m_chunks; // head pointer
+        Chunk*      m_current;
+        std::size_t m_chunkSize;
 
-        Chunk*                 m_chunks; // head pointer
-        Chunk*                 m_current;
-        std::size_t            m_chunkSize;
-
-        void                   allocateChunk(std::size_t minSize, std::size_t alignment);
+        void        allocateChunk(std::size_t minSize, std::size_t alignment);
     };
 
 } // namespace cx

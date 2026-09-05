@@ -16,6 +16,7 @@ add_executable(curiousx_test
 target_link_libraries(curiousx_test
     PRIVATE
         curiousx_core
+        curiousx_warnings
         GTest::gtest_main
 )
 

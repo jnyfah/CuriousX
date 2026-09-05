@@ -2,7 +2,6 @@
 #include <string>
 #include <string_view>
 #include <vector>
-
 #include "parser/arena.hpp"
 #include "parser/parser.hpp"
 #include "sema/sema.hpp"
@@ -15,14 +14,14 @@ namespace
     //! Parses and analyses `src`, keeping everything alive for the caller.
     struct Analysed
     {
-        Diagnostics diag;
-        Arena       arena{8192};
-        Sema        sema{diag};
+        Diagnostics  diag;
+        Arena        arena{8192};
+        Sema         sema{diag};
 
         ProgramNode* run(std::string_view src)
         {
-            m_lexer  = std::make_unique<Lexer>(src, diag);
-            m_parser = std::make_unique<Parser>(*m_lexer, diag, arena);
+            m_lexer           = std::make_unique<Lexer>(src, diag);
+            m_parser          = std::make_unique<Parser>(*m_lexer, diag, arena);
 
             ProgramNode* root = m_parser->Parse();
             sema.analyze(root);
@@ -34,7 +33,10 @@ namespace
             std::size_t n = 0;
             for (const auto& d : diag.all())
             {
-                if (d.severity == Severity::Error) ++n;
+                if (d.severity == Severity::Error)
+                {
+                    ++n;
+                }
             }
             return n;
         }
@@ -42,7 +44,10 @@ namespace
         std::string messages() const
         {
             std::string out;
-            for (const auto& d : diag.all()) out += d.message + "\n";
+            for (const auto& d : diag.all())
+            {
+                out += d.message + "\n";
+            }
             return out;
         }
 
@@ -205,7 +210,7 @@ TEST(Sema, ReturnTypeIsInferred)
     ASSERT_EQ(a.errors(), 0u) << a.messages();
 
     const auto* root = static_cast<const ProgramNode*>(nullptr);
-    (void)root;
+    (void) root;
 }
 
 TEST(Sema, ReturnStatementsMustAgree)
@@ -246,7 +251,10 @@ TEST(Sema, BodyIsAnalysedOnlyOnce)
     const FunctionInfo* f = nullptr;
     for (const auto& fn : a.sema.table().functions())
     {
-        if (fn.name == "f") f = &fn;
+        if (fn.name == "f")
+        {
+            f = &fn;
+        }
     }
     ASSERT_NE(f, nullptr);
 

@@ -4,7 +4,6 @@
 #include <string_view>
 #include "helpers/location.hpp"
 
-
 namespace cx
 {
     enum class TokenType
@@ -67,7 +66,7 @@ namespace cx
         TokenType        type;
     };
 
-    //! Given the tokentype return the char equivalent 
+    //! Given the tokentype return the char equivalent
     const char* describe(TokenType t);
 
     //! Given the Token return the char equivalent of the tokentype

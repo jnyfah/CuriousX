@@ -35,7 +35,7 @@ namespace cx
         ValueType               returnType = ValueType::Unknown;
         std::vector<SymbolInfo> locals;
         Analysis                state = Analysis::NotStarted; // keeps track of functions local var
-        FuncNode*               decl = nullptr;
+        FuncNode*               decl  = nullptr;
     };
 
     struct ActiveFunction
@@ -159,14 +159,14 @@ namespace cx
             for (std::size_t i = 0; i < params.size() && i < types.size(); ++i)
             {
                 params[i]->valuetype = types[i];
-                params[i]->slot = insert(params[i]->token.value, types[i], params[i]->token);
+                params[i]->slot      = insert(params[i]->token.value, types[i], params[i]->token);
             }
         }
 
         void endFunction()
         {
             // drop every scope this function opened
-            m_table.resize(m_active.back().scopeFloor); 
+            m_table.resize(m_active.back().scopeFloor);
             m_active.pop_back();
         }
 

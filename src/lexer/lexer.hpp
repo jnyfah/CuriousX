@@ -1,8 +1,8 @@
 #pragma once
 #include <optional>
 #include <string_view>
-#include "token.hpp"
 #include "helpers/diagnostics.hpp"
+#include "token.hpp"
 
 namespace cx
 {

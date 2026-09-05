@@ -34,12 +34,12 @@ namespace cx
 
     struct Node
     {
-        cx::Token token;
-        NodeKind  kind;
-        ValueType valuetype = ValueType::Unknown;
+        cx::Token   token;
+        NodeKind    kind;
+        ValueType   valuetype = ValueType::Unknown;
 
         //! Identifiers only
-        std::size_t slot = static_cast<std::size_t>(-1);
+        std::size_t slot      = static_cast<std::size_t>(-1);
 
         Node(Token token, NodeKind kind, ValueType valuetype) : token(token), kind(kind), valuetype(valuetype) {}
     };
@@ -49,7 +49,9 @@ namespace cx
         Node* left;
         Node* right;
 
-        BinaryNode(Token token, NodeKind kind,  ValueType valuetype,  Node* left, Node* right) : Node(token, kind, valuetype), left(left), right(right) {}
+        BinaryNode(Token token, NodeKind kind, ValueType valuetype, Node* left, Node* right) : Node(token, kind, valuetype), left(left), right(right)
+        {
+        }
     };
 
     struct UnaryNode : Node
@@ -76,7 +78,10 @@ namespace cx
         Node*            condition;
         std::span<Node*> loop;
 
-        WhileNode(Token token, NodeKind kind, ValueType valuetype, Node* cond, std::span<Node*> loop) : Node(token, kind, valuetype), condition(cond), loop(loop) {}
+        WhileNode(Token token, NodeKind kind, ValueType valuetype, Node* cond, std::span<Node*> loop)
+            : Node(token, kind, valuetype), condition(cond), loop(loop)
+        {
+        }
     };
 
     // function definition
@@ -97,13 +102,19 @@ namespace cx
     {
         Node*            callee;
         std::span<Node*> arguments;
-        CallNode(Token token, NodeKind kind, ValueType valuetype, Node* callee, std::span<Node*> arguments) : Node(token, kind, valuetype), callee(callee), arguments(arguments) {}
+        CallNode(Token token, NodeKind kind, ValueType valuetype, Node* callee, std::span<Node*> arguments)
+            : Node(token, kind, valuetype), callee(callee), arguments(arguments)
+        {
+        }
     };
 
     struct ProgramNode : Node
     {
         std::span<Node*> statements;
-        ProgramNode(Token token, NodeKind kind, ValueType valuetype, std::span<Node*> statements) : Node(token, kind, valuetype), statements(statements) {}
+        ProgramNode(Token token, NodeKind kind, ValueType valuetype, std::span<Node*> statements)
+            : Node(token, kind, valuetype), statements(statements)
+        {
+        }
     };
 
     struct PrintNode : Node
