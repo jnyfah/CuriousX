@@ -1,0 +1,22 @@
+# Checks are opt-in by family. The disabled entries are ones that fire constantly
+# on a codebase like this without pointing at real defects.
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  performance-*,
+  misc-*,
+  cppcoreguidelines-pro-type-member-init,
+  cppcoreguidelines-slicing,
+  readability-const-return-type,
+  readability-redundant-*,
+  readability-misleading-indentation,
+  readability-simplify-boolean-expr,
+  -bugprone-easily-swappable-parameters,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
+  -performance-avoid-endl
+
+WarningsAsErrors: ''
+HeaderFilterRegex: 'src/.*\.hpp$'
+FormatStyle: file

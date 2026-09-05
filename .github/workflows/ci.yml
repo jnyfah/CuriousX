@@ -30,27 +30,28 @@ jobs:
             | xargs -0 clang-format-18 --dry-run --Werror
 
   build-and-test:
-    name: ${{ matrix.name }} / ${{ matrix.build_type }}
+    name: ${{ matrix.platform }} / ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        platform: [linux-gcc, linux-clang, macos, windows]
         build_type: [Debug, Release]
         include:
-          - name: linux-gcc-14
+          - platform: linux-gcc
             os: ubuntu-latest
             cc: gcc-14
             cxx: g++-14
-            install: gcc-14 g++-14
-          - name: linux-clang-18
+            apt: gcc-14 g++-14
+          - platform: linux-clang
             os: ubuntu-latest
             cc: clang-18
             cxx: clang++-18
-            install: clang-18
-          - name: macos-appleclang
+            apt: clang-18
+          - platform: macos
             os: macos-latest
-          - name: windows-msvc
+          - platform: windows
             os: windows-latest
 
     steps:
@@ -61,10 +62,10 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Install compiler
-        if: matrix.install != ''
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ${{ matrix.install }}
+          sudo apt-get install -y ${{ matrix.apt }}
 
       - name: Configure
         env:
@@ -79,6 +80,37 @@ jobs:
         working-directory: build
         run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
 
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Install clang-tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy-18
+
+      # tests are excluded: GoogleTest macros generate code that trips several
+      # checks, and the findings would be about gtest rather than about CuriousX
+      - name: Configure
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+          sudo apt-get install -y clang-18
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=OFF \
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Run clang-tidy
+        run: |
+          find src -name '*.cpp' -print0 \
+            | xargs -0 clang-tidy-18 -p build --warnings-as-errors='*'
+
   sanitizers:
     name: ASan + UBSan
     runs-on: ubuntu-latest
@@ -88,6 +120,11 @@ jobs:
 
       - name: Set up CMake
         uses: lukka/get-cmake@latest
+
+      - name: Install compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-14 g++-14
 
       - name: Configure
         env:
