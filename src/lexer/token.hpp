@@ -63,7 +63,7 @@ namespace cx
     {
         std::string_view value;
         Location         location;
-        TokenType        type;
+        TokenType        type = TokenType::Unknown;
     };
 
     //! Given the tokentype return the char equivalent

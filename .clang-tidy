@@ -1,5 +1,5 @@
-# Checks are opt-in by family. The disabled entries are ones that fire constantly
-# on a codebase like this without pointing at real defects.
+# Checks are opt-in by family. Each disabled entry below fires constantly on this
+# codebase without pointing at a defect
 Checks: >
   -*,
   bugprone-*,
@@ -15,7 +15,9 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -misc-non-private-member-variables-in-classes,
   -misc-no-recursion,
-  -performance-avoid-endl
+  -misc-include-cleaner,
+  -performance-avoid-endl,
+  -performance-enum-size
 
 WarningsAsErrors: ''
 HeaderFilterRegex: 'src/.*\.hpp$'

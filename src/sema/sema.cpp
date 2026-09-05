@@ -139,8 +139,8 @@ namespace cx
             case NodeKind::FuncCall:
                 return analyzeFunCall(static_cast<CallNode*>(node));
             case NodeKind::Error:
-                return ValueType::Error;
             default:
+                // an Error node was already reported where it was created
                 return ValueType::Error;
         }
     }
@@ -453,7 +453,7 @@ namespace cx
 
     void Sema::analyzeFunDclr(FuncNode* node)
     {
-        std::vector<ValueType> params(node->parameters.size(), ValueType::Unknown);
+        const std::vector<ValueType> params(node->parameters.size(), ValueType::Unknown);
         m_table.declareFunction(node->name->token.value, node->token, params, ValueType::Unknown, node);
     }
 
