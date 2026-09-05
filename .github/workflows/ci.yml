@@ -30,40 +30,54 @@ jobs:
             | xargs -0 clang-format-18 --dry-run --Werror
 
   build-and-test:
-    name: ${{ matrix.compiler }} / ${{ matrix.build_type }}
-    runs-on: ubuntu-latest
+    name: ${{ matrix.name }} / ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc-13, gcc-14]
         build_type: [Debug, Release]
+        include:
+          - name: linux-gcc-14
+            os: ubuntu-latest
+            cc: gcc-14
+            cxx: g++-14
+            install: gcc-14 g++-14
+          - name: linux-clang-18
+            os: ubuntu-latest
+            cc: clang-18
+            cxx: clang++-18
+            install: clang-18
+          - name: macos-appleclang
+            os: macos-latest
+          - name: windows-msvc
+            os: windows-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      # the project requires CMake 4, which is newer than the runner image ships
+      # the project requires CMake 4, which is newer than the runner images ship
       - name: Set up CMake
         uses: lukka/get-cmake@latest
 
-      - name: Set up compiler
+      - name: Install compiler
+        if: matrix.install != ''
         run: |
-          CXX_COMPILER="${{ matrix.compiler }}"
-          CXX_COMPILER="${CXX_COMPILER/gcc/g++}"
           sudo apt-get update
-          sudo apt-get install -y "${{ matrix.compiler }}" "$CXX_COMPILER"
-          echo "CC=${{ matrix.compiler }}" >> "$GITHUB_ENV"
-          echo "CXX=$CXX_COMPILER"          >> "$GITHUB_ENV"
+          sudo apt-get install -y ${{ matrix.install }}
 
       - name: Configure
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_TESTS=ON
 
       - name: Build
-        run: cmake --build build -j
+        run: cmake --build build --config ${{ matrix.build_type }} -j
 
       - name: Test
         working-directory: build
-        run: ctest --output-on-failure
+        run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
 
   sanitizers:
     name: ASan + UBSan
@@ -87,7 +101,6 @@ jobs:
       - name: Test
         working-directory: build
         env:
-          # leaks
           ASAN_OPTIONS: detect_leaks=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
         run: ctest --output-on-failure
