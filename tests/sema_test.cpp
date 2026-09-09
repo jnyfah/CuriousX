@@ -92,7 +92,7 @@ TEST(Sema, UndefinedVariable)
     expectErrors("x = y + 1;", 1);
 }
 
-TEST(Sema, IdentifiersGetTheirSlotStamped)
+TEST(Sema, IdentifiersGetTheirlocalIndexStamped)
 {
     Analysed     a;
     ProgramNode* root = a.run("x = 1; y = 2; print y;");
@@ -102,7 +102,7 @@ TEST(Sema, IdentifiersGetTheirSlotStamped)
 
     const auto* print = static_cast<const PrintNode*>(root->statements[2]);
     EXPECT_EQ(print->expression->kind, NodeKind::Identifier);
-    EXPECT_EQ(print->expression->slot, 1u) << "y is the second local, so slot 1";
+    EXPECT_EQ(print->expression->localIndex, 1u) << "y is the second local, so localIndex 1";
     EXPECT_EQ(print->expression->valuetype, ValueType::Int);
 }
 

@@ -268,7 +268,7 @@ namespace cx
             return m_arena.create<Node>(funcTok, NodeKind::Error, ValueType::Unknown);
         }
 
-        return m_arena.create<FuncNode>(m_current, NodeKind::FuncDecl, ValueType::Unknown, name, m_arena.copyOf(parameters), m_arena.copyOf(body));
+        return m_arena.create<FuncNode>(funcTok, NodeKind::FuncDecl, ValueType::Unknown, name, m_arena.copyOf(parameters), m_arena.copyOf(body));
     }
 
     Node* Parser::parseWhileLoop()
