@@ -249,9 +249,9 @@ namespace cx
         // the parameters can be part of @main body, if so extract from m_frame and put it in args
         std::vector<Value> args;
         args.reserve(node->arguments.size());
-        for (auto node : node->arguments)
+        for (auto n : node->arguments)
         {
-            args.push_back(evalExpr(node));
+            args.push_back(evalExpr(n));
         }
 
         m_frames.emplace_back(m_sym.functions()[index].locals.size());
