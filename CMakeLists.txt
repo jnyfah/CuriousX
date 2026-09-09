@@ -54,6 +54,7 @@ target_sources(curiousx_core
     src/parser/parser.cpp
     src/parser/arena.cpp
     src/sema/sema.cpp
+    src/interp/interp.cpp
 )
 
 target_include_directories(curiousx_core PUBLIC src)

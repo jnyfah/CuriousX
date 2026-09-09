@@ -16,7 +16,7 @@ namespace cx
     {
         ValueType   valuetype;
         Token       token;
-        std::size_t slot; //!< index into the owning function's local list
+        std::size_t localIndex; //!< index into the owning function's local list
     };
 
     //! what is function current condition
@@ -74,7 +74,7 @@ namespace cx
         }
 
         //! Declares `name` if it is not visible, otherwise treats this as an assignment and checks the type matches.
-        //! Returns the slot the variable lives in, either way
+        //! Returns the localIndex the variable lives in, either way
         std::size_t insert(std::string_view name, ValueType valuetype, Token token)
         {
             if (auto existing = lookup(name))
@@ -84,12 +84,12 @@ namespace cx
                     m_diag.error(
                         token.location, "cannot assign {} to '{}' of valuetype {}", describe(valuetype), name, describe(existing->valuetype));
                 }
-                return existing->slot;
+                return existing->localIndex;
             }
 
-            const std::size_t slot = recordLocal(valuetype, token);
-            m_table.back().emplace(name, SymbolInfo{valuetype, token, slot});
-            return slot;
+            const std::size_t localIndex = recordLocal(valuetype, token);
+            m_table.back().emplace(name, SymbolInfo{valuetype, token, localIndex});
+            return localIndex;
         }
 
         //! lookup var names in the table if they exist
@@ -158,8 +158,8 @@ namespace cx
 
             for (std::size_t i = 0; i < params.size() && i < types.size(); ++i)
             {
-                params[i]->valuetype = types[i];
-                params[i]->slot      = insert(params[i]->token.value, types[i], params[i]->token);
+                params[i]->valuetype  = types[i];
+                params[i]->localIndex = insert(params[i]->token.value, types[i], params[i]->token);
             }
         }
 
@@ -176,7 +176,7 @@ namespace cx
         }
 
     private:
-        //! Appends to the current function's local list and hands back its slot.
+        //! Appends to the current function's local list and hands back its localIndex.
         std::size_t recordLocal(ValueType valuetype, Token token)
         {
             const std::size_t index = currentFunction();

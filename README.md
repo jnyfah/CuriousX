@@ -63,7 +63,7 @@ than source order, so a function that is never called is never type-checked
 ```
 source ─► Lexer ─► Parser ─► Sema ─► [ IR ] ─► [ RISC-V ]
             │        │         │
-          tokens    AST    types + slots
+          tokens    AST    types + localIndexs
 ```
 
 | Layer | Directory | Responsibility |
@@ -71,7 +71,7 @@ source ─► Lexer ─► Parser ─► Sema ─► [ IR ] ─► [ RISC-V ]
 | Helpers | `src/helpers/` | source locations, diagnostics, the type enum |
 | Lexer | `src/lexer/` | hand-written scanner; whitespace and comments are trivia |
 | Parser | `src/parser/` | recursive descent with precedence climbing; arena-allocated AST |
-| Sema | `src/sema/` | scoped symbol table, type inference, name resolution, frame slots |
+| Sema | `src/sema/` | scoped symbol table, type inference, name resolution, frame localIndexs |
 
 Dependencies point one way only. Nothing below a layer knows about the layers
 above it, and the eventual back end will consume only the IR.
@@ -86,12 +86,12 @@ Some things worth knowing about how it is built:
   are bump-allocated and freed wholesale. Nodes hold `std::span` children rather
   than vectors; non-trivially-destructible objects register a finaliser.
 - **Sema annotates the tree.** Each expression node is stamped with its type,
-  and each identifier with the **slot** it occupies in its function's stack
+  and each identifier with the **localIndex** it occupies in its function's stack
   frame. Later phases read those off the node instead of re-deriving them —
   by codegen time the scopes no longer exist.
 - **Top-level code is a function.** Statements outside any `func` become the
   body of an implicit `@main`, so every variable in a program belongs to a
-  frame and has a real slot. There are no global variables.
+  frame and has a real localIndex. There are no global variables.
 
 ## Building
 
@@ -127,7 +127,7 @@ Builds with ASan and UBSan. Warnings are errors by default
 
 - [x] Lexer
 - [x] Parser with error recovery
-- [x] Semantic analysis: inference, scoping, frame slots
+- [x] Semantic analysis: inference, scoping, frame localIndexs
 - [ ] Tree-walking interpreter — a reference implementation to diff the back end against
 - [ ] IR: three-address, virtual registers, basic blocks
 - [ ] RISC-V code generation, running under Spike

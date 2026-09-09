@@ -36,10 +36,10 @@ namespace cx
     {
         cx::Token   token;
         NodeKind    kind;
-        ValueType   valuetype = ValueType::Unknown;
+        ValueType   valuetype  = ValueType::Unknown;
 
         //! Identifiers only
-        std::size_t slot      = static_cast<std::size_t>(-1);
+        std::size_t localIndex = static_cast<std::size_t>(-1);
 
         Node(Token token, NodeKind kind, ValueType valuetype) : token(token), kind(kind), valuetype(valuetype) {}
     };

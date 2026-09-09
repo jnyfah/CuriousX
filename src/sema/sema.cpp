@@ -48,8 +48,7 @@ namespace cx
 
     void Sema::analyze(ProgramNode* root)
     {
-        // pass 1: every top-level function is declared before any body is walked,
-        // so a call may name a function declared further down the file
+        // pass 1: gather all func declarations no mather where they are in the code
         for (Node* statement : root->statements)
         {
             if (statement->kind == NodeKind::FuncDecl)
@@ -58,8 +57,10 @@ namespace cx
             }
         }
 
-        // top-level statements are the body of an implicit function, so that every
-        // variable in the program belongs to a frame and gets a real slot
+        //  pass 2: Every other node outside explicit functions is put inside an implicit main function
+        // note that order of function call matters for binding variable types to calls
+        // foo(1, 2) before foo (1.47, 9.008), the later is an error because the first call of `foo`
+        // has bound `foo` too foo(int, int)
         const Token mainToken{
             "@main", Location{0, 0},
              TokenType::Var
@@ -69,7 +70,6 @@ namespace cx
         const std::size_t mainIndex = m_table.findFunction("@main");
         m_table.beginFunction(mainIndex);
 
-        // pass 2: function bodies are walked here, once the argument types have bound the parameters
         for (Node* statement : root->statements)
         {
             if (statement->kind != NodeKind::FuncDecl)
@@ -149,8 +149,8 @@ namespace cx
     {
         if (const auto info = m_table.lookup(node->token.value))
         {
-            node->slot      = info->slot;
-            node->valuetype = info->valuetype;
+            node->localIndex = info->localIndex;
+            node->valuetype  = info->valuetype;
             return node->valuetype;
         }
 
@@ -175,9 +175,9 @@ namespace cx
             }
 
             // insert() reports the mismatch when the variable already exists with another type.
-            node->left->slot      = m_table.insert(node->left->token.value, right, node->left->token);
-            node->left->valuetype = right;
-            node->valuetype       = right;
+            node->left->localIndex = m_table.insert(node->left->token.value, right, node->left->token);
+            node->left->valuetype  = right;
+            node->valuetype        = right;
             return right;
         }
 
@@ -461,18 +461,13 @@ namespace cx
     {
         FunctionInfo& funcInfo = m_table.function(index);
 
-        // InProgress: a recursive call reached us while the body is still being walked.
-        // Done: a later call site; the arguments were checked, the body needs no rewalk.
-        if (funcInfo.state != Analysis::NotStarted)
+        // function is already running or, has been analyzed before by another call
+        if (funcInfo.state != Analysis::NotStarted || funcInfo.decl == nullptr)
         {
             return;
         }
 
-        if (funcInfo.decl == nullptr)
-        {
-            return;
-        }
-
+        // set to now in progress
         funcInfo.state = Analysis::InProgress;
 
         m_table.beginFunction(index);
@@ -488,6 +483,7 @@ namespace cx
             funcInfo.returnType = ValueType::Void;
         }
 
+        // set to done so we dont have to rewalk this function in the future
         funcInfo.state = Analysis::Done;
     }
 
