@@ -27,7 +27,7 @@ namespace cx
             }
         }
 
-        m_index = m_sym.findFunction("@main");
+        m_index          = m_sym.findFunction("@main");
         const auto& func = m_sym.functions()[m_index];
         ResetCounter(func.locals.size());
         const auto instrsize = m_instr.size();
@@ -44,7 +44,8 @@ namespace cx
         return m_arena.copyOf(m_instr);
     }
 
-    std::size_t Lower::MainIndex(){
+    std::size_t Lower::MainIndex()
+    {
         return m_index;
     }
 
@@ -86,7 +87,7 @@ namespace cx
                 PrintInstr(static_cast<PrintNode*>(node));
                 break;
             case NodeKind::FuncDecl:
-                //already lowered in MirLower's first pass
+                // already lowered in MirLower's first pass
                 break;
             default:
                 ExprInstr(node);
@@ -303,8 +304,8 @@ namespace cx
     void Lower::FuncDclInstr(FuncNode* node)
     {
         // reset temp counter for all new function, and temp number should start after all locals in the function
-        auto index = m_sym.findFunction(node->name->token.value);
-        const auto& func = m_sym.functions()[index];
+        auto        index = m_sym.findFunction(node->name->token.value);
+        const auto& func  = m_sym.functions()[index];
         ResetCounter(func.locals.size());
 
         const auto instrsize = m_instr.size();

@@ -26,7 +26,7 @@ namespace
         std::span<Instruction>    rows;
         std::span<FunctionLayout> layouts;
 
-        bool                   run(std::string_view src)
+        bool                      run(std::string_view src)
         {
             m_lexer           = std::make_unique<Lexer>(src, diag);
             m_parser          = std::make_unique<Parser>(*m_lexer, diag, arena);
@@ -146,8 +146,7 @@ namespace
     void expectTempsWrittenBeforeRead(std::span<const Instruction> rows)
     {
         std::vector<std::size_t> written;
-        auto                     isWritten = [&](std::size_t slot)
-        {
+        auto                     isWritten = [&](std::size_t slot) {
             for (auto w : written)
             {
                 if (w == slot)
@@ -260,11 +259,11 @@ TEST(Lower, TempsStartAfterMainsLocals)
 TEST(Lower, EachOperatorMapsToItsOp)
 {
     const std::vector<std::pair<std::string_view, Op>> cases = {
-        { "print 1 + 2;",  Op::Add},
-        { "print 1 - 2;",  Op::Sub},
-        { "print 1 * 2;",  Op::Mul},
-        { "print 1 / 2;",  Op::Div},
-        { "print 7 % 2;",  Op::Mod},
+        { "print 1 + 2;",   Op::Add},
+        { "print 1 - 2;",   Op::Sub},
+        { "print 1 * 2;",   Op::Mul},
+        { "print 1 / 2;",   Op::Div},
+        { "print 7 % 2;",   Op::Mod},
         {"print 1 == 2;", Op::CmpEQ},
         {"print 1 != 2;", Op::CmpNE},
         { "print 1 < 2;", Op::CmpLT},
@@ -313,8 +312,7 @@ TEST(Lower, WhileLoopLowersToLabelsAndJumps)
     ASSERT_TRUE(l.run("i = 0; while (i < 3) { i = i + 1; }")) << l.messages();
 
     // store i 0 | label S | lt | jiff E | add | store | jump S | label E | return
-    ASSERT_EQ(opsOf(l.rows),
-              (std::vector<Op>{Op::Store, Op::Label, Op::CmpLT, Op::JumpIFF, Op::Add, Op::Store, Op::Jump, Op::Label, Op::Return}));
+    ASSERT_EQ(opsOf(l.rows), (std::vector<Op>{Op::Store, Op::Label, Op::CmpLT, Op::JumpIFF, Op::Add, Op::Store, Op::Jump, Op::Label, Op::Return}));
 
     const auto start = l.rows[1].dest.index;
     const auto exit  = l.rows[7].dest.index;
@@ -341,8 +339,7 @@ TEST(Lower, IfElseJumpsToElseThenSkipsIt)
     ASSERT_TRUE(l.run("x = 9; if (x > 5) { print 1; } else { print 2; }")) << l.messages();
 
     // store | gt | jiff ELSE | print 1 | jump END | label ELSE | print 2 | label END | return
-    ASSERT_EQ(opsOf(l.rows),
-              (std::vector<Op>{Op::Store, Op::CmpGT, Op::JumpIFF, Op::Print, Op::Jump, Op::Label, Op::Print, Op::Label, Op::Return}));
+    ASSERT_EQ(opsOf(l.rows), (std::vector<Op>{Op::Store, Op::CmpGT, Op::JumpIFF, Op::Print, Op::Jump, Op::Label, Op::Print, Op::Label, Op::Return}));
 
     const auto elseLabel = l.rows[5].dest.index;
     const auto endLabel  = l.rows[7].dest.index;
@@ -357,8 +354,9 @@ TEST(Lower, IfElseJumpsToElseThenSkipsIt)
 TEST(Lower, LabelsAreUniqueAcrossStatements)
 {
     Lowered l;
-    ASSERT_TRUE(l.run("i = 0; while (i < 3) { i = i + 1; } if (i > 1) { print 1; } else { print 2; }"
-                      "while (i > 0) { if (i == 2) { print i; } i = i - 1; }"))
+    ASSERT_TRUE(l.run(
+        "i = 0; while (i < 3) { i = i + 1; } if (i > 1) { print 1; } else { print 2; }"
+        "while (i > 0) { if (i == 2) { print i; } i = i - 1; }"))
         << l.messages();
     expectLabelsConsistent(l.rows);
 }
@@ -372,8 +370,7 @@ TEST(Lower, FunctionBodyComesBeforeMainAndEndsWithReturn)
 
     // add:  add t2 a b | return t2 | return
     // main: arg 1 | arg 2 | call t0 add | print t0 | return
-    ASSERT_EQ(opsOf(l.rows),
-              (std::vector<Op>{Op::Add, Op::Return, Op::Return, Op::Arg, Op::Arg, Op::Call, Op::Print, Op::Return}));
+    ASSERT_EQ(opsOf(l.rows), (std::vector<Op>{Op::Add, Op::Return, Op::Return, Op::Arg, Op::Arg, Op::Call, Op::Print, Op::Return}));
 
     // add's locals are a=0, b=1 so its first temp is slot 2
     expectTemp(l.rows[0].dest, 2);
@@ -411,7 +408,7 @@ TEST(Lower, NestedCallArgumentsStayNextToTheirCall)
     ASSERT_TRUE(l.run("func g(a) { return a; } func f(a, b) { return a + b; } print f(1, g(2));")) << l.messages();
 
     std::vector<Instruction> main;
-    bool                     inMain = false;
+    bool                     inMain  = false;
     std::size_t              returns = 0;
     for (const auto& r : l.rows)
     {
@@ -437,9 +434,10 @@ TEST(Lower, NestedCallArgumentsStayNextToTheirCall)
 TEST(Lower, FunctionsKeepTheirOwnTempNumbering)
 {
     Lowered l;
-    ASSERT_TRUE(l.run("func add3(a, b, c) { s = a + b; return s + c; }"
-                      "func add31(a, b, c) { s = a + b; return s + c; }"
-                      "x = add3(1, 2, 3) + add31(4, 5, 6);"))
+    ASSERT_TRUE(l.run(
+        "func add3(a, b, c) { s = a + b; return s + c; }"
+        "func add31(a, b, c) { s = a + b; return s + c; }"
+        "x = add3(1, 2, 3) + add31(4, 5, 6);"))
         << l.messages();
 
     // both functions have 4 locals, so both use temps 4 and 5
@@ -548,10 +546,11 @@ TEST(LowerLayout, EntryRowsPointAtEachFunctionsFirstRow)
 TEST(LowerLayout, EveryEntryRowIsInRangeAndFollowsAReturn)
 {
     Lowered l;
-    ASSERT_TRUE(l.run("x = 1;"
-                      "func f(a) { if (a > 0) { return 1; } }"
-                      "func g(a, b) { while (a < b) { a = a + 1; } return a; }"
-                      "print f(x) + g(x, 5);"))
+    ASSERT_TRUE(l.run(
+        "x = 1;"
+        "func f(a) { if (a > 0) { return 1; } }"
+        "func g(a, b) { while (a < b) { a = a + 1; } return a; }"
+        "print f(x) + g(x, 5);"))
         << l.messages();
 
     for (std::size_t i = 0; i < l.layouts.size(); ++i)
@@ -602,8 +601,9 @@ TEST(LowerLayout, VoidCallTakesNoSlot)
 TEST(LowerLayout, EverySlotUsedFitsInTheFrame)
 {
     Lowered l;
-    ASSERT_TRUE(l.run("func f(a, b) { c = a * b; while (c > 10) { c = c - a; } return c + 1; }"
-                      "x = 3; y = f(x, 7); print y + x * 2;"))
+    ASSERT_TRUE(l.run(
+        "func f(a, b) { c = a * b; while (c > 10) { c = c - a; } return c + 1; }"
+        "x = 3; y = f(x, 7); print y + x * 2;"))
         << l.messages();
 
     for (std::string_view name : {"f", "@main"})

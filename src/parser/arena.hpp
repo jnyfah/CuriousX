@@ -43,7 +43,7 @@ namespace cx
             std::copy(src.begin(), src.end(), mem);
             return {mem, src.size()};
         }
-        
+
         template <typename T>
         std::span<T> copyOf(const std::vector<T>& src)
         {
@@ -55,7 +55,6 @@ namespace cx
             std::copy(src.begin(), src.end(), mem);
             return {mem, src.size()};
         }
-        
 
     private:
         struct Chunk
