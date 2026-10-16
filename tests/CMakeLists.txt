@@ -12,6 +12,7 @@ add_executable(curiousx_test
     parser_test.cpp
     sema_test.cpp
     interp_test.cpp
+    lower_test.cpp
 )
 
 target_link_libraries(curiousx_test

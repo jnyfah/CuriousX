@@ -6,12 +6,11 @@
 #include <variant>
 #include <vector>
 #include "helpers/type.hpp"
-#include "interp/value.hpp"
 #include "lexer/token.hpp"
 #include "parser/node.hpp"
 #include "sema/sema.hpp"
 
-namespace cx
+namespace cx::Interpreter
 {
     namespace
     {
@@ -86,25 +85,11 @@ namespace cx
         switch (node->kind)
         {
             case NodeKind::Number:
-            {
-                if (node->valuetype == ValueType::Float)
-                {
-                    double d = 0.0;
-                    std::from_chars(node->token.value.data(), node->token.value.data() + node->token.value.size(), d);
-                    return d;
-                }
-
-                std::int32_t i = 0;
-                std::from_chars(node->token.value.data(), node->token.value.data() + node->token.value.size(), i);
-                return i;
-            }
-
             case NodeKind::Bool:
-                return node->token.value == "true";
+            case NodeKind::String:
+                return valueOf(node);
             case cx::NodeKind::Identifier:
                 return m_frames.back().slots[node->localIndex];
-            case NodeKind::String:
-                return std::string{node->token.value};
             case NodeKind::FuncCall:
                 return evalCall(static_cast<const CallNode*>(node));
             case NodeKind::BinaryExpr:
@@ -338,4 +323,4 @@ namespace cx
         return m_output;
     }
 
-} // namespace cx
+} // namespace cx::Interpreter

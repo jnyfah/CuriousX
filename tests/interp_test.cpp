@@ -31,7 +31,7 @@ namespace
                 return false;
             }
 
-            Interpreter interp(sema.table());
+            Interpreter::Interpreter interp(sema.table());
             interp.run(*root);
             out = interp.output();
             return true;

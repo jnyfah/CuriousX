@@ -5,7 +5,7 @@
 #include <variant>
 #include "helpers/type.hpp"
 
-namespace cx
+namespace cx::Interpreter
 {
 
     using Value = std::variant<std::monostate, std::int32_t, double, bool, std::string>;
@@ -78,4 +78,4 @@ namespace cx
         return "";
     }
 
-} // namespace cx
+} // namespace cx::Interpreter
