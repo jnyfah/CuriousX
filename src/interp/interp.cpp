@@ -10,7 +10,7 @@
 #include "parser/node.hpp"
 #include "sema/sema.hpp"
 
-namespace cx
+namespace cx::Interpreter
 {
     namespace
     {
@@ -323,4 +323,4 @@ namespace cx
         return m_output;
     }
 
-} // namespace cx
+} // namespace cx::Interpreter

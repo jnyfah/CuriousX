@@ -6,7 +6,7 @@
 #include "sema/symboltable.hpp"
 #include "value.hpp"
 
-namespace cx
+namespace cx::Interpreter
 {
     struct ReturnSignal
     {
@@ -68,4 +68,4 @@ namespace cx
                 return std::monostate{};
         }
     }
-} // namespace cx
+} // namespace cx::Interpreter
