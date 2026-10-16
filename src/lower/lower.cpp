@@ -1,6 +1,5 @@
 #include "lower/lower.hpp"
 #include <cstddef>
-#include <variant>
 #include <vector>
 #include "helpers/type.hpp"
 #include "lexer/token.hpp"

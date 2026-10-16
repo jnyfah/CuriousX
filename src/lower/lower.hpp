@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <string_view>
+#include <variant>
 #include <vector>
 #include "helpers/type.hpp"
 #include "parser/arena.hpp"
@@ -71,10 +72,10 @@ namespace cx
 
     struct FunctionLayout
     {
-        size_t                 entryRow;  //!< ow in the instruction list where this function starts
-        size_t                 slotCount; //!< total no of var(local + IR temp)
+        size_t               entryRow;  //!< row in the instruction list where this function starts
+        size_t               slotCount; //!< total no of var(local + IR temp)
         std::span<ValueType> paramTypes;
-        ValueType              returnType = ValueType::Unknown;
+        ValueType            returnType = ValueType::Unknown;
     };
 
     //!< Intermidiate Representation
@@ -92,7 +93,7 @@ namespace cx
         Arena&                      m_arena;
         const SymbolTable&          m_sym;
 
-        std::size_t                 m_nextSlot;  //<! the next free slot, reset to the locals count for each function
+        std::size_t                 m_nextSlot; //<! the next free slot, reset to the locals count for each function
         std::size_t                 m_labelcount;
         std::size_t                 m_index;
 
