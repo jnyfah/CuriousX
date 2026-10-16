@@ -113,7 +113,6 @@ namespace cx
             default:
                 return Operand{};
         }
-        return Operand{};
     }
 
     Operand Lower::BinaryInstr(BinaryNode* node)

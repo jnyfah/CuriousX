@@ -6,6 +6,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <variant>
 #include <vector>
 #include "lower/lower.hpp"
 #include "parser/arena.hpp"
