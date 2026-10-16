@@ -41,4 +41,30 @@ namespace cx
         std::vector<Frame> m_frames;
         const SymbolTable& m_sym;
     };
+
+    inline Value valueOf(const Node* node)
+    {
+        switch (node->kind)
+        {
+            case NodeKind::Number:
+            {
+                if (node->valuetype == ValueType::Float)
+                {
+                    double d = 0.0;
+                    std::from_chars(node->token.value.data(), node->token.value.data() + node->token.value.size(), d);
+                    return d;
+                }
+
+                std::int32_t i = 0;
+                std::from_chars(node->token.value.data(), node->token.value.data() + node->token.value.size(), i);
+                return i;
+            }
+            case NodeKind::Bool:
+                return node->token.value == "true";
+            case NodeKind::String:
+                return std::string{node->token.value};
+            default:
+                return std::monostate{};
+        }
+    }
 } // namespace cx

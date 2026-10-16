@@ -5,7 +5,6 @@
 #include <span>
 #include <utility>
 #include <vector>
-#include "node.hpp"
 
 namespace cx
 {
@@ -32,7 +31,31 @@ namespace cx
             return obj;
         }
 
-        std::span<Node*> copyOf(const std::vector<Node*>& src);
+        //! Allocate vector in the Arena and return a view to it
+        template <typename T>
+        std::span<T*> copyOf(const std::vector<T*>& src)
+        {
+            if (src.empty())
+            {
+                return {};
+            }
+            auto* mem = reinterpret_cast<T**>(allocate(sizeof(T*) * src.size(), alignof(T*)));
+            std::copy(src.begin(), src.end(), mem);
+            return {mem, src.size()};
+        }
+        
+        template <typename T>
+        std::span<T> copyOf(const std::vector<T>& src)
+        {
+            if (src.empty())
+            {
+                return {};
+            }
+            auto* mem = reinterpret_cast<T*>(allocate(sizeof(T) * src.size(), alignof(T)));
+            std::copy(src.begin(), src.end(), mem);
+            return {mem, src.size()};
+        }
+        
 
     private:
         struct Chunk

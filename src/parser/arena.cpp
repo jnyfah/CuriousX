@@ -86,16 +86,4 @@ namespace cx
         m_current             = m_current->next;
     }
 
-    //! Allocate vector in the Arena and return a view to it
-    std::span<Node*> Arena::copyOf(const std::vector<Node*>& src)
-    {
-        if (src.empty())
-        {
-            return {};
-        }
-        auto* mem = reinterpret_cast<Node**>(allocate(sizeof(Node*) * src.size(), alignof(Node*)));
-        std::copy(src.begin(), src.end(), mem);
-        return {mem, src.size()};
-    }
-
 } // namespace cx
