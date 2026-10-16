@@ -72,8 +72,8 @@ namespace cx
 
     struct FunctionLayout
     {
-        size_t               entryRow;  //!< row in the instruction list where this function starts
-        size_t               slotCount; //!< total no of var(local + IR temp)
+        size_t               entryRow  = 0; //!< row in the instruction list where this function starts
+        size_t               slotCount = 0; //!< total no of var(local + IR temp)
         std::span<ValueType> paramTypes;
         ValueType            returnType = ValueType::Unknown;
     };
@@ -97,9 +97,9 @@ namespace cx
         std::size_t                 m_labelcount;
         std::size_t                 m_index;
 
-        std::vector<Instruction>    m_instr{};
+        std::vector<Instruction>    m_instr;
         // each index represents a function, and index can be found in m_instr's call of the func
-        std::vector<FunctionLayout> m_layouts{};
+        std::vector<FunctionLayout> m_layouts;
 
         void                        ResetCounter(std::size_t count);
         size_t                      LabelCounter();

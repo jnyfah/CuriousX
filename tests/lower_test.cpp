@@ -354,9 +354,8 @@ TEST(Lower, IfElseJumpsToElseThenSkipsIt)
 TEST(Lower, LabelsAreUniqueAcrossStatements)
 {
     Lowered l;
-    ASSERT_TRUE(l.run(
-        "i = 0; while (i < 3) { i = i + 1; } if (i > 1) { print 1; } else { print 2; }"
-        "while (i > 0) { if (i == 2) { print i; } i = i - 1; }"))
+    ASSERT_TRUE(l.run("i = 0; while (i < 3) { i = i + 1; } if (i > 1) { print 1; } else { print 2; }"
+                      "while (i > 0) { if (i == 2) { print i; } i = i - 1; }"))
         << l.messages();
     expectLabelsConsistent(l.rows);
 }
@@ -434,10 +433,9 @@ TEST(Lower, NestedCallArgumentsStayNextToTheirCall)
 TEST(Lower, FunctionsKeepTheirOwnTempNumbering)
 {
     Lowered l;
-    ASSERT_TRUE(l.run(
-        "func add3(a, b, c) { s = a + b; return s + c; }"
-        "func add31(a, b, c) { s = a + b; return s + c; }"
-        "x = add3(1, 2, 3) + add31(4, 5, 6);"))
+    ASSERT_TRUE(l.run("func add3(a, b, c) { s = a + b; return s + c; }"
+                      "func add31(a, b, c) { s = a + b; return s + c; }"
+                      "x = add3(1, 2, 3) + add31(4, 5, 6);"))
         << l.messages();
 
     // both functions have 4 locals, so both use temps 4 and 5
@@ -546,11 +544,10 @@ TEST(LowerLayout, EntryRowsPointAtEachFunctionsFirstRow)
 TEST(LowerLayout, EveryEntryRowIsInRangeAndFollowsAReturn)
 {
     Lowered l;
-    ASSERT_TRUE(l.run(
-        "x = 1;"
-        "func f(a) { if (a > 0) { return 1; } }"
-        "func g(a, b) { while (a < b) { a = a + 1; } return a; }"
-        "print f(x) + g(x, 5);"))
+    ASSERT_TRUE(l.run("x = 1;"
+                      "func f(a) { if (a > 0) { return 1; } }"
+                      "func g(a, b) { while (a < b) { a = a + 1; } return a; }"
+                      "print f(x) + g(x, 5);"))
         << l.messages();
 
     for (std::size_t i = 0; i < l.layouts.size(); ++i)
@@ -601,9 +598,8 @@ TEST(LowerLayout, VoidCallTakesNoSlot)
 TEST(LowerLayout, EverySlotUsedFitsInTheFrame)
 {
     Lowered l;
-    ASSERT_TRUE(l.run(
-        "func f(a, b) { c = a * b; while (c > 10) { c = c - a; } return c + 1; }"
-        "x = 3; y = f(x, 7); print y + x * 2;"))
+    ASSERT_TRUE(l.run("func f(a, b) { c = a * b; while (c > 10) { c = c - a; } return c + 1; }"
+                      "x = 3; y = f(x, 7); print y + x * 2;"))
         << l.messages();
 
     for (std::string_view name : {"f", "@main"})

@@ -10,7 +10,7 @@
 namespace cx
 {
 
-    Lower::Lower(Arena& arena, const SymbolTable& sym) : m_arena(arena), m_sym(sym), m_nextSlot(0), m_labelcount(0) {}
+    Lower::Lower(Arena& arena, const SymbolTable& sym) : m_arena(arena), m_sym(sym), m_nextSlot(0), m_labelcount(0), m_index(0) {}
 
     std::span<Instruction> Lower::MirLower(ProgramNode* root)
     {
