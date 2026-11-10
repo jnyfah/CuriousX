@@ -4,6 +4,7 @@ project("CuriousX" VERSION 2.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(BUILD_TESTS       "Build unit tests"          ON)
 option(ENABLE_SANITIZERS "Build with ASan + UBSan"   OFF)
@@ -56,6 +57,7 @@ target_sources(curiousx_core
     src/sema/sema.cpp
     src/interp/interp.cpp
     src/lower/lower.cpp
+    src/riscv/asm.cpp
 )
 
 target_include_directories(curiousx_core PUBLIC src)
