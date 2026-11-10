@@ -57,10 +57,9 @@ namespace cx
 
     Instruction Asm::peekInstr()
     {
-        size_t i = m_entry + 1;
+        const size_t i = m_entry + 1;
         return m_instr[i];
     }
-    
 
     void Asm::emitInstruction(const Instruction& instr)
     {
@@ -99,13 +98,13 @@ namespace cx
             break;
             case Op::Jump:
             {
-                std::cout<< std::endl;
+                std::cout << std::endl;
                 std::cout << "j LABEL" << instr.dest.index << "\n";
             }
             break;
             case Op::Label:
             {
-                std::cout<< std::endl;
+                std::cout << std::endl;
                 std::cout << "LABEL" << instr.dest.index << ": \n";
             }
             break;
@@ -320,11 +319,9 @@ namespace cx
             case Op::Div:
                 return type == ValueType::Int ? "divw" : "fdiv.s";
             case Op::CmpEQ:
-                return "subw";
             case Op::CmpNE:
                 return "subw";
             case Op::CmpLT:
-                return "slt";
             case Op::CmpGT:
                 return "slt";
             default:
